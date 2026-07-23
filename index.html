@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>智慧消防综合管理平台</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true"><i data-lucide="building-2"></i></div>
+          <div>
+            <strong>养老机构数智</strong>
+            <span>管理平台</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item static-nav" type="button">
+            <i data-lucide="folder"></i><span>任务中心</span><i data-lucide="chevron-right"></i>
+          </button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="image"></i><span>主体责任</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="folder"></i><span>场所设置</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item static-nav" type="button">
+            <i data-lucide="folder"></i><span>设施运行</span><i data-lucide="chevron-right"></i>
+          </button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="folder"></i><span>日常安全管理</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="folder"></i><span>隐患整改</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item static-nav" type="button">
+            <i data-lucide="folder"></i><span>能力提升</span><i data-lucide="chevron-right"></i>
+          </button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="stethoscope"></i><span>教育培训</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item" type="button" data-view="terminals">
+            <i data-lucide="cpu"></i><span>智能终端</span><i data-lucide="chevron-down"></i>
+          </button>
+          <button class="nav-subitem active" type="button" data-view="terminals">设备运行状态</button>
+          <button class="nav-subitem" type="button" data-view="terminal-alarms">设备告警列表<b class="nav-sub-badge">3</b></button>
+          <button class="nav-subitem" type="button" data-view="terminal-warnings">设备预警列表<b class="nav-sub-badge warning">4</b></button>
+          <button class="nav-subitem" type="button" data-view="terminal-faults">设备故障记录<b class="nav-sub-badge fault" id="faultNavBadge">3</b></button>
+          <button class="nav-item" type="button" data-view="video-monitoring" data-video-module="offduty">
+            <i data-lucide="video"></i><span>视频监控</span><i data-lucide="chevron-right"></i>
+          </button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="folder"></i><span>微型消防站</span><i data-lucide="chevron-right"></i></button>
+          <button class="nav-item static-nav" type="button"><i data-lucide="satellite-dish"></i><span>消防点位设置</span><i data-lucide="chevron-right"></i></button>
+        </nav>
+
+        <div class="sidebar-status">
+          <div class="status-heading">
+            <span>报警接入服务</span>
+            <i data-lucide="more-horizontal"></i>
+          </div>
+          <div class="service-row">
+            <span class="pulse-dot"></span>
+            <div><strong>AMS 监听正常</strong><small>UDP :7200</small></div>
+          </div>
+          <div class="service-meta"><span>设备在线</span><strong>31 / 32</strong></div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <nav class="module-nav" aria-label="业务模块">
+            <button type="button"><i data-lucide="shield-check"></i>食品安全</button>
+            <button type="button"><i data-lucide="chart-pie"></i>膳食营养</button>
+            <button type="button"><i data-lucide="leaf"></i>食材采购与经费</button>
+            <button type="button"><i data-lucide="shopping-cart"></i>物品管理</button>
+            <button type="button"><i data-lucide="badge-japanese-yen"></i>资金监测</button>
+            <button class="active" type="button"><i data-lucide="flame"></i>消防安全</button>
+            <button type="button"><i data-lucide="settings"></i>系统设置</button>
+          </nav>
+          <div class="topbar-actions">
+            <div class="site-select"><button type="button" id="siteButton">金台区第一养老院 <i data-lucide="chevron-down"></i></button></div>
+            <button class="message-button" type="button"><i data-lucide="message-circle"></i><span>消息中心</span><b>3</b></button>
+            <button class="icon-button" type="button" id="soundToggle" title="关闭告警声音" aria-label="关闭告警声音">
+              <i data-lucide="volume-2"></i><span class="notify-dot"></span>
+            </button>
+            <button class="icon-button" type="button" id="refreshButton" title="刷新数据" aria-label="刷新数据">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+            <div class="operator">
+              <span>管</span>
+              <div><strong>Admin</strong><small id="liveClock">2026-07-23 19:43:08</small></div>
+              <i data-lucide="chevron-down"></i>
+            </div>
+          </div>
+        </header>
+
+        <div class="workspace-tabs">
+          <button class="tab-collapse" type="button" title="收起侧栏" aria-label="收起侧栏"><i data-lucide="panel-left-close"></i></button>
+          <div class="active-tab"><i data-lucide="cpu"></i><span id="workspaceTabLabel">设备运行状态</span><button type="button" title="关闭页签" aria-label="关闭页签"><i data-lucide="x"></i></button></div>
+          <div class="tab-spacer"></div>
+          <button class="tab-tools" type="button" title="页签管理" aria-label="页签管理"><i data-lucide="chevrons-right"></i></button>
+        </div>
+
+        <div class="view-container">
+          <section class="app-view" id="view-dashboard" data-view-panel="dashboard" hidden>
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="demo-badge">演示数据</span><span>园区消防态势</span></div>
+                <h1>消防安全运行总览</h1>
+              </div>
+              <div class="page-actions">
+                <span class="updated-at">数据更新于 <b id="updatedAt">19:43:08</b></span>
+                <button class="secondary-button" type="button" id="exportButton"><i data-lucide="download"></i>导出日报</button>
+              </div>
+            </div>
+
+            <div class="critical-strip" role="status">
+              <div class="critical-icon"><i data-lucide="flame"></i></div>
+              <div class="critical-copy">
+                <div><span>一级告警</span><strong>可视化红外火焰探测器检测到火焰与高温</strong></div>
+                <p>危化品暂存间 · 当前 86.4°C · 阈值 70.0°C · 19:42:16</p>
+              </div>
+              <div class="critical-duration"><small>持续时间</small><strong id="criticalDuration">00:01:12</strong></div>
+              <button class="danger-button" type="button" data-action="handle" data-alert-id="flame">立即处置</button>
+            </div>
+
+            <div class="metric-band" aria-label="关键指标">
+              <article class="metric-item metric-danger">
+                <div><span>待处置告警</span><i data-lucide="circle-alert"></i></div>
+                <strong>3</strong><small>较昨日同期 <b>+1</b></small>
+              </article>
+              <article class="metric-item">
+                <div><span>今日告警</span><i data-lucide="bell-ring"></i></div>
+                <strong>12</strong><small>已闭环 <b>9</b></small>
+              </article>
+              <article class="metric-item">
+                <div><span>设备在线率</span><i data-lucide="radio-tower"></i></div>
+                <strong>96.9<em>%</em></strong><small>31 / 32 台在线</small>
+              </article>
+              <article class="metric-item">
+                <div><span>平均响应</span><i data-lucide="timer"></i></div>
+                <strong>02:18</strong><small>目标 ≤ 03:00</small>
+              </article>
+              <article class="metric-item">
+                <div><span>今日安全运行</span><i data-lucide="shield-check"></i></div>
+                <strong>19<em>h</em></strong><small>高风险点位 1 处</small>
+              </article>
+            </div>
+
+            <section class="operations-section" aria-labelledby="active-events-heading">
+              <div class="section-toolbar">
+                <div>
+                  <h2 id="active-events-heading">实时事件</h2>
+                  <span class="section-subtitle">按风险等级与触发时间排序</span>
+                </div>
+                <div class="segmented-control" role="tablist" aria-label="事件状态">
+                  <button class="active" type="button" data-alert-filter="pending">待处置 <b>3</b></button>
+                  <button type="button" data-alert-filter="processing">处理中 <b>2</b></button>
+                  <button type="button" data-alert-filter="closed">已闭环 <b>9</b></button>
+                </div>
+              </div>
+
+              <div class="event-workbench">
+                <div class="alert-queue" id="alertQueue" aria-label="告警列表"></div>
+
+                <div class="evidence-panel">
+                  <div class="evidence-toolbar">
+                    <div class="camera-title"><span class="live-dot"></span><strong id="focusCameraName">危化品暂存间 · 红外火焰-01</strong></div>
+                    <div class="view-switch" role="group" aria-label="画面模式">
+                      <button type="button" data-camera-mode="visible">可见光</button>
+                      <button class="active" type="button" data-camera-mode="thermal">热成像</button>
+                    </div>
+                    <button class="icon-button compact" type="button" id="snapshotButton" title="保存当前抓拍" aria-label="保存当前抓拍"><i data-lucide="camera"></i></button>
+                    <button class="icon-button compact" type="button" id="expandButton" title="全屏查看" aria-label="全屏查看"><i data-lucide="maximize-2"></i></button>
+                  </div>
+                  <div class="focus-canvas-wrap" id="focusCanvasWrap">
+                    <canvas id="focusCanvas" width="960" height="540" aria-label="告警监控画面"></canvas>
+                    <div class="canvas-hud top-left"><span id="focusTimestamp">2026-07-23 19:42:16</span><span>CH 03</span></div>
+                    <div class="canvas-hud bottom-right"><span>演示画面</span></div>
+                    <div class="temperature-scale" id="temperatureScale" aria-hidden="true"><span>120°</span><i></i><span>20°</span></div>
+                  </div>
+                  <div class="evidence-caption">
+                    <div><i data-lucide="scan-line"></i><span id="evidenceSummary">检测区域 R-03 · 最高温点已超过阈值 16.4°C</span></div>
+                    <button type="button" id="historyButton">查看前后 30 秒</button>
+                  </div>
+                </div>
+
+                <aside class="event-detail" aria-label="事件详情">
+                  <div class="detail-heading">
+                    <div><span class="severity-label level-one" id="detailSeverity">一级</span><span class="state-label" id="detailState">待处置</span></div>
+                    <button class="icon-button compact" type="button" id="detailMore" title="更多操作" aria-label="更多操作"><i data-lucide="ellipsis"></i></button>
+                  </div>
+                  <h3 id="detailTitle">高温与火焰报警</h3>
+                  <p class="detail-code" id="detailCode">ALM-20260723-0042</p>
+                  <dl class="detail-list">
+                    <div><dt>监测点位</dt><dd id="detailLocation">危化品暂存间</dd></div>
+                    <div><dt>触发设备</dt><dd id="detailDevice">红外火焰-01</dd></div>
+                    <div><dt>设备序列号</dt><dd id="detailSerial">DS-FL-03A821</dd></div>
+                    <div><dt>事件类型</dt><dd><code id="detailEventType">TMA / flame</code></dd></div>
+                    <div><dt>通道 / 规则</dt><dd id="detailChannel">CH 03 / R-03</dd></div>
+                    <div><dt>发生时间</dt><dd id="detailTime">2026-07-23 19:42:16</dd></div>
+                  </dl>
+                  <div class="temperature-reading" id="temperatureReading">
+                    <div><span>当前最高温</span><strong id="currentTemp">86.4<em>°C</em></strong></div>
+                    <div><span>报警阈值</span><b id="thresholdTemp">70.0°C</b></div>
+                  </div>
+                  <div class="response-owner">
+                    <span>当前责任人</span>
+                    <div><span class="avatar">未</span><b id="detailOwner">待分派</b></div>
+                  </div>
+                  <button class="primary-action" type="button" data-action="handle" data-alert-id="flame"><i data-lucide="radio"></i>接警并处置</button>
+                </aside>
+              </div>
+            </section>
+
+            <section class="monitoring-section" id="monitoring-section" aria-labelledby="monitoring-heading">
+              <div class="section-toolbar">
+                <div><h2 id="monitoring-heading">重点监测点位</h2><span class="section-subtitle">三类设备实时状态</span></div>
+                <button class="text-button" type="button" data-view-jump="devices">查看全部设备 <i data-lucide="arrow-right"></i></button>
+              </div>
+              <div class="monitor-grid">
+                <article class="monitor-card" data-alert-select="offduty">
+                  <div class="monitor-visual"><canvas id="scene-offduty" width="640" height="360"></canvas><span class="monitor-chip danger">岗位无人</span><span class="monitor-time">19:40:31</span></div>
+                  <div class="monitor-body"><div><strong>消控室主岗</strong><span>人员在离岗检测</span></div><div class="mini-stat"><span>离岗时长</span><b>06:48</b></div></div>
+                  <footer><span><i></i>设备在线</span><code>isSupportOffDuty</code></footer>
+                </article>
+                <article class="monitor-card" data-alert-select="passage">
+                  <div class="monitor-visual"><canvas id="scene-passage" width="640" height="360"></canvas><span class="monitor-chip warning">车辆占用</span><span class="monitor-time">19:41:03</span></div>
+                  <div class="monitor-body"><div><strong>东侧消防通道</strong><span>室外通道检测</span></div><div class="mini-stat"><span>占用时长</span><b>02:13</b></div></div>
+                  <footer><span><i></i>设备在线</span><code>isSupportChannelOccupy</code></footer>
+                </article>
+                <article class="monitor-card" data-alert-select="flame">
+                  <div class="monitor-visual"><canvas id="scene-thermal" width="640" height="360"></canvas><span class="monitor-chip danger">火焰 / 高温</span><span class="monitor-time">19:42:16</span></div>
+                  <div class="monitor-body"><div><strong>危化品暂存间</strong><span>可视化红外火焰探测</span></div><div class="mini-stat hot"><span>最高温度</span><b>86.4°C</b></div></div>
+                  <footer><span><i></i>设备在线</span><code>TMA / flame</code></footer>
+                </article>
+              </div>
+            </section>
+
+            <section class="analysis-grid" aria-label="趋势和设备健康">
+              <div class="trend-panel">
+                <div class="section-toolbar compact-toolbar">
+                  <div><h2>近 7 日告警趋势</h2><span class="section-subtitle">按设备类型统计</span></div>
+                  <div class="legend"><span><i class="legend-offduty"></i>人员离岗</span><span><i class="legend-passage"></i>通道占用</span><span><i class="legend-flame"></i>火焰高温</span></div>
+                </div>
+                <canvas id="trendCanvas" width="900" height="260" aria-label="近七日告警趋势图"></canvas>
+              </div>
+              <div class="health-panel">
+                <div class="section-toolbar compact-toolbar"><div><h2>设备健康</h2><span class="section-subtitle">1 台设备需要关注</span></div><button class="icon-button compact" title="设备健康设置" aria-label="设备健康设置"><i data-lucide="settings-2"></i></button></div>
+                <div class="health-list">
+                  <div><span class="health-icon warning"><i data-lucide="wifi-off"></i></span><p><strong>北门通道检测-02</strong><small>网络抖动 · 18:56</small></p><b>78%</b></div>
+                  <div><span class="health-icon ok"><i data-lucide="cctv"></i></span><p><strong>消控室离岗检测-01</strong><small>运行正常 · 19:43</small></p><b>99%</b></div>
+                  <div><span class="health-icon ok"><i data-lucide="thermometer"></i></span><p><strong>红外火焰探测-01</strong><small>运行正常 · 19:43</small></p><b>97%</b></div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="app-view" id="view-alarms" data-view-panel="alarms" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>事件处置</span></div><h1>告警中心</h1></div>
+              <div class="page-actions"><button class="secondary-button"><i data-lucide="sliders-horizontal"></i>通知规则</button><button class="primary-button"><i data-lucide="file-down"></i>导出记录</button></div>
+            </div>
+            <div class="alert-summary-band">
+              <div><span>待处置</span><strong>3</strong><small>一级 1 · 二级 2</small></div>
+              <div><span>处理中</span><strong>2</strong><small>超时 0</small></div>
+              <div><span>今日已闭环</span><strong>9</strong><small>闭环率 75%</small></div>
+              <div><span>平均处置时长</span><strong>08:42</strong><small>较昨日 -01:15</small></div>
+            </div>
+            <div class="filter-bar">
+              <label class="filter-search"><i data-lucide="search"></i><input id="alarmSearch" type="search" placeholder="告警编号、设备或点位" /></label>
+              <select id="typeFilter" aria-label="事件类型"><option value="all">全部事件类型</option><option value="flame">火焰 / 高温</option><option value="passage">通道占用</option><option value="offduty">人员离岗</option></select>
+              <select id="levelFilter" aria-label="风险等级"><option value="all">全部等级</option><option value="1">一级</option><option value="2">二级</option><option value="3">三级</option></select>
+              <select id="stateFilter" aria-label="处置状态"><option value="all">全部状态</option><option value="pending">待处置</option><option value="processing">处理中</option><option value="closed">已闭环</option></select>
+              <button class="icon-button compact" id="clearFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table alert-table">
+                <thead><tr><th>风险</th><th>告警事件</th><th>点位 / 设备</th><th>事件类型</th><th>发生时间</th><th>持续</th><th>状态</th><th>责任人</th><th></th></tr></thead>
+                <tbody id="alarmTableBody"></tbody>
+              </table>
+              <div class="table-empty" id="alarmTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配告警</strong><span>请调整筛选条件</span></div>
+              <div class="table-footer"><span id="alarmCountLabel">共 8 条记录</span><div class="pagination"><button disabled><i data-lucide="chevron-left"></i></button><button class="active">1</button><button>2</button><button><i data-lucide="chevron-right"></i></button></div></div>
+            </div>
+          </section>
+
+          <section class="app-view" id="view-devices" data-view-panel="devices" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>设备资产</span></div><h1>设备管理</h1></div>
+              <div class="page-actions"><button class="secondary-button"><i data-lucide="scan-search"></i>发现设备</button><button class="primary-button" id="addDeviceButton"><i data-lucide="plus"></i>添加设备</button></div>
+            </div>
+            <div class="device-overview">
+              <div class="device-total"><span class="device-total-icon"><i data-lucide="boxes"></i></span><div><span>设备总数</span><strong>32</strong><small>覆盖 18 个监测点位</small></div></div>
+              <div><span>在线</span><strong class="success-text">31</strong><div class="progress"><i style="width:96.9%"></i></div></div>
+              <div><span>离线</span><strong class="danger-text">1</strong><div class="progress danger"><i style="width:3.1%"></i></div></div>
+              <div><span>今日上报</span><strong>2,841</strong><small>事件与心跳数据</small></div>
+              <div><span>平均可用率</span><strong>99.2%</strong><small>近 30 天</small></div>
+            </div>
+            <div class="filter-bar">
+              <label class="filter-search wide"><i data-lucide="search"></i><input id="deviceSearch" type="search" placeholder="搜索设备名称、序列号或点位" /></label>
+              <div class="segmented-control device-tabs"><button class="active" data-device-type="all">全部 32</button><button data-device-type="offduty">离岗检测 8</button><button data-device-type="passage">通道检测 16</button><button data-device-type="flame">火焰探测 8</button></div>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table device-table">
+                <thead><tr><th>设备</th><th>监测点位</th><th>产品类型</th><th>能力识别</th><th>网络 / 心跳</th><th>在线状态</th><th>固件版本</th><th></th></tr></thead>
+                <tbody id="deviceTableBody"></tbody>
+              </table>
+              <div class="table-footer"><span>显示 6 台重点设备，共 32 台</span><button class="text-button">查看全部资产 <i data-lucide="arrow-right"></i></button></div>
+            </div>
+          </section>
+
+          <section class="app-view" id="view-terminals" data-view-panel="terminals">
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>消防物联设备</span><span class="connection-badge"><i></i>状态同步正常</span></div><h1>设备运行状态</h1></div>
+              <div class="page-actions"><span class="updated-at">最近同步 <b id="terminalSyncTime">19:43:08</b></span><button class="secondary-button" id="syncTerminals"><i data-lucide="refresh-cw"></i>同步状态</button></div>
+            </div>
+
+            <div class="terminal-overview" aria-label="智能终端概况">
+              <div class="terminal-total"><span class="device-total-icon"><i data-lucide="cpu"></i></span><div><span>终端总数</span><strong>57</strong><small>8 类消防物联设备</small></div></div>
+              <div><span>在线设备</span><strong class="success-text">56</strong><small>在线率 98.2%</small></div>
+              <div><span>当前告警</span><strong class="danger-text">3</strong><small>均来自视频监测设备</small></div>
+              <div><span>状态异常</span><strong class="warning-text">2</strong><small>离线 1 · 预警 1</small></div>
+              <div><span>覆盖点位</span><strong>24</strong><small>消防水源、管网及重点区域</small></div>
+            </div>
+
+            <section class="terminal-types-section" aria-labelledby="terminal-types-heading">
+              <div class="section-toolbar">
+                <div><h2 id="terminal-types-heading">设备类型</h2><span class="section-subtitle">点击类型筛选设备</span></div>
+                <button class="text-button active" type="button" data-terminal-type="all">全部设备 57 <i data-lucide="rotate-ccw"></i></button>
+              </div>
+              <div class="terminal-type-grid">
+                <button class="terminal-type-card" type="button" data-terminal-type="power"><span class="terminal-type-icon blue"><i data-lucide="zap"></i></span><div><strong>智能用电采集终端</strong><small>12 台 · 全部在线</small></div><b class="status-pill online">正常</b></button>
+                <button class="terminal-type-card" type="button" data-terminal-type="transmitter"><span class="terminal-type-icon cyan"><i data-lucide="radio-tower"></i></span><div><strong>用户信息传输装置</strong><small>6 台 · 全部在线</small></div><b class="status-pill online">正常</b></button>
+                <button class="terminal-type-card" type="button" data-terminal-type="level"><span class="terminal-type-icon cyan"><i data-lucide="waves"></i></span><div><strong>无线远程液位采集终端</strong><small>8 台 · 1 台离线</small></div><b class="status-pill offline">关注</b></button>
+                <button class="terminal-type-card" type="button" data-terminal-type="pressure"><span class="terminal-type-icon blue"><i data-lucide="gauge"></i></span><div><strong>无线远程压力采集终端</strong><small>10 台 · 全部在线</small></div><b class="status-pill online">正常</b></button>
+                <button class="terminal-type-card" type="button" data-terminal-type="gas"><span class="terminal-type-icon amber"><i data-lucide="wind"></i></span><div><strong>可燃气体探测器</strong><small>5 台 · 1 台预警</small></div><b class="status-pill warning">预警</b></button>
+                <button class="terminal-type-card camera-type" type="button" data-terminal-type="offduty"><span class="terminal-type-icon purple"><i data-lucide="user-round-x"></i></span><div><strong>人员在离岗监测</strong><small>4 台 · 1 条告警</small></div><b class="status-pill alarm">告警</b></button>
+                <button class="terminal-type-card camera-type" type="button" data-terminal-type="passage"><span class="terminal-type-icon amber"><i data-lucide="traffic-cone"></i></span><div><strong>室外通道监测</strong><small>8 台 · 1 条告警</small></div><b class="status-pill alarm">告警</b></button>
+                <button class="terminal-type-card camera-type" type="button" data-terminal-type="flame"><span class="terminal-type-icon red"><i data-lucide="flame"></i></span><div><strong>可视化红外火焰探测器</strong><small>4 台 · 1 条告警</small></div><b class="status-pill alarm">告警</b></button>
+              </div>
+            </section>
+
+            <div class="filter-bar terminal-filter-bar">
+              <label class="filter-search wide"><i data-lucide="search"></i><input id="terminalSearch" type="search" placeholder="搜索设备名称、编号或监测点位" /></label>
+              <select id="terminalStatusFilter" aria-label="终端状态"><option value="all">全部状态</option><option value="normal">正常</option><option value="warning">预警</option><option value="alarm">告警</option><option value="offline">离线</option></select>
+              <select id="terminalZoneFilter" aria-label="所属区域"><option value="all">全部区域</option><option value="消防控制室">消防控制室</option><option value="配电区域">配电区域</option><option value="消防水源">消防水源</option><option value="消防管网">消防管网</option><option value="重点防护区">重点防护区</option><option value="室外通道">室外通道</option></select>
+              <button class="icon-button compact" id="clearTerminalFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+
+            <div class="data-table-wrap">
+              <table class="data-table terminal-table">
+                <thead><tr><th>终端设备</th><th>监测点位</th><th>设备类型</th><th>实时状态 / 读数</th><th>通信质量</th><th>运行状态</th><th>更新时间</th><th></th></tr></thead>
+                <tbody id="terminalTableBody"></tbody>
+              </table>
+              <div class="table-empty" id="terminalTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配终端</strong><span>请调整筛选条件</span></div>
+              <div class="table-footer"><span id="terminalCountLabel">显示 12 台重点终端，共 57 台</span><div class="terminal-legend"><span><i class="normal"></i>正常</span><span><i class="warning"></i>预警</span><span><i class="alarm"></i>告警</span><span><i class="offline"></i>离线</span></div></div>
+            </div>
+          </section>
+
+          <section class="app-view terminal-event-view" id="view-terminal-alarms" data-view-panel="terminal-alarms" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>智能终端</span><span class="connection-badge alarm-connection"><i></i>火警通道在线</span></div><h1>设备告警列表</h1></div>
+              <div class="page-actions"><span class="updated-at">最近接警 <b>19:42:16</b></span><button class="secondary-button" id="exportFireAlarms"><i data-lucide="file-down"></i>导出记录</button></div>
+            </div>
+
+            <div class="alert-summary-band fire-summary-band" aria-label="设备告警概况">
+              <div><span>待确认火警</span><strong class="danger-text" id="firePendingCount">2</strong><small>一级火警 1 条</small></div>
+              <div><span>警情处置中</span><strong class="warning-text" id="fireProcessingCount">1</strong><small>现场人员已到场</small></div>
+              <div><span>今日火警</span><strong>6</strong><small>自动报警 5 · 主机上报 1</small></div>
+              <div><span>今日已闭环</span><strong class="success-text" id="fireClosedCount">3</strong><small>平均处置 08:42</small></div>
+            </div>
+
+            <div class="filter-bar fire-alarm-filter">
+              <label class="filter-search wide"><i data-lucide="search"></i><input id="fireAlarmSearch" type="search" placeholder="搜索警情编号、设备或点位" /></label>
+              <select id="fireAlarmLevelFilter" aria-label="火警等级"><option value="all">全部等级</option><option value="1">一级火警</option><option value="2">二级火警</option></select>
+              <select id="fireAlarmStateFilter" aria-label="火警状态"><option value="all">全部状态</option><option value="pending">待确认</option><option value="confirmed">已确认</option><option value="processing">处置中</option><option value="reset">已复位</option><option value="false">误报消警</option></select>
+              <button class="icon-button compact" id="clearFireAlarmFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+
+            <div class="fire-alarm-workbench">
+              <aside class="fire-alarm-list-panel" aria-label="火警记录">
+                <header><div><strong>火警记录</strong><span id="fireAlarmCountLabel">共 6 条</span></div><span class="live-indicator"><i></i>实时</span></header>
+                <div class="fire-alarm-list" id="fireAlarmList"></div>
+                <div class="fire-list-empty" id="fireAlarmListEmpty" hidden><i data-lucide="search-x"></i><span>暂无匹配火警</span></div>
+              </aside>
+
+              <section class="fire-alarm-detail-panel" aria-label="火警详情">
+                <header class="fire-detail-header">
+                  <div><div class="fire-detail-tags"><span class="severity-label level-one" id="fireDetailLevel">一级火警</span><span class="state-pill pending" id="fireDetailState">待确认</span></div><h2 id="fireDetailTitle">可视化红外火焰报警</h2><p id="fireDetailMeta">危化品暂存间 · 红外火焰探测-01 · ALM-FIRE-20260723-0068</p></div>
+                  <div class="fire-detail-clock"><span>持续时间</span><strong id="fireDetailDuration">00:01:12</strong></div>
+                </header>
+
+                <div class="fire-process-strip" id="fireProcessStrip" aria-label="警情处置进度"></div>
+
+                <div class="fire-detail-body">
+                  <div class="fire-evidence-column">
+                    <div class="fire-evidence-toolbar">
+                      <div><strong id="fireEvidenceTitle">现场影像</strong><span id="fireEvidenceTime">2026-07-23 19:42:16</span></div>
+                      <div class="segmented-control compact-segmented fire-evidence-switch" role="group" aria-label="影像类型">
+                        <button class="active" type="button" data-fire-evidence="images"><i data-lucide="images"></i>火警图片</button>
+                        <button type="button" data-fire-evidence="video"><i data-lucide="video"></i>前后录像</button>
+                      </div>
+                    </div>
+
+                    <div class="fire-data-evidence" id="fireDataEvidence" hidden>
+                      <div class="data-evidence-status"><span><i data-lucide="radio-tower"></i></span><div><strong>用户信息传输装置数据上报</strong><p>当前事件由消防主机数据触发，无现场图片及前后录像。</p></div><b>数据型事件</b></div>
+                      <dl class="data-evidence-grid">
+                        <div><dt>主机状态</dt><dd id="transmitterHostState">火警</dd></div>
+                        <div><dt>上报协议</dt><dd id="transmitterProtocol">ISUP / EHome</dd></div>
+                        <div><dt>报警回路</dt><dd id="transmitterLoop">03</dd></div>
+                        <div><dt>报警点位</dt><dd id="transmitterPoint">012</dd></div>
+                        <div><dt>事件代码</dt><dd><code id="transmitterEventCode">fireAlarm</code></dd></div>
+                        <div><dt>事件状态</dt><dd><code id="transmitterEventState">active</code></dd></div>
+                      </dl>
+                      <div class="raw-report-block"><header><span>原始上报摘要</span><time id="transmitterReportTime">19:36:09</time></header><code id="transmitterRawReport">eventType=fireAlarm; eventState=active; loop=03; point=012;</code></div>
+                    </div>
+
+                    <div class="fire-image-evidence" id="fireImageEvidence">
+                      <div class="fire-main-visual"><canvas id="fireAlarmMainCanvas" width="960" height="540" aria-label="火警主画面"></canvas><span class="evidence-label danger">火焰检测框</span><span class="evidence-camera">CH 03 · 可见光</span></div>
+                      <div class="fire-thumbnail-grid">
+                        <button class="fire-thumbnail active" type="button" data-fire-image-mode="visible"><canvas id="fireSnapshotVisible" width="320" height="180" aria-label="可见光抓拍"></canvas><span>可见光抓拍</span><time>19:42:16</time></button>
+                        <button class="fire-thumbnail" type="button" data-fire-image-mode="thermal"><canvas id="fireSnapshotThermal" width="320" height="180" aria-label="热成像抓拍"></canvas><span>热成像抓拍</span><time>19:42:16</time></button>
+                        <button class="fire-thumbnail" type="button" data-fire-image-mode="context"><canvas id="fireSnapshotContext" width="320" height="180" aria-label="现场全景"></canvas><span>现场全景</span><time>19:42:08</time></button>
+                      </div>
+                    </div>
+
+                    <div class="fire-video-evidence" id="fireVideoEvidence" hidden>
+                      <div class="fire-video-visual"><canvas id="fireAlarmVideoCanvas" width="960" height="540" aria-label="火警前后录像"></canvas><button class="video-play-button" id="fireVideoPlay" type="button" title="播放录像" aria-label="播放录像"><i data-lucide="play"></i></button><span class="evidence-camera" id="fireVideoTimestamp">19:41:46 · 报警前 30 秒</span></div>
+                      <div class="video-timeline"><i></i><span class="alarm-marker"></span></div>
+                      <div class="video-offset-control" role="group" aria-label="录像时间段"><button class="active" type="button" data-fire-video-offset="before">报警前 30 秒</button><button type="button" data-fire-video-offset="alarm">告警时刻</button><button type="button" data-fire-video-offset="after">报警后 30 秒</button></div>
+                    </div>
+                  </div>
+
+                  <aside class="fire-information-panel">
+                    <div class="fire-reading-strip"><div><span>当前最高温</span><strong id="fireDetailTemperature">86.4<em>°C</em></strong></div><div><span>报警阈值</span><b id="fireDetailThreshold">70.0°C</b></div></div>
+                    <dl class="fire-information-list">
+                      <div><dt>报警点位</dt><dd id="fireDetailLocation">危化品暂存间</dd></div>
+                      <div><dt>报警设备</dt><dd id="fireDetailDevice">红外火焰探测-01</dd></div>
+                      <div><dt>设备编号</dt><dd><code id="fireDetailSerial">DS-FL-03A821</code></dd></div>
+                      <div><dt>报警类型</dt><dd><code id="fireDetailEventType">TMA / flame</code></dd></div>
+                      <div><dt>报警通道</dt><dd id="fireDetailChannel">CH 03 / R-03</dd></div>
+                      <div><dt>处置人员</dt><dd id="fireDetailOperator">待确认</dd></div>
+                    </dl>
+                    <div class="fire-disposition-note"><span>警情记录</span><p id="fireDispositionNote">设备检测到明火与持续高温，请立即确认现场警情。</p></div>
+                    <div class="fire-action-grid">
+                      <button class="fire-action assignment" type="button" data-assign-fire><i data-lucide="user-plus"></i>指派处置人员</button>
+                      <button class="fire-action primary" type="button" data-fire-action="confirm"><i data-lucide="badge-check"></i>确认警情</button>
+                      <button class="fire-action false" type="button" data-fire-action="false"><i data-lucide="circle-x"></i>误报消警</button>
+                      <button class="fire-action" type="button" data-fire-action="dispose"><i data-lucide="radio"></i>警情处置</button>
+                      <button class="fire-action" type="button" data-fire-action="reset"><i data-lucide="rotate-ccw"></i>设备复位</button>
+                    </div>
+                  </aside>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="app-view" id="view-terminal-warnings" data-view-panel="terminal-warnings" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>智能终端</span><span>运行风险提示</span></div><h1>设备预警列表</h1></div>
+              <div class="page-actions"><button class="primary-button" id="exportWarnings"><i data-lucide="file-down"></i>导出记录</button></div>
+            </div>
+            <div class="alert-summary-band warning-summary-band" aria-label="设备预警概况">
+              <div><span>当前预警</span><strong class="warning-text" id="warningActiveCount">4</strong><small>高风险 1 · 中风险 3</small></div>
+              <div><span>待核查</span><strong id="warningPendingCount">3</strong><small>最长等待 12 分钟</small></div>
+              <div><span>今日已恢复</span><strong class="success-text" id="warningRecoveredCount">8</strong><small>自动恢复 6 · 人工 2</small></div>
+              <div><span>预警设备类型</span><strong>5</strong><small>用电、燃气、水系统及视频</small></div>
+            </div>
+            <div class="filter-bar">
+              <label class="filter-search wide"><i data-lucide="search"></i><input id="terminalWarningSearch" type="search" placeholder="搜索预警编号、设备或点位" /></label>
+              <select id="terminalWarningTypeFilter" aria-label="设备类型"><option value="all">全部设备类型</option><option value="power">智能用电</option><option value="transmitter">用户信息传输装置</option><option value="gas">可燃气体</option><option value="level">远程液位</option><option value="pressure">远程压力</option><option value="camera">视频监测</option></select>
+              <select id="terminalWarningStateFilter" aria-label="预警状态"><option value="all">全部状态</option><option value="pending">待核查</option><option value="checking">核查中</option><option value="recovered">已恢复</option></select>
+              <button class="icon-button compact" id="clearTerminalWarningFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table terminal-warning-table">
+                <thead><tr><th>风险</th><th>预警信息</th><th>设备 / 点位</th><th>当前值</th><th>预警阈值</th><th>首次发生</th><th>最近更新</th><th>处置人</th><th>状态</th><th></th></tr></thead>
+                <tbody id="terminalWarningTableBody"></tbody>
+              </table>
+              <div class="table-empty" id="terminalWarningTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配预警</strong><span>请调整筛选条件</span></div>
+              <div class="table-footer"><span id="terminalWarningCountLabel">共 7 条记录</span><div class="warning-legend"><span><i class="risk-high"></i>高风险</span><span><i class="risk-medium"></i>中风险</span><span><i class="risk-low"></i>低风险</span></div></div>
+            </div>
+          </section>
+
+          <section class="app-view" id="view-terminal-faults" data-view-panel="terminal-faults" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>智能终端</span><span>设备运行维护档案</span></div><h1>设备故障记录</h1></div>
+            </div>
+            <div class="alert-summary-band fault-summary-band" aria-label="设备故障概况">
+              <div><span>当前故障</span><strong class="danger-text" id="faultActiveCount">3</strong><small>全部终端实时汇总</small></div>
+              <div><span>待处理</span><strong id="faultPendingCount">1</strong><small>需要指派运维人员</small></div>
+              <div><span>处理中</span><strong class="warning-text" id="faultProcessingCount">2</strong><small>运维人员已接单</small></div>
+              <div><span>今日已修复</span><strong class="success-text" id="faultRepairedCount">5</strong><small>设备状态恢复正常</small></div>
+            </div>
+            <div class="filter-bar">
+              <label class="filter-search wide"><i data-lucide="search"></i><input id="terminalFaultSearch" type="search" placeholder="搜索故障编号、设备、点位或故障代码" /></label>
+              <select id="terminalFaultTypeFilter" aria-label="故障设备类型">
+                <option value="all">全部设备类型</option>
+                <option value="power">智能用电采集终端</option>
+                <option value="transmitter">用户信息传输装置</option>
+                <option value="level">无线远程液位终端</option>
+                <option value="pressure">无线远程压力终端</option>
+                <option value="gas">可燃气体探测器</option>
+                <option value="offduty">人员在离岗监测</option>
+                <option value="passage">室外通道监测</option>
+                <option value="flame">红外火焰探测器</option>
+              </select>
+              <select id="terminalFaultStateFilter" aria-label="故障状态"><option value="all">全部状态</option><option value="pending">待处理</option><option value="processing">处理中</option><option value="repaired">已修复</option></select>
+              <button class="icon-button compact" id="clearTerminalFaultFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table terminal-fault-table">
+                <thead><tr><th>故障信息</th><th>设备 / 点位</th><th>故障类型</th><th>首次发生</th><th>最近更新</th><th>持续时间</th><th>处理人</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="terminalFaultTableBody"></tbody>
+              </table>
+              <div class="table-empty" id="terminalFaultTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配故障</strong><span>请调整筛选条件</span></div>
+              <div class="table-footer"><span id="terminalFaultCountLabel">共 8 条记录</span><div class="fault-legend"><span><i class="pending"></i>待处理</span><span><i class="processing"></i>处理中</span><span><i class="repaired"></i>已修复</span></div></div>
+            </div>
+          </section>
+
+          <section class="app-view video-monitoring-view" id="view-video-monitoring" data-view-panel="video-monitoring" hidden>
+            <div class="page-heading video-page-heading">
+              <div>
+                <div class="eyebrow"><span>视频监控</span><span class="connection-badge"><i></i><b id="videoModuleCapability">双人值守检测在线</b></span></div>
+                <h1 id="videoModuleTitle">双人值守监测</h1>
+              </div>
+              <div class="page-actions">
+                <span class="live-indicator"><i></i>实时视频</span>
+                <button class="secondary-button" id="videoSnapshotButton" type="button"><i data-lucide="camera"></i>保存抓拍</button>
+              </div>
+            </div>
+
+            <div class="video-module-tabs" role="tablist" aria-label="视频监控类型">
+              <button class="active" type="button" data-video-module-tab="offduty"><i data-lucide="users"></i><span>双人值守监测</span><b>1 条预警</b></button>
+              <button type="button" data-video-module-tab="passage"><i data-lucide="traffic-cone"></i><span>消防通道监测</span><b>1 条预警</b></button>
+              <button type="button" data-video-module-tab="flame"><i data-lucide="scan-thermal"></i><span>红外火灾监控摄像头</span><b class="danger">1 条告警</b></button>
+            </div>
+
+            <div class="alert-summary-band video-summary-band" aria-label="视频监控概况">
+              <div><span>接入摄像头</span><strong id="videoSummaryDevices">4</strong><small id="videoSummaryDevicesNote">4 台在线</small></div>
+              <div><span id="videoSummaryActiveLabel">当前脱岗预警</span><strong class="warning-text" id="videoSummaryActive">1</strong><small id="videoSummaryActiveNote">持续 06:48</small></div>
+              <div><span>今日事件</span><strong id="videoSummaryToday">6</strong><small id="videoSummaryTodayNote">已消警 5 条</small></div>
+              <div><span>录像存储</span><strong>30<em> 天</em></strong><small>录像完整率 100%</small></div>
+            </div>
+
+            <section class="video-monitor-workbench" aria-label="视频监控工作台">
+              <aside class="video-channel-panel">
+                <header><div><strong>监控通道</strong><span id="videoChannelCount">4 个通道</span></div><button class="icon-button compact" id="videoChannelRefresh" type="button" title="刷新通道" aria-label="刷新通道"><i data-lucide="refresh-cw"></i></button></header>
+                <div class="video-channel-list" id="videoChannelList"></div>
+              </aside>
+
+              <section class="video-live-panel">
+                <div class="video-live-toolbar">
+                  <div class="camera-title"><span class="live-dot"></span><strong id="videoCameraName">消防控制室全景 · 双人值守-01</strong></div>
+                  <div class="view-switch" id="videoViewSwitch" role="group" aria-label="视频画面模式">
+                    <button class="active" type="button" data-video-view-mode="visible">可见光</button>
+                    <button type="button" data-video-view-mode="thermal">热成像</button>
+                  </div>
+                  <button class="icon-button compact" id="videoFullscreenButton" type="button" title="全屏查看" aria-label="全屏查看"><i data-lucide="maximize-2"></i></button>
+                </div>
+                <div class="video-monitor-canvas-wrap" id="videoMonitorCanvasWrap">
+                  <canvas id="videoMonitorCanvas" width="960" height="540" aria-label="实时监控视频"></canvas>
+                  <div class="canvas-hud top-left"><span id="videoMonitorTime">2026-07-23 19:43:08</span><span id="videoMonitorChannel">CH 01</span></div>
+                  <div class="canvas-hud bottom-right"><span>LIVE</span><span>1080P</span></div>
+                  <span class="video-scene-state warning" id="videoSceneState"><i data-lucide="user-round-x"></i>当前 1 / 2 人在岗</span>
+                  <div class="temperature-scale" id="videoMonitorTemperatureScale" hidden><span>120°</span><i></i><span>20°</span></div>
+                </div>
+                <div class="video-live-caption">
+                  <div><i data-lucide="scan-line"></i><span id="videoLiveSummary">副岗连续 06:48 未检测到值守人员</span></div>
+                  <button type="button" id="videoPlaybackButton"><i data-lucide="calendar-clock"></i>录像回看</button>
+                </div>
+              </section>
+
+              <aside class="video-event-panel">
+                <div class="video-event-heading"><span class="severity-label level-two" id="videoEventLevel">脱岗预警</span><span class="state-pill pending" id="videoEventState">待消警</span></div>
+                <h2 id="videoEventTitle">双人值守人数不足</h2>
+                <p id="videoEventDescription">消防控制室当前仅识别到 1 名值守人员，请核实副岗人员状态。</p>
+                <dl class="video-event-details">
+                  <div><dt>监控点位</dt><dd id="videoEventPoint">消防控制室</dd></div>
+                  <div><dt>触发设备</dt><dd id="videoEventDevice">双人值守-01</dd></div>
+                  <div><dt>事件类型</dt><dd><code id="videoEventType">offDuty</code></dd></div>
+                  <div><dt id="videoMetricLabel">在岗人数</dt><dd id="videoMetricValue">1 / 2 人</dd></div>
+                  <div><dt>发生时间</dt><dd id="videoEventTime">19:40:31</dd></div>
+                  <div><dt>处置人员</dt><dd id="videoEventOwner">待处置</dd></div>
+                </dl>
+                <div class="video-event-note"><i data-lucide="info"></i><p id="videoEventNote">脱岗消警后保留抓拍、录像和操作记录。</p></div>
+                <div class="video-event-actions">
+                  <button class="primary-button" id="videoPrimaryAction" type="button"><i data-lucide="badge-check"></i><span>脱岗消警</span></button>
+                </div>
+              </aside>
+            </section>
+
+            <section class="video-record-section" aria-labelledby="videoRecordHeading">
+              <div class="section-toolbar">
+                <div><h2 id="videoRecordHeading">脱岗预警记录</h2><span class="section-subtitle" id="videoRecordSubtitle">抓拍、录像和消警结果全程留痕</span></div>
+                <div class="video-record-filter" role="group" aria-label="记录状态">
+                  <button class="active" type="button" data-video-record-filter="all">全部记录</button>
+                  <button type="button" data-video-record-filter="active">待处理</button>
+                  <button type="button" data-video-record-filter="closed">已完成</button>
+                </div>
+              </div>
+              <div class="data-table-wrap">
+                <table class="data-table video-record-table">
+                  <thead><tr><th>发生时间</th><th>事件信息</th><th>设备 / 点位</th><th>持续时间</th><th>处置人员</th><th>状态</th><th></th></tr></thead>
+                  <tbody id="videoRecordTableBody"></tbody>
+                </table>
+                <div class="table-empty" id="videoRecordEmpty" hidden><i data-lucide="inbox"></i><strong>暂无匹配记录</strong><span>请切换其他状态查看</span></div>
+                <div class="table-footer"><span id="videoRecordCount">共 0 条记录</span><span>录像与事件记录保存 30 天</span></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="app-view" id="view-access" data-view-panel="access" hidden>
+            <div class="page-heading">
+              <div><div class="eyebrow"><span>HCISUPSDK V2.5</span><span class="connection-badge"><i></i>链路正常</span></div><h1>海康设备接入状态</h1></div>
+              <div class="page-actions"><span class="updated-at">最近心跳 <b>19:43:06</b></span><button class="secondary-button" id="testConnection"><i data-lucide="zap"></i>链路检测</button></div>
+            </div>
+            <section class="pipeline-section" aria-labelledby="pipeline-heading">
+              <div class="section-toolbar"><div><h2 id="pipeline-heading">报警接入链路</h2><span class="section-subtitle">设备注册与 AMS 报警回调</span></div><span class="protocol-chip">ISUP 5.0 / UDP</span></div>
+              <div class="pipeline">
+                <div class="pipeline-node"><span><i data-lucide="cctv"></i></span><strong>海康设备</strong><small>32 台 · 31 在线</small></div>
+                <i data-lucide="arrow-right"></i>
+                <div class="pipeline-node"><span><i data-lucide="server-cog"></i></span><strong>CMS 注册服务</strong><small>NET_ECMS_StartListen</small></div>
+                <i data-lucide="arrow-right"></i>
+                <div class="pipeline-node active"><span><i data-lucide="radio-tower"></i></span><strong>AMS 报警监听</strong><small>NET_EALARM_StartListen</small></div>
+                <i data-lucide="arrow-right"></i>
+                <div class="pipeline-node"><span><i data-lucide="braces"></i></span><strong>事件解析</strong><small>XML / JSON / Picture</small></div>
+                <i data-lucide="arrow-right"></i>
+                <div class="pipeline-node"><span><i data-lucide="layout-dashboard"></i></span><strong>消防平台</strong><small>入库 · 通知 · 处置</small></div>
+              </div>
+            </section>
+            <div class="access-grid">
+              <section class="listener-panel">
+                <div class="section-toolbar compact-toolbar"><div><h2>服务监听</h2><span class="section-subtitle">当前运行参数</span></div><button class="icon-button compact"><i data-lucide="settings-2"></i></button></div>
+                <dl class="listener-list">
+                  <div><dt>CMS 注册服务</dt><dd><span class="status-pill online">运行中</span></dd></div>
+                  <div><dt>AMS 报警服务</dt><dd><span class="status-pill online">运行中</span></dd></div>
+                  <div><dt>监听地址</dt><dd><code>10.18.32.20:7200</code></dd></div>
+                  <div><dt>传输协议</dt><dd>UDP <small>byProtocolType = 1</small></dd></div>
+                  <div><dt>SessionKey</dt><dd><span class="status-pill online">已同步</span></dd></div>
+                  <div><dt>今日回调</dt><dd><strong>2,841</strong> 次</dd></div>
+                  <div><dt>回调失败</dt><dd><strong>0</strong> 次</dd></div>
+                  <div><dt>平均解析耗时</dt><dd><strong>36 ms</strong></dd></div>
+                </dl>
+              </section>
+              <section class="callback-panel">
+                <div class="section-toolbar compact-toolbar"><div><h2>实时回调</h2><span class="section-subtitle">最近 5 条设备事件</span></div><span class="live-indicator"><i></i>LIVE</span></div>
+                <div class="callback-log" id="callbackLog">
+                  <div><time>19:42:16.328</time><code>EHOME_ISAPI_ALARM</code><span class="log-event danger">TMA / flame</span><b>DS-FL-03A821</b></div>
+                  <div><time>19:41:03.104</time><code>EHOME_ISAPI_ALARM</code><span class="log-event warning">channelOccupy</span><b>DS-PS-08D114</b></div>
+                  <div><time>19:40:31.942</time><code>EHOME_ISAPI_ALARM</code><span class="log-event warning">offDuty</span><b>DS-OD-01C772</b></div>
+                  <div><time>19:39:55.007</time><code>ENUM_DEV_SESSIONKEY</code><span class="log-event ok">sessionKey</span><b>DS-PS-12D302</b></div>
+                  <div><time>19:38:46.611</time><code>EHOME_ALARM</code><span class="log-event ok">heartbeat</span><b>DS-FL-07B219</b></div>
+                </div>
+              </section>
+            </div>
+            <section class="mapping-section">
+              <div class="section-toolbar"><div><h2>三类产品字段映射</h2><span class="section-subtitle">依据 HCISUPSDK 通用开发指南 V2.5</span></div><span class="document-ref"><i data-lucide="book-open"></i>能力集 / 报警回调 / ISAPI 事件</span></div>
+              <div class="data-table-wrap flush">
+                <table class="data-table mapping-table"><thead><tr><th>业务场景</th><th>设备能力字段</th><th>事件识别</th><th>平台展示字段</th><th>当前状态</th></tr></thead><tbody>
+                  <tr><td><span class="type-icon purple"><i data-lucide="user-round-x"></i></span><b>人员在离岗检测</b></td><td><code>isSupportOffDuty</code></td><td><code>eventType / eventState</code></td><td>点位、通道、离岗时长、抓拍图</td><td><span class="status-pill online">已映射</span></td></tr>
+                  <tr><td><span class="type-icon amber"><i data-lucide="traffic-cone"></i></span><b>室外消防通道检测</b></td><td><code>isSupportChannelOccupy</code><small>isSupportFireEscapeDetection</small></td><td><code>eventType / ruleID</code></td><td>占用目标、持续时长、检测框、图片</td><td><span class="status-pill online">已映射</span></td></tr>
+                  <tr><td><span class="type-icon red"><i data-lucide="flame"></i></span><b>可视化红外火焰探测</b></td><td><code>isSupportDetectorTemperatureAlarm</code><small>highTemperature / riseTemperature / flame</small></td><td><code>TMA / flame</code></td><td>当前温度、阈值、可见光图、热图</td><td><span class="status-pill online">已映射</span></td></tr>
+                </tbody></table>
+              </div>
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <section class="critical-fire-alert" id="criticalFireAlert" role="alertdialog" aria-modal="true" aria-labelledby="criticalFireAlertTitle" aria-describedby="criticalFireAlertNote" hidden>
+      <header class="critical-fire-alert-header">
+        <div class="critical-fire-alert-mark"><span><i data-lucide="siren"></i></span><div><b>一级火警</b><strong>紧急火警提醒</strong><p>消防报警通道检测到高危警情，请立即核查并处置</p></div></div>
+        <div class="critical-fire-alert-status">
+          <div><span>报警时间</span><time id="criticalFireAlertTime">2026-07-23 19:42:16</time></div>
+          <button class="critical-fire-sound-status" id="criticalFireSoundStatus" type="button" title="关闭报警声音" aria-label="关闭报警声音"><i data-lucide="volume-2"></i><span>报警声音已开启</span></button>
+        </div>
+      </header>
+
+      <main class="critical-fire-alert-main">
+        <section class="critical-fire-alert-visual" aria-label="火警现场画面">
+          <canvas id="criticalFireAlertCanvas" width="1280" height="720" aria-label="一级火警热成像画面"></canvas>
+          <div class="critical-fire-alert-data" id="criticalFireAlertData" hidden>
+            <span><i data-lucide="radio-tower"></i></span>
+            <div><small>消防主机数据上报</small><strong id="criticalFireDataState">火警</strong><p>当前事件由用户信息传输装置上报，无现场图片及前后录像。</p></div>
+            <dl>
+              <div><dt>通信协议</dt><dd id="criticalFireDataProtocol">ISUP / EHome</dd></div>
+              <div><dt>报警回路</dt><dd id="criticalFireDataLoop">03</dd></div>
+              <div><dt>报警点位</dt><dd id="criticalFireDataPoint">012</dd></div>
+              <div><dt>事件代码</dt><dd><code id="criticalFireDataCode">fireAlarm</code></dd></div>
+            </dl>
+          </div>
+          <div class="critical-fire-visual-hud">
+            <span><i></i>实时报警画面</span>
+            <code id="criticalFireAlertChannel">CH 03 / R-03</code>
+          </div>
+          <div class="critical-fire-detection-label" id="criticalFireDetectionLabel"><i data-lucide="scan"></i>火焰 / 高温目标</div>
+        </section>
+
+        <aside class="critical-fire-alert-detail">
+          <div class="critical-fire-alert-tags"><span>一级火警</span><b>待确认</b></div>
+          <h1 id="criticalFireAlertTitle">可视化红外火焰报警</h1>
+          <code class="critical-fire-alert-no" id="criticalFireAlertNo">ALM-FIRE-20260723-0068</code>
+          <div class="critical-fire-reading" id="criticalFireReading">
+            <div><span>当前最高温</span><strong id="criticalFireTemperature">86.4<em>°C</em></strong></div>
+            <div><span>报警阈值</span><b id="criticalFireThreshold">70.0°C</b></div>
+          </div>
+          <dl class="critical-fire-alert-info">
+            <div><dt>报警点位</dt><dd id="criticalFireLocation">危化品暂存间</dd></div>
+            <div><dt>报警设备</dt><dd id="criticalFireDevice">红外火焰探测-01</dd></div>
+            <div><dt>设备编号</dt><dd><code id="criticalFireSerial">DS-FL-03A821</code></dd></div>
+            <div><dt>事件类型</dt><dd><code id="criticalFireEventType">TMA / flame</code></dd></div>
+            <div><dt>持续时间</dt><dd class="critical-fire-duration" id="criticalFireDuration">00:01:12</dd></div>
+            <div><dt>处置人员</dt><dd id="criticalFireOperator">待确认</dd></div>
+          </dl>
+          <div class="critical-fire-alert-note" id="criticalFireAlertNote"><i data-lucide="triangle-alert"></i><p>设备检测到明火与持续高温，请立即确认现场警情。</p></div>
+        </aside>
+      </main>
+
+      <footer class="critical-fire-alert-actions">
+        <div><i data-lucide="shield-alert"></i><span><strong>当前警情尚未确认</strong><small>稍后处理不会改变警情状态，5 分钟后将再次提醒</small></span></div>
+        <button class="critical-fire-snooze" id="criticalFireSnooze" type="button"><i data-lucide="clock-3"></i>稍后处理</button>
+        <button class="critical-fire-enter" id="criticalFireEnter" type="button"><i data-lucide="radio"></i>进入警情处置</button>
+      </footer>
+    </section>
+
+    <div class="modal-backdrop" id="handleModal" hidden>
+      <section class="handle-modal" role="dialog" aria-modal="true" aria-labelledby="handleModalTitle">
+        <header><div><span class="severity-label level-one" id="modalSeverity">一级告警</span><h2 id="handleModalTitle">接警处置</h2></div><button class="icon-button" type="button" data-modal-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button></header>
+        <div class="modal-event-summary"><span class="summary-icon"><i data-lucide="flame"></i></span><div><strong id="modalEventTitle">高温与火焰报警</strong><p id="modalEventMeta">危化品暂存间 · 19:42:16 · ALM-20260723-0042</p></div></div>
+        <form id="handleForm">
+          <label><span>处置人员</span><select id="handlerSelect" required><option value="">请选择处置人员</option><option>王晨（当班值守）</option><option>李明（消防主管）</option><option>赵凯（现场巡查）</option></select></label>
+          <label><span>处置方式</span><div class="option-grid"><button class="selected" type="button" data-disposal="现场核查"><i data-lucide="footprints"></i>现场核查</button><button type="button" data-disposal="视频复核"><i data-lucide="video"></i>视频复核</button><button type="button" data-disposal="联动通知"><i data-lucide="phone-call"></i>联动通知</button></div></label>
+          <label><span>处置备注</span><textarea id="handleNote" rows="3" placeholder="记录现场情况或处置要求"></textarea></label>
+          <div class="notify-row"><div><strong>同步通知消防主管</strong><small>通过平台消息与短信发送</small></div><label class="switch"><input type="checkbox" checked /><i></i></label></div>
+          <footer><button class="secondary-button" type="button" data-modal-close>取消</button><button class="primary-button" type="submit"><i data-lucide="radio"></i>确认接警</button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="assignmentModal" hidden>
+      <section class="handle-modal assignment-modal" role="dialog" aria-modal="true" aria-labelledby="assignmentModalTitle">
+        <header><div><span class="assignment-badge"><i data-lucide="user-plus"></i>任务指派</span><h2 id="assignmentModalTitle">指派处置人员</h2></div><button class="icon-button" type="button" data-assignment-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button></header>
+        <div class="modal-event-summary assignment-summary"><span class="summary-icon"><i data-lucide="siren"></i></span><div><strong id="assignmentTargetTitle">可视化红外火焰报警</strong><p id="assignmentTargetMeta">危化品暂存间 · ALM-FIRE-20260723-0068</p></div></div>
+        <form id="assignmentForm">
+          <label><span>处置人员</span><select id="assignmentPerson" required><option value="">请选择处置人员</option><option>王晨（当班值守）</option><option>李明（消防主管）</option><option>赵凯（现场巡查）</option><option>陈峰（设备运维）</option></select></label>
+          <label><span>任务要求</span><textarea id="assignmentMessage" rows="3" placeholder="填写现场核查、处置或反馈要求"></textarea></label>
+          <div class="assignment-info-row"><i data-lucide="clock-3"></i><div><strong>要求 10 分钟内响应</strong><small>超时未接单将通知消防主管</small></div></div>
+          <div class="notify-row"><div><strong>立即通知处置人员</strong><small>通过平台消息与短信发送任务</small></div><label class="switch"><input id="assignmentNotify" type="checkbox" checked /><i></i></label></div>
+          <footer><button class="secondary-button" type="button" data-assignment-close>取消</button><button class="primary-button" type="submit"><i data-lucide="send"></i>确认指派</button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="faultDetailModal" hidden>
+      <section class="handle-modal fault-detail-modal" role="dialog" aria-modal="true" aria-labelledby="faultDetailModalTitle">
+        <header>
+          <div><span class="assignment-badge fault-detail-badge"><i data-lucide="wrench"></i>设备运维档案</span><h2 id="faultDetailModalTitle">设备故障详情</h2></div>
+          <button class="icon-button" type="button" data-fault-detail-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="record-detail-summary fault-detail-summary">
+          <div><span class="state-pill pending" id="faultDetailState">待处理</span><strong id="faultDetailTitle">设备通信中断</strong><small id="faultDetailMeta">2026-07-23 16:30:42 · DEV_OFFLINE</small></div>
+          <code id="faultDetailNo">FLT-20260723-0031</code>
+        </div>
+        <div class="fault-detail-grid">
+          <div class="fault-diagnostic-panel">
+            <span class="fault-diagnostic-icon"><i data-lucide="radio-tower"></i></span>
+            <div><small>故障数据来源</small><strong id="faultDetailSource">NB-IoT 心跳检测</strong><p>本记录由设备状态数据触发，不包含现场图片或视频。</p></div>
+            <code id="faultDetailCode">DEV_OFFLINE</code>
+          </div>
+          <dl class="record-detail-list fault-detail-list">
+            <div><dt>设备名称</dt><dd id="faultDetailDevice">无线远程液位终端-04</dd></div>
+            <div><dt>设备编号</dt><dd><code id="faultDetailSerial">WL-04-B9230</code></dd></div>
+            <div><dt>安装点位</dt><dd id="faultDetailPoint">屋顶高位水箱</dd></div>
+            <div><dt>故障类型</dt><dd id="faultDetailType">通信中断</dd></div>
+            <div><dt>持续时间</dt><dd id="faultDetailDuration">03:12:26</dd></div>
+            <div><dt>处理人员</dt><dd id="faultDetailAssignee">待指派</dd></div>
+            <div><dt>修复时间</dt><dd id="faultDetailRepairedAt">--</dd></div>
+          </dl>
+        </div>
+        <div class="fault-detail-note" id="faultDetailNote"><i data-lucide="info"></i><div><strong>当前处理记录</strong><p>设备连续多个心跳周期未上报，等待指派运维人员现场核查。</p></div></div>
+        <div class="fault-process" aria-label="故障处理过程">
+          <div class="completed" id="faultProcessReported"><span><i data-lucide="radio"></i></span><strong>故障上报</strong><small id="faultProcessReportedAt">16:30:42</small></div>
+          <i data-lucide="chevron-right"></i>
+          <div id="faultProcessAssigned"><span><i data-lucide="user-check"></i></span><strong>人员指派</strong><small id="faultProcessAssignedAt">待指派</small></div>
+          <i data-lucide="chevron-right"></i>
+          <div id="faultProcessRepaired"><span><i data-lucide="circle-check"></i></span><strong>完成修复</strong><small id="faultProcessRepairedAt">待完成</small></div>
+        </div>
+        <footer class="fault-detail-actions">
+          <button class="secondary-button" type="button" data-fault-detail-close>关闭</button>
+          <button class="secondary-button" type="button" id="faultDetailAssign"><i data-lucide="user-plus"></i>指派人员</button>
+          <button class="primary-button" type="button" id="faultDetailRepair"><i data-lucide="circle-check"></i>标记修复</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="videoPlaybackModal" hidden>
+      <section class="handle-modal video-playback-modal" role="dialog" aria-modal="true" aria-labelledby="videoPlaybackTitle">
+        <header>
+          <div><span class="assignment-badge"><i data-lucide="calendar-clock"></i>录像检索</span><h2 id="videoPlaybackTitle">视频录像回看</h2></div>
+          <button class="icon-button" type="button" data-video-playback-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="playback-query-bar">
+          <label><span>监控通道</span><select id="videoPlaybackChannel"></select></label>
+          <label><span>回看日期</span><input id="videoPlaybackDate" type="date" value="2026-07-23" /></label>
+          <label><span>开始时间</span><input id="videoPlaybackStart" type="time" value="19:30" /></label>
+          <label><span>结束时间</span><input id="videoPlaybackEnd" type="time" value="20:00" /></label>
+          <button class="primary-button" id="videoPlaybackSearch" type="button"><i data-lucide="search"></i>查询录像</button>
+        </div>
+        <div class="playback-result-meta"><span><i data-lucide="hard-drive"></i><b id="videoPlaybackResult">录像连续，已加载 30 分钟</b></span><span id="videoPlaybackRange">2026-07-23 19:30 - 20:00</span></div>
+        <div class="playback-canvas-wrap">
+          <canvas id="videoPlaybackCanvas" width="960" height="540" aria-label="历史录像回看画面"></canvas>
+          <div class="canvas-hud top-left"><span id="videoPlaybackTimestamp">2026-07-23 19:40:31</span><span id="videoPlaybackChannelCode">CH 01</span></div>
+          <span class="playback-badge"><i data-lucide="history"></i>历史录像</span>
+        </div>
+        <div class="playback-controls">
+          <button class="playback-play-button" id="videoPlaybackPlay" type="button" title="播放" aria-label="播放"><i data-lucide="play"></i></button>
+          <span>19:30:00</span>
+          <input id="videoPlaybackProgress" type="range" min="0" max="100" value="35" aria-label="录像播放进度" />
+          <span>20:00:00</span>
+          <select id="videoPlaybackSpeed" aria-label="播放速度"><option>0.5x</option><option selected>1.0x</option><option>2.0x</option><option>4.0x</option></select>
+        </div>
+        <div class="playback-segments" aria-label="录像片段">
+          <button class="active" type="button" data-playback-segment="normal"><i></i><span>19:30 - 19:40</span><small>连续录像</small></button>
+          <button type="button" data-playback-segment="event"><i></i><span>19:40 - 19:47</span><small>事件录像</small></button>
+          <button type="button" data-playback-segment="normal"><i></i><span>19:47 - 20:00</span><small>连续录像</small></button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="videoRecordModal" hidden>
+      <section class="handle-modal video-record-modal" role="dialog" aria-modal="true" aria-labelledby="videoRecordDetailTitle">
+        <header>
+          <div><span class="assignment-badge"><i data-lucide="clipboard-check"></i>事件记录</span><h2 id="videoRecordDetailTitle">脱岗预警记录详情</h2></div>
+          <button class="icon-button" type="button" data-video-record-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="record-detail-summary">
+          <div><span class="state-pill reset" id="videoRecordDetailState">已消警</span><strong id="videoRecordDetailEvent">副岗短时脱岗</strong><small id="videoRecordDetailMeta">2026-07-23 16:42:09 · offDuty</small></div>
+          <code id="videoRecordDetailNo">REC-OD-20260723-0002</code>
+        </div>
+        <div class="record-detail-grid">
+          <div class="record-snapshot-wrap">
+            <canvas id="videoRecordCanvas" width="960" height="540" aria-label="事件抓拍画面"></canvas>
+            <span><i data-lucide="camera"></i>事件抓拍</span>
+          </div>
+          <dl class="record-detail-list">
+            <div><dt>监控点位</dt><dd id="videoRecordDetailPoint">消防控制室</dd></div>
+            <div><dt>触发设备</dt><dd id="videoRecordDetailDevice">双人值守-03</dd></div>
+            <div><dt>持续时间</dt><dd id="videoRecordDetailDuration">00:02:25</dd></div>
+            <div><dt>处置人员</dt><dd id="videoRecordDetailOwner">王晨</dd></div>
+            <div><dt>处置方式</dt><dd id="videoRecordDetailMethod">视频复核并脱岗消警</dd></div>
+            <div><dt>完成时间</dt><dd id="videoRecordDetailClosedAt">2026-07-23 16:45:02</dd></div>
+          </dl>
+        </div>
+        <div class="record-conclusion"><i data-lucide="badge-check"></i><div><strong>处置结论</strong><p id="videoRecordDetailConclusion">副岗值守人员已返回岗位，双人值守状态恢复正常，预警完成消警。</p></div></div>
+        <div class="record-process" aria-label="事件处置过程">
+          <div class="completed"><span><i data-lucide="radio"></i></span><strong>预警上报</strong><small id="videoRecordReportedAt">16:42:09</small></div>
+          <i data-lucide="chevron-right"></i>
+          <div class="completed"><span><i data-lucide="eye"></i></span><strong>视频复核</strong><small>16:42:38</small></div>
+          <i data-lucide="chevron-right"></i>
+          <div class="completed"><span><i data-lucide="user-check"></i></span><strong>人员返岗</strong><small>16:44:51</small></div>
+          <i data-lucide="chevron-right"></i>
+          <div class="completed"><span><i data-lucide="circle-check"></i></span><strong>完成消警</strong><small id="videoRecordCompletedAt">16:45:02</small></div>
+        </div>
+        <footer><button class="primary-button" type="button" data-video-record-close><i data-lucide="check"></i>关闭</button></footer>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden><i data-lucide="circle-check"></i><span>操作成功</span></div>
+
+    <script src="assets/vendor/lucide.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
