@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>智慧消防综合管理平台</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260724-fault-handling" />
   </head>
   <body>
     <div class="app-shell">
@@ -434,8 +434,13 @@
                       <div><dt>报警类型</dt><dd><code id="fireDetailEventType">TMA / flame</code></dd></div>
                       <div><dt>报警通道</dt><dd id="fireDetailChannel">CH 03 / R-03</dd></div>
                       <div><dt>处置人员</dt><dd id="fireDetailOperator">待确认</dd></div>
+                      <div><dt>接单截止</dt><dd id="fireDetailDeadline">--</dd></div>
                     </dl>
                     <div class="fire-disposition-note"><span>警情记录</span><p id="fireDispositionNote">设备检测到明火与持续高温，请立即确认现场警情。</p></div>
+                    <section class="fire-operation-history" aria-labelledby="fireOperationHistoryTitle">
+                      <div class="fire-history-heading"><div><span id="fireOperationHistoryTitle">操作留痕</span><small>说明和现场照片按时间保留</small></div><span id="fireOperationHistoryCount">0 条</span></div>
+                      <div class="fire-history-list" id="fireOperationHistory" role="list"></div>
+                    </section>
                     <div class="fire-action-grid">
                       <button class="fire-action assignment" type="button" data-assign-fire><i data-lucide="user-plus"></i>指派处置人员</button>
                       <button class="fire-action primary" type="button" data-fire-action="confirm"><i data-lucide="badge-check"></i>确认警情</button>
@@ -483,8 +488,8 @@
             <div class="alert-summary-band fault-summary-band" aria-label="设备故障概况">
               <div><span>当前故障</span><strong class="danger-text" id="faultActiveCount">3</strong><small>全部终端实时汇总</small></div>
               <div><span>待处理</span><strong id="faultPendingCount">1</strong><small>需要指派运维人员</small></div>
-              <div><span>处理中</span><strong class="warning-text" id="faultProcessingCount">2</strong><small>运维人员已接单</small></div>
-              <div><span>今日已修复</span><strong class="success-text" id="faultRepairedCount">5</strong><small>设备状态恢复正常</small></div>
+              <div><span>处理中 / 待恢复</span><strong class="warning-text" id="faultProcessingCount">2</strong><small id="faultProcessingSummary">处理中 1 · 待恢复 1</small></div>
+              <div><span>今日已恢复</span><strong class="success-text" id="faultRepairedCount">5</strong><small>设备状态已人工确认</small></div>
             </div>
             <div class="filter-bar">
               <label class="filter-search wide"><i data-lucide="search"></i><input id="terminalFaultSearch" type="search" placeholder="搜索故障编号、设备、点位或故障代码" /></label>
@@ -499,16 +504,16 @@
                 <option value="passage">室外通道监测</option>
                 <option value="flame">红外火焰探测器</option>
               </select>
-              <select id="terminalFaultStateFilter" aria-label="故障状态"><option value="all">全部状态</option><option value="pending">待处理</option><option value="processing">处理中</option><option value="repaired">已修复</option></select>
+              <select id="terminalFaultStateFilter" aria-label="故障状态"><option value="all">全部状态</option><option value="pending">待处理</option><option value="processing">处理中</option><option value="handled">已处理待恢复</option><option value="recovered">已恢复</option></select>
               <button class="icon-button compact" id="clearTerminalFaultFilters" title="重置筛选" aria-label="重置筛选"><i data-lucide="rotate-ccw"></i></button>
             </div>
             <div class="data-table-wrap">
               <table class="data-table terminal-fault-table">
-                <thead><tr><th>故障信息</th><th>设备 / 点位</th><th>故障类型</th><th>首次发生</th><th>最近更新</th><th>持续时间</th><th>处理人</th><th>状态</th><th>操作</th></tr></thead>
+                <thead><tr><th>故障信息</th><th>设备 / 点位</th><th>故障类型</th><th>首次发生</th><th>最近更新</th><th>持续时间</th><th>设备状态</th><th>处理人</th><th>处置状态</th><th>操作</th></tr></thead>
                 <tbody id="terminalFaultTableBody"></tbody>
               </table>
               <div class="table-empty" id="terminalFaultTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配故障</strong><span>请调整筛选条件</span></div>
-              <div class="table-footer"><span id="terminalFaultCountLabel">共 8 条记录</span><div class="fault-legend"><span><i class="pending"></i>待处理</span><span><i class="processing"></i>处理中</span><span><i class="repaired"></i>已修复</span></div></div>
+              <div class="table-footer"><span id="terminalFaultCountLabel">共 8 条记录</span><div class="fault-legend"><span><i class="pending"></i>待处理</span><span><i class="processing"></i>处理中</span><span><i class="handled"></i>待恢复</span><span><i class="recovered"></i>已恢复</span></div></div>
             </div>
           </section>
 
@@ -739,10 +744,58 @@
         <div class="modal-event-summary assignment-summary"><span class="summary-icon"><i data-lucide="siren"></i></span><div><strong id="assignmentTargetTitle">可视化红外火焰报警</strong><p id="assignmentTargetMeta">危化品暂存间 · ALM-FIRE-20260723-0068</p></div></div>
         <form id="assignmentForm">
           <label><span>处置人员</span><select id="assignmentPerson" required><option value="">请选择处置人员</option><option>王晨（当班值守）</option><option>李明（消防主管）</option><option>赵凯（现场巡查）</option><option>陈峰（设备运维）</option></select></label>
+          <label><span>接单时限</span><select id="assignmentDeadline" required aria-describedby="assignmentDeadlineHint"></select></label>
           <label><span>任务要求</span><textarea id="assignmentMessage" rows="3" placeholder="填写现场核查、处置或反馈要求"></textarea></label>
-          <div class="assignment-info-row"><i data-lucide="clock-3"></i><div><strong>要求 10 分钟内响应</strong><small>超时未接单将通知消防主管</small></div></div>
+          <div class="assignment-info-row"><i data-lucide="clock-3"></i><div><strong id="assignmentDeadlineSummary">请在 1 分钟内接单并开始处置</strong><small id="assignmentDeadlineHint">预计截止 -- · 超过接单时限需升级通知消防主管</small></div></div>
           <div class="notify-row"><div><strong>立即通知处置人员</strong><small>通过平台消息与短信发送任务</small></div><label class="switch"><input id="assignmentNotify" type="checkbox" checked /><i></i></label></div>
           <footer><button class="secondary-button" type="button" data-assignment-close>取消</button><button class="primary-button" type="submit"><i data-lucide="send"></i>确认指派</button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="fireActionModal" hidden>
+      <section class="handle-modal fire-action-modal" role="dialog" aria-modal="true" aria-labelledby="fireActionModalTitle">
+        <header>
+          <div><span class="assignment-badge fire-action-badge"><i data-lucide="clipboard-pen-line"></i><span id="fireActionModalType">警情操作</span></span><h2 id="fireActionModalTitle">确认警情</h2></div>
+          <button class="icon-button" type="button" data-fire-action-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="modal-event-summary fire-action-summary"><span class="summary-icon"><i data-lucide="siren"></i></span><div><strong id="fireActionTargetTitle">可视化红外火焰报警</strong><p id="fireActionTargetMeta">危化品暂存间 · ALM-FIRE-20260723-0068</p></div></div>
+        <form id="fireActionForm">
+          <div class="fire-action-context"><i data-lucide="info"></i><p id="fireActionPrompt">请填写确认警情的现场依据，照片可选。</p></div>
+          <label><span>操作说明 <b class="required-mark">必填</b></span><textarea id="fireActionDescription" rows="4" required placeholder="请填写本次操作的现场依据和处理结果"></textarea><small class="field-hint" id="fireActionDescriptionHint">说明会作为本次操作记录保存。</small></label>
+          <label><span>现场照片 <em>选填</em></span><div class="photo-upload-box"><input id="fireActionPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple /><span class="photo-upload-icon"><i data-lucide="image-plus"></i></span><strong>选择现场照片</strong><small>支持 JPG、PNG、WebP，最多 6 张，单张不超过 10 MB</small></div><div class="photo-error" id="fireActionPhotoError" role="alert" hidden></div><div class="photo-preview-grid" id="fireActionPhotoPreview"></div></label>
+          <footer><button class="secondary-button" type="button" data-fire-action-close>取消</button><button class="primary-button" type="submit" id="fireActionSubmit"><i data-lucide="check"></i>提交操作记录</button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="passageActionModal" hidden>
+      <section class="handle-modal passage-action-modal" role="dialog" aria-modal="true" aria-labelledby="passageActionModalTitle">
+        <header>
+          <div><span class="assignment-badge passage-action-badge"><i data-lucide="traffic-cone"></i>通道处置</span><h2 id="passageActionModalTitle">确认通道畅通</h2></div>
+          <button class="icon-button" type="button" data-passage-action-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="modal-event-summary passage-action-summary"><span class="summary-icon"><i data-lucide="traffic-cone"></i></span><div><strong id="passageActionTargetTitle">消防通道车辆拥堵</strong><p id="passageActionTargetMeta">东侧消防通道 · 通道监测-08</p></div></div>
+        <form id="passageActionForm" novalidate>
+          <div class="passage-action-context"><i data-lucide="info"></i><p>请确认占用车辆或物品已经移除，并记录现场核查结果。</p></div>
+          <label><span>处置说明 <b class="required-mark">必填</b></span><textarea id="passageActionDescription" rows="4" required placeholder="例如：车辆已驶离，现场确认消防通道无障碍物，已恢复正常通行。"></textarea><small class="field-hint">处置说明将保存在本次通道恢复记录中。</small></label>
+          <label><span>现场照片 <em>选填</em></span><div class="photo-upload-box"><input id="passageActionPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple /><span class="photo-upload-icon"><i data-lucide="image-plus"></i></span><strong>选择现场照片</strong><small>支持 JPG、PNG、WebP，最多 6 张，单张不超过 10 MB</small></div><div class="photo-error" id="passageActionPhotoError" role="alert" hidden></div><div class="photo-preview-grid" id="passageActionPhotoPreview"></div></label>
+          <footer><button class="secondary-button" type="button" data-passage-action-close>取消</button><button class="primary-button" type="submit"><i data-lucide="badge-check"></i>确认通道畅通</button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="faultHandleModal" hidden>
+      <section class="handle-modal fault-handle-modal" role="dialog" aria-modal="true" aria-labelledby="faultHandleModalTitle">
+        <header>
+          <div><span class="assignment-badge fault-detail-badge"><i data-lucide="clipboard-check"></i>故障处置</span><h2 id="faultHandleModalTitle">标记处理</h2></div>
+          <button class="icon-button" type="button" data-fault-handle-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="modal-event-summary fault-handle-summary"><span class="summary-icon"><i data-lucide="wrench"></i></span><div><strong id="faultHandleTargetTitle">设备通信中断</strong><p id="faultHandleTargetMeta">屋顶高位水箱 · FLT-20260723-0031</p></div></div>
+        <form id="faultHandleForm">
+          <div class="fault-handle-operator"><i data-lucide="user-check"></i><div><small>本次处理记录</small><strong id="faultHandleOperator">Admin</strong></div></div>
+          <label><span>处理备注 <b class="required-mark">必填</b></span><textarea id="faultHandleNote" rows="4" required placeholder="请记录故障原因、处理措施和当前设备情况"></textarea><small class="field-hint">提交后进入“已处理待恢复”，需设备状态恢复正常后再确认闭环。</small></label>
+          <footer><button class="secondary-button" type="button" data-fault-handle-close>取消</button><button class="primary-button" type="submit"><i data-lucide="clipboard-check"></i>确认标记处理</button></footer>
         </form>
       </section>
     </div>
@@ -770,21 +823,22 @@
             <div><dt>故障类型</dt><dd id="faultDetailType">通信中断</dd></div>
             <div><dt>持续时间</dt><dd id="faultDetailDuration">03:12:26</dd></div>
             <div><dt>处理人员</dt><dd id="faultDetailAssignee">待指派</dd></div>
-            <div><dt>修复时间</dt><dd id="faultDetailRepairedAt">--</dd></div>
+            <div><dt>接单截止</dt><dd id="faultDetailDeadline">--</dd></div>
+            <div><dt>恢复时间</dt><dd id="faultDetailRepairedAt">--</dd></div>
           </dl>
         </div>
-        <div class="fault-detail-note" id="faultDetailNote"><i data-lucide="info"></i><div><strong>当前处理记录</strong><p>设备连续多个心跳周期未上报，等待指派运维人员现场核查。</p></div></div>
-        <div class="fault-process" aria-label="故障处理过程">
-          <div class="completed" id="faultProcessReported"><span><i data-lucide="radio"></i></span><strong>故障上报</strong><small id="faultProcessReportedAt">16:30:42</small></div>
-          <i data-lucide="chevron-right"></i>
-          <div id="faultProcessAssigned"><span><i data-lucide="user-check"></i></span><strong>人员指派</strong><small id="faultProcessAssignedAt">待指派</small></div>
-          <i data-lucide="chevron-right"></i>
-          <div id="faultProcessRepaired"><span><i data-lucide="circle-check"></i></span><strong>完成修复</strong><small id="faultProcessRepairedAt">待完成</small></div>
+        <div class="fault-device-status-row">
+          <div><span class="fault-device-status-icon" id="faultDetailDeviceStatusIcon"><i data-lucide="wifi-off"></i></span><div><small>当前设备状态</small><strong id="faultDetailDeviceStatus">离线</strong><p id="faultDetailDeviceUpdated">最近上报 16:30:42</p></div></div>
+          <button class="secondary-button" type="button" id="faultDetailViewDevice"><i data-lucide="cpu"></i>查看设备状态</button>
         </div>
+        <div class="fault-detail-note" id="faultDetailNote"><i data-lucide="info"></i><div><strong>当前处理记录</strong><p>设备连续多个心跳周期未上报，等待指派运维人员现场核查。</p></div></div>
+        <div class="fault-process" id="faultProcess" aria-label="故障处理过程"></div>
+        <section class="fault-handling-history" aria-labelledby="faultHandlingHistoryTitle"><div class="fault-history-heading"><div><strong id="faultHandlingHistoryTitle">处理留痕</strong><small>记录操作人、时间和备注</small></div><span id="faultHandlingHistoryCount">0 条</span></div><div class="fault-history-list" id="faultHandlingHistory"></div></section>
         <footer class="fault-detail-actions">
           <button class="secondary-button" type="button" data-fault-detail-close>关闭</button>
           <button class="secondary-button" type="button" id="faultDetailAssign"><i data-lucide="user-plus"></i>指派人员</button>
-          <button class="primary-button" type="button" id="faultDetailRepair"><i data-lucide="circle-check"></i>标记修复</button>
+          <button class="secondary-button" type="button" id="faultDetailHandle"><i data-lucide="clipboard-check"></i>标记处理</button>
+          <button class="primary-button" type="button" id="faultDetailRecover"><i data-lucide="badge-check"></i>确认恢复</button>
         </footer>
       </section>
     </div>
@@ -834,36 +888,57 @@
           <code id="videoRecordDetailNo">REC-OD-20260723-0002</code>
         </div>
         <div class="record-detail-grid">
-          <div class="record-snapshot-wrap">
-            <canvas id="videoRecordCanvas" width="960" height="540" aria-label="事件抓拍画面"></canvas>
-            <span><i data-lucide="camera"></i>事件抓拍</span>
+          <div class="record-evidence-column">
+            <div class="record-snapshot-wrap">
+              <canvas id="videoRecordCanvas" width="960" height="540" aria-label="事件抓拍画面"></canvas>
+              <span><i data-lucide="camera"></i>事件抓拍</span>
+            </div>
+            <button class="secondary-button record-playback-button" type="button" id="videoRecordPlaybackAction"><i data-lucide="history"></i>查看前后录像</button>
           </div>
           <dl class="record-detail-list">
             <div><dt>监控点位</dt><dd id="videoRecordDetailPoint">消防控制室</dd></div>
             <div><dt>触发设备</dt><dd id="videoRecordDetailDevice">双人值守-03</dd></div>
             <div><dt>持续时间</dt><dd id="videoRecordDetailDuration">00:02:25</dd></div>
+            <div data-offduty-record-only><dt>要求人数</dt><dd id="offDutyRequiredCount">2 人</dd></div>
+            <div data-offduty-record-only><dt>触发人数</dt><dd id="offDutyTriggerCount">1 人</dd></div>
+            <div data-offduty-record-only><dt>当前人数</dt><dd id="offDutyCurrentCount">2 / 2 人</dd></div>
+            <div data-offduty-record-only><dt>触发规则</dt><dd id="offDutyTriggerRule">人数不足持续 60 秒</dd></div>
             <div><dt>处置人员</dt><dd id="videoRecordDetailOwner">王晨</dd></div>
             <div><dt>处置方式</dt><dd id="videoRecordDetailMethod">视频复核并脱岗消警</dd></div>
             <div><dt>完成时间</dt><dd id="videoRecordDetailClosedAt">2026-07-23 16:45:02</dd></div>
           </dl>
         </div>
-        <div class="record-conclusion"><i data-lucide="badge-check"></i><div><strong>处置结论</strong><p id="videoRecordDetailConclusion">副岗值守人员已返回岗位，双人值守状态恢复正常，预警完成消警。</p></div></div>
-        <div class="record-process" aria-label="事件处置过程">
-          <div class="completed"><span><i data-lucide="radio"></i></span><strong>预警上报</strong><small id="videoRecordReportedAt">16:42:09</small></div>
-          <i data-lucide="chevron-right"></i>
-          <div class="completed"><span><i data-lucide="eye"></i></span><strong>视频复核</strong><small>16:42:38</small></div>
-          <i data-lucide="chevron-right"></i>
-          <div class="completed"><span><i data-lucide="user-check"></i></span><strong>人员返岗</strong><small>16:44:51</small></div>
-          <i data-lucide="chevron-right"></i>
-          <div class="completed"><span><i data-lucide="circle-check"></i></span><strong>完成消警</strong><small id="videoRecordCompletedAt">16:45:02</small></div>
-        </div>
-        <footer><button class="primary-button" type="button" data-video-record-close><i data-lucide="check"></i>关闭</button></footer>
+        <div class="record-conclusion" id="videoRecordConclusion" hidden><i data-lucide="badge-check"></i><div><strong>处置结论</strong><p id="videoRecordDetailConclusion"></p></div></div>
+        <div class="record-process" id="videoRecordTimeline" aria-label="事件处置过程"></div>
+        <section class="passage-operation-history" id="passageOperationHistory" hidden>
+          <div class="passage-history-heading"><div><strong>处置留痕</strong><small>处置说明和现场照片按操作时间保留</small></div><span id="passageOperationHistoryCount">0 条</span></div>
+          <div class="passage-history-list" id="passageOperationHistoryList"></div>
+        </section>
+        <section class="offduty-review-panel" id="offDutyReviewPanel" hidden>
+          <div class="offduty-review-start" id="offDutyReviewStart">
+            <div><strong>等待人工复核</strong><p>核对事件抓拍与前后录像后开始处置。</p></div>
+            <button class="primary-button" type="button" id="offDutyStartReview"><i data-lucide="eye"></i>开始复核</button>
+          </div>
+          <form id="offDutyResolutionForm" hidden novalidate>
+            <div class="offduty-resolution-heading"><div><strong>复核结果</strong><p>选择实际处置结果并填写说明。</p></div><span id="offDutyReviewer">Admin</span></div>
+            <div class="offduty-resolution-options" role="group" aria-label="复核结果">
+              <button class="active" type="button" data-offduty-resolution="returned"><i data-lucide="user-check"></i><span>人员返岗</span></button>
+              <button type="button" data-offduty-resolution="false_alarm"><i data-lucide="shield-alert"></i><span>误报消警</span></button>
+            </div>
+            <div class="offduty-recovery-gate" id="offDutyRecoveryGate"><i data-lucide="users"></i><div><strong id="offDutyRecoveryGateTitle">当前人数尚未恢复</strong><p id="offDutyRecoveryGateText">识别到 1 / 2 人，暂不能按人员返岗消警。</p></div></div>
+            <label id="offDutyFalseAlarmField" hidden><span>误报原因 <b class="required-mark">必填</b></span><select id="offDutyFalseAlarmReason"><option value="">请选择误报原因</option><option value="画面遮挡">画面遮挡</option><option value="识别错误">识别错误</option><option value="交接班">交接班</option><option value="其他">其他</option></select></label>
+            <label><span>处置说明 <b class="required-mark">必填</b></span><textarea id="offDutyHandlingNote" rows="3" placeholder="请记录视频复核情况和处置结果"></textarea></label>
+            <p class="form-error" id="offDutyResolutionError" hidden></p>
+            <div class="offduty-resolution-submit"><button class="primary-button" type="submit" id="offDutyResolutionSubmit"><i data-lucide="badge-check"></i>确认消警</button></div>
+          </form>
+        </section>
+        <footer><button class="secondary-button" type="button" data-video-record-close><i data-lucide="x"></i>关闭</button></footer>
       </section>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden><i data-lucide="circle-check"></i><span>操作成功</span></div>
 
     <script src="assets/vendor/lucide.min.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=20260724-passage-action"></script>
   </body>
 </html>

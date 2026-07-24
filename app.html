@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>消防安全机构端 App</title>
+    <link rel="stylesheet" href="app.css?v=20260724-duty-flow" />
+  </head>
+  <body class="device-shell-enabled">
+    <aside class="preview-controls" aria-label="预览设置">
+      <button class="preview-control-trigger" id="previewControlTrigger" type="button" aria-label="预览设置" aria-expanded="false" title="预览设置">
+        <i data-lucide="smartphone"></i>
+      </button>
+      <div class="preview-control-menu" id="previewControlMenu" hidden>
+        <div class="preview-control-heading"><strong>预览设置</strong><small>页面显示方式</small></div>
+        <label class="preview-toggle"><span><i data-lucide="smartphone"></i><b>手机外壳</b></span><input id="deviceShellToggle" type="checkbox" checked /><i></i></label>
+        <label class="preview-toggle"><span><i data-lucide="bell-ring"></i><b>新通知</b></span><input id="newNotificationToggle" type="checkbox" /><i></i></label>
+        <label class="preview-person-field"><span><i data-lucide="users-round"></i><b>值班身份</b></span><select id="dutyPersonSelect" aria-label="选择值班演示身份"><optgroup label="接班方"><option value="admin">Admin</option><option value="wang">王晨</option></optgroup><optgroup label="交班方"><option value="li">李明</option><option value="zhao">赵凯</option></optgroup></select></label>
+        <div class="preview-reset-actions">
+          <button type="button" data-reset-state="fire"><i data-lucide="siren"></i><span>火警告警状态初始化</span></button>
+          <button type="button" data-reset-state="warning"><i data-lucide="triangle-alert"></i><span>设备预警状态初始化</span></button>
+          <button type="button" data-reset-state="fault"><i data-lucide="wrench"></i><span>设备故障状态初始化</span></button>
+          <button type="button" data-reset-state="offduty"><i data-lucide="users-round"></i><span>脱岗监测状态初始化</span></button>
+          <button type="button" data-reset-state="passage"><i data-lucide="traffic-cone"></i><span>消防通道监测状态初始化</span></button>
+          <button type="button" data-reset-state="duty"><i data-lucide="monitor-check"></i><span>消控室值班状态初始化</span></button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="device-stage">
+      <div class="device-frame">
+        <div class="device-hardware" aria-hidden="true"><span class="device-speaker"></span><span class="device-camera"></span><i class="device-button volume-up"></i><i class="device-button volume-down"></i><i class="device-button power"></i></div>
+        <div class="mobile-shell" id="mobileApp">
+          <header class="app-header" id="appHeader"></header>
+          <main class="app-main" id="appMain"></main>
+          <nav class="bottom-nav" id="bottomNav" aria-label="主导航">
+            <button type="button" data-nav="home"><i data-lucide="house"></i><span>首页</span></button>
+            <button type="button" data-nav="applications"><i data-lucide="layout-grid"></i><span>应用</span></button>
+            <button type="button" data-nav="profile"><i data-lucide="user-round"></i><span>我的</span></button>
+          </nav>
+        </div>
+
+        <aside class="push-banner" id="pushBanner" aria-live="polite" hidden>
+          <button class="push-banner-open" id="pushBannerOpen" type="button"></button>
+          <button class="push-banner-close" type="button" data-push-close aria-label="关闭通知"><i data-lucide="x"></i></button>
+        </aside>
+
+        <div class="sheet-layer" id="sheetLayer" hidden>
+          <button class="sheet-backdrop" type="button" data-sheet-close aria-label="关闭弹层"></button>
+          <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+            <div class="sheet-grabber" aria-hidden="true"></div>
+            <header class="sheet-header">
+              <div><small id="sheetEyebrow"></small><h2 id="sheetTitle"></h2></div>
+              <button class="icon-control" type="button" data-sheet-close aria-label="关闭"><i data-lucide="x"></i></button>
+            </header>
+            <form id="sheetForm">
+              <div class="sheet-body" id="sheetBody"></div>
+              <footer class="sheet-footer"><button class="primary-command" id="sheetSubmit" type="submit"></button></footer>
+            </form>
+          </section>
+        </div>
+
+        <div class="photo-lightbox" id="photoLightbox" hidden>
+          <button type="button" aria-label="关闭图片" data-lightbox-close><i data-lucide="x"></i></button>
+          <img id="lightboxImage" alt="现场照片预览" />
+        </div>
+        <div class="toast" id="appToast" role="status" aria-live="polite"></div>
+        <span class="device-home-indicator" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <script src="assets/vendor/lucide.min.js"></script>
+    <script src="mobile-app.js?v=20260724-duty-flow"></script>
+  </body>
+</html>

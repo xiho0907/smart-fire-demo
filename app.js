@@ -181,6 +181,8 @@ const terminals = [
   { id: "t10", type: "offduty", name: "人员在离岗监测-01", serial: "DS-OD-01C772", point: "消控室主岗", zone: "消防控制室", area: "消防控制室", reading: "岗位无人 06:48", detail: "CH 01 · offDuty", signal: 96, network: "以太网", status: "alarm", updated: "19:40:31", alertId: "offduty" },
   { id: "t11", type: "passage", name: "室外通道监测-08", serial: "DS-PS-08D114", point: "东侧消防通道", zone: "室外通道", area: "园区东侧", reading: "车辆占用 02:13", detail: "CH 08 · channelOccupy", signal: 91, network: "以太网", status: "alarm", updated: "19:41:03", alertId: "passage" },
   { id: "t12", type: "flame", name: "可视化红外火焰探测-01", serial: "DS-FL-03A821", point: "危化品暂存间", zone: "重点防护区", area: "仓储一区", reading: "86.4°C · 检测到火焰", detail: "CH 03 · TMA / flame", signal: 97, network: "以太网", status: "alarm", updated: "19:42:16", alertId: "flame" },
+  { id: "t13", type: "transmitter", name: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", zone: "消防控制室", area: "备用机柜", reading: "主电正常 · 数据上报正常", detail: "备电回路已完成检查", signal: 100, network: "以太网", status: "normal", updated: "19:43:07" },
+  { id: "t14", type: "passage", name: "室外通道监测-02", serial: "DS-PS-02D531", point: "北门消防通道", zone: "室外通道", area: "园区北门", reading: "设备未上报", detail: "ISUP 心跳中断", signal: 0, network: "以太网", status: "offline", updated: "18:56:14" },
 ];
 
 const fireAlarms = [
@@ -191,6 +193,13 @@ const fireAlarms = [
   { id: "fa5", no: "ALM-FIRE-20260723-0051", level: 2, title: "锅炉房火焰识别报警", location: "锅炉房燃气阀组", device: "红外火焰探测-04", serial: "DS-FL-04C507", eventType: "TMA / flame", channel: "CH 04 / R-02", time: "2026-07-23 13:12:47", duration: "00:02:06", temperature: 61.3, threshold: 70.0, state: "false", stage: 3, operator: "李明", note: "视频复核为锅炉正常点火反光，已按误报消警并留存影像。" },
   { id: "fa6", no: "ALM-FIRE-20260723-0046", level: 2, title: "库房异常热源报警", location: "物资库房 A 区", device: "红外火焰探测-02", serial: "DS-FL-02A416", eventType: "TMA / highTemperature", channel: "CH 02 / R-04", time: "2026-07-23 10:48:03", duration: "00:03:41", temperature: 72.5, threshold: 68.0, state: "pending", stage: 0, operator: "待确认", note: "检测区域出现持续异常热源，等待值班人员确认警情。" },
 ];
+
+fireAlarms.forEach((alarm) => {
+  alarm.operationHistory = [];
+  alarm.assignedAt = "";
+  alarm.assignmentWindowMinutes = 0;
+  alarm.assignmentDeadlineAt = "";
+});
 
 const terminalWarnings = [
   { id: "tw1", no: "WRN-20260723-0118", risk: "medium", type: "power", title: "配电回路温度接近阈值", device: "智能用电采集终端-05", serial: "PW-05-A2361", point: "厨房动力配电箱", value: "68.2°C", threshold: "≥ 70.0°C", firstTime: "19:31:08", updated: "19:42:58", state: "pending", assignee: "待指派" },
@@ -204,14 +213,40 @@ const terminalWarnings = [
 
 const terminalFaults = [
   { id: "tf1", no: "FLT-20260723-0031", terminalId: "t05", type: "level", faultType: "通信中断", faultCode: "DEV_OFFLINE", title: "液位终端连续心跳超时", device: "无线远程液位终端-04", serial: "WL-04-B9230", point: "屋顶高位水箱", source: "NB-IoT 心跳检测", firstTime: "2026-07-23 16:30:42", updated: "2026-07-23 19:43:08", duration: "03:12:26", state: "pending", assignee: "待指派", assignedAt: "", repairedAt: "", note: "设备连续多个心跳周期未上报，等待指派运维人员现场核查。" },
-  { id: "tf2", no: "FLT-20260723-0030", terminalId: null, type: "transmitter", faultType: "备电故障", faultCode: "BACKUP_POWER_FAULT", title: "用户信息传输装置备电异常", device: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", source: "传输装置状态上报", firstTime: "2026-07-23 18:46:17", updated: "2026-07-23 19:42:51", duration: "00:56:34", state: "processing", assignee: "陈峰", assignedAt: "2026-07-23 18:58:12", repairedAt: "", note: "已安排检查备用电池组与充电回路，设备主电及数据传输正常。" },
-  { id: "tf3", no: "FLT-20260723-0029", terminalId: null, type: "passage", faultType: "设备离线", faultCode: "ISUP_HEARTBEAT_LOST", title: "消防通道摄像头离线", device: "室外通道监测-02", serial: "DS-PS-02D531", point: "北门消防通道", source: "ISUP 设备心跳", firstTime: "2026-07-23 18:56:14", updated: "2026-07-23 19:42:44", duration: "00:46:30", state: "processing", assignee: "赵凯", assignedAt: "2026-07-23 19:02:35", repairedAt: "", note: "已指派现场巡查人员检查摄像头供电及园区交换机端口。" },
+  { id: "tf2", no: "FLT-20260723-0030", terminalId: "t13", type: "transmitter", faultType: "备电故障", faultCode: "BACKUP_POWER_FAULT", title: "用户信息传输装置备电异常", device: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", source: "传输装置状态上报", firstTime: "2026-07-23 18:46:17", updated: "2026-07-23 19:42:51", duration: "00:56:34", state: "handled", assignee: "陈峰", assignedAt: "2026-07-23 18:58:12", handledAt: "2026-07-23 19:38:26", repairedAt: "", note: "已完成备用电池组与充电回路检查，设备主电及数据传输已恢复，等待确认设备稳定运行。" },
+  { id: "tf3", no: "FLT-20260723-0029", terminalId: "t14", type: "passage", faultType: "设备离线", faultCode: "ISUP_HEARTBEAT_LOST", title: "消防通道摄像头离线", device: "室外通道监测-02", serial: "DS-PS-02D531", point: "北门消防通道", source: "ISUP 设备心跳", firstTime: "2026-07-23 18:56:14", updated: "2026-07-23 19:42:44", duration: "00:46:30", state: "processing", assignee: "赵凯", assignedAt: "2026-07-23 19:02:35", repairedAt: "", note: "已指派现场巡查人员检查摄像头供电及园区交换机端口。" },
   { id: "tf4", no: "FLT-20260723-0027", terminalId: null, type: "power", faultType: "回路通信异常", faultCode: "METER_CHANNEL_TIMEOUT", title: "用电采集回路通信异常", device: "智能用电采集终端-09", serial: "PW-09-A6842", point: "锅炉房动力配电箱", source: "RS-485 采集状态", firstTime: "2026-07-23 15:18:09", updated: "2026-07-23 15:42:36", duration: "00:24:27", state: "repaired", assignee: "陈峰", assignedAt: "2026-07-23 15:23:18", repairedAt: "2026-07-23 15:42:36", note: "重新紧固采集回路接线后通信恢复，连续数据上报正常。" },
   { id: "tf5", no: "FLT-20260723-0024", terminalId: null, type: "pressure", faultType: "传感器异常", faultCode: "SENSOR_ZERO_DRIFT", title: "压力传感器零点漂移", device: "无线远程压力终端-05", serial: "WP-05-D4406", point: "消防泵房出水总管", source: "压力终端设备自检", firstTime: "2026-07-23 13:06:25", updated: "2026-07-23 13:38:14", duration: "00:31:49", state: "repaired", assignee: "李明", assignedAt: "2026-07-23 13:12:40", repairedAt: "2026-07-23 13:38:14", note: "完成压力传感器零点校准，与机械压力表比对读数正常。" },
   { id: "tf6", no: "FLT-20260723-0021", terminalId: null, type: "gas", faultType: "自检失败", faultCode: "GAS_SENSOR_SELFTEST_FAIL", title: "气敏传感器自检失败", device: "可燃气体探测器-03", serial: "GD-03-F2167", point: "厨房燃气总阀间", source: "探测器自检上报", firstTime: "2026-07-23 11:22:48", updated: "2026-07-23 11:51:20", duration: "00:28:32", state: "repaired", assignee: "王晨", assignedAt: "2026-07-23 11:28:05", repairedAt: "2026-07-23 11:51:20", note: "清洁传感器并重新执行自检，浓度读数与设备状态恢复正常。" },
   { id: "tf7", no: "FLT-20260723-0018", terminalId: null, type: "offduty", faultType: "视频丢失", faultCode: "VIDEO_SIGNAL_LOST", title: "双人值守监控视频流中断", device: "人员在离岗监测-03", serial: "DS-OD-03C284", point: "消防控制室副岗", source: "视频通道状态检测", firstTime: "2026-07-23 09:47:16", updated: "2026-07-23 10:03:52", duration: "00:16:36", state: "repaired", assignee: "赵凯", assignedAt: "2026-07-23 09:50:21", repairedAt: "2026-07-23 10:03:52", note: "重启摄像头编码通道后视频流恢复，双人值守识别服务运行正常。" },
   { id: "tf8", no: "FLT-20260723-0014", terminalId: null, type: "flame", faultType: "存储异常", faultCode: "STORAGE_WRITE_ERROR", title: "红外火焰探测器存储写入异常", device: "可视化红外火焰探测器-04", serial: "DS-FL-04C507", point: "锅炉房燃气阀组", source: "设备存储状态上报", firstTime: "2026-07-23 08:18:33", updated: "2026-07-23 08:46:05", duration: "00:27:32", state: "repaired", assignee: "陈峰", assignedAt: "2026-07-23 08:24:10", repairedAt: "2026-07-23 08:46:05", note: "更换存储卡并完成格式化，抓拍及录像写入测试正常。" },
 ];
+
+terminalFaults.forEach((fault) => {
+  const previousState = fault.state;
+  fault.state = previousState === "repaired" ? "recovered" : previousState;
+  fault.assignmentWindowMinutes = 0;
+  fault.assignmentDeadlineAt = "";
+  fault.handledAt = fault.handledAt || (previousState === "repaired" ? fault.repairedAt : "");
+  fault.recoveredAt = previousState === "repaired" ? fault.repairedAt : "";
+  fault.handledBy = fault.handledAt ? fault.assignee : "";
+  fault.handlingHistory = [];
+  if (fault.assignedAt) {
+    fault.handlingHistory.push({ action: "assign", operator: fault.assignee, time: fault.assignedAt, note: `指派${fault.assignee}负责设备故障处理。` });
+  }
+  if (fault.handledAt) {
+    fault.handlingHistory.push({ action: "mark_handled", operator: fault.assignee, time: fault.handledAt, note: fault.note });
+  }
+  if (fault.recoveredAt) {
+    fault.handlingHistory.push({ action: "confirm_recovery", operator: fault.assignee, time: fault.recoveredAt, note: "已核对设备在线状态、心跳和数据上报，确认恢复正常。" });
+  }
+});
+
+terminalWarnings.forEach((warning) => {
+  warning.assignedAt = "";
+  warning.assignmentWindowMinutes = 0;
+  warning.assignmentDeadlineAt = "";
+});
 
 const videoMonitoringModules = {
   offduty: {
@@ -223,10 +258,10 @@ const videoMonitoringModules = {
     activeLabel: "当前脱岗预警",
     today: 6,
     summaryNote: "持续 06:48",
-    todayNote: "已消警 5 条",
+    todayNote: "已消警 4 条",
     recordTitle: "脱岗预警记录",
     recordSubtitle: "抓拍、录像和脱岗消警结果全程留痕",
-    primaryAction: "脱岗消警",
+    primaryAction: "查看并复核",
     channels: [
       { id: "od01", name: "消防控制室全景", device: "双人值守-01", point: "消防控制室", channel: "CH 01", status: "warning", statusLabel: "1 / 2 人在岗", active: true },
       { id: "od02", name: "消防控制室主岗", device: "双人值守-02", point: "消控室主岗", channel: "CH 02", status: "normal", statusLabel: "双人在岗", active: false },
@@ -236,14 +271,14 @@ const videoMonitoringModules = {
     event: {
       title: "双人值守人数不足",
       level: "脱岗预警",
-      state: "待消警",
+      state: "待复核",
       description: "消防控制室当前仅识别到 1 名值守人员，请核实副岗人员状态。",
       eventType: "offDuty",
       metricLabel: "在岗人数",
       metricValue: "1 / 2 人",
       time: "19:40:31",
       owner: "待处置",
-      note: "脱岗消警后保留抓拍、录像和操作记录。",
+      note: "请先复核抓拍与前后录像，再根据人员返岗或识别误报完成消警。",
       liveSummary: "副岗连续 06:48 未检测到值守人员",
       sceneState: "当前 1 / 2 人在岗",
       sceneClass: "warning",
@@ -251,10 +286,31 @@ const videoMonitoringModules = {
       closed: false,
     },
     records: [
-      { id: "vod01", time: "2026-07-23 19:40:31", title: "双人值守人数不足", eventType: "offDuty", device: "双人值守-01", point: "消防控制室", duration: "00:06:48", owner: "待处置", state: "active" },
-      { id: "vod02", time: "2026-07-23 16:42:09", title: "副岗短时脱岗", eventType: "offDuty", device: "双人值守-03", point: "消防控制室", duration: "00:02:25", owner: "王晨", state: "closed" },
-      { id: "vod03", time: "2026-07-23 11:18:36", title: "主岗短时脱岗", eventType: "offDuty", device: "双人值守-02", point: "消防控制室", duration: "00:01:17", owner: "李明", state: "closed" },
-      { id: "vod04", time: "2026-07-23 08:03:14", title: "交接班人数不足", eventType: "staffCount", device: "双人值守-01", point: "消防控制室", duration: "00:00:46", owner: "赵凯", state: "closed" },
+      {
+        id: "vod01", channelId: "od01", time: "2026-07-23 19:40:31", title: "双人值守人数不足", eventType: "offDuty", device: "双人值守-01", point: "消防控制室", duration: "00:06:48", owner: "待处置", state: "pending",
+        requiredCount: 2, detectedCountAtTrigger: 1, currentDetectedCount: 1, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+        underCountStartedAt: "2026-07-23 19:39:31", triggeredAt: "2026-07-23 19:40:31", reviewedAt: "", recoveredAt: "", recoveryStableSince: "", completedAt: "", resolution: "", falseAlarmReason: "", handlingNote: "",
+      },
+      {
+        id: "vod05", channelId: "od03", time: "2026-07-23 18:20:40", title: "副岗人员脱岗", eventType: "offDuty", device: "双人值守-03", point: "消防控制室", duration: "00:03:12", owner: "Admin", state: "recovered_pending",
+        requiredCount: 2, detectedCountAtTrigger: 1, currentDetectedCount: 2, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+        underCountStartedAt: "2026-07-23 18:19:40", triggeredAt: "2026-07-23 18:20:40", reviewedAt: "2026-07-23 18:21:02", recoveredAt: "2026-07-23 18:22:52", recoveryStableSince: "2026-07-23 18:22:52", completedAt: "", resolution: "", falseAlarmReason: "", handlingNote: "",
+      },
+      {
+        id: "vod02", channelId: "od03", time: "2026-07-23 16:42:09", title: "副岗短时脱岗", eventType: "offDuty", device: "双人值守-03", point: "消防控制室", duration: "00:02:25", owner: "王晨", state: "closed",
+        requiredCount: 2, detectedCountAtTrigger: 1, currentDetectedCount: 2, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+        underCountStartedAt: "2026-07-23 16:41:09", triggeredAt: "2026-07-23 16:42:09", reviewedAt: "2026-07-23 16:42:38", recoveredAt: "2026-07-23 16:43:34", recoveryStableSince: "2026-07-23 16:43:34", completedAt: "2026-07-23 16:45:02", resolution: "returned", falseAlarmReason: "", handlingNote: "视频复核确认副岗人员已返回，双人值守状态持续稳定。",
+      },
+      {
+        id: "vod03", channelId: "od02", time: "2026-07-23 11:18:36", title: "主岗短时脱岗", eventType: "offDuty", device: "双人值守-02", point: "消防控制室", duration: "00:01:17", owner: "李明", state: "closed",
+        requiredCount: 2, detectedCountAtTrigger: 1, currentDetectedCount: 2, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+        underCountStartedAt: "2026-07-23 11:17:36", triggeredAt: "2026-07-23 11:18:36", reviewedAt: "2026-07-23 11:18:44", recoveredAt: "2026-07-23 11:18:53", recoveryStableSince: "2026-07-23 11:18:53", completedAt: "2026-07-23 11:19:58", resolution: "returned", falseAlarmReason: "", handlingNote: "主岗人员已返回值守区域，核对实时画面后完成消警。",
+      },
+      {
+        id: "vod04", channelId: "od01", time: "2026-07-23 08:03:14", title: "交接班人数不足", eventType: "staffCount", device: "双人值守-01", point: "消防控制室", duration: "00:01:46", owner: "赵凯", state: "closed",
+        requiredCount: 2, detectedCountAtTrigger: 1, currentDetectedCount: 1, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+        underCountStartedAt: "2026-07-23 08:02:14", triggeredAt: "2026-07-23 08:03:14", reviewedAt: "2026-07-23 08:03:28", recoveredAt: "", recoveryStableSince: "", completedAt: "2026-07-23 08:04:00", resolution: "false_alarm", falseAlarmReason: "交接班", handlingNote: "交接班人员短时处于识别区域外，核对排班与录像后按误报消警。",
+      },
     ],
   },
   passage: {
@@ -295,10 +351,10 @@ const videoMonitoringModules = {
       closed: false,
     },
     records: [
-      { id: "vps01", time: "2026-07-23 19:41:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:02:13", owner: "待处置", state: "active" },
-      { id: "vps02", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", owner: "赵凯", state: "closed" },
-      { id: "vps03", time: "2026-07-23 15:08:37", title: "临停车辆占用通道", eventType: "channelOccupy", device: "通道监测-02", point: "北门消防通道", duration: "00:04:16", owner: "陈峰", state: "closed" },
-      { id: "vps04", time: "2026-07-23 09:26:18", title: "卸货车辆短时占用", eventType: "channelOccupy", device: "通道监测-12", point: "西侧装卸通道", duration: "00:03:42", owner: "王晨", state: "closed" },
+      { id: "vps01", channelId: "ps08", time: "2026-07-23 19:41:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:02:13", owner: "待处置", state: "active", completedAt: "", handlingNote: "", operationHistory: [] },
+      { id: "vps02", channelId: "ps12", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", owner: "赵凯", state: "closed", completedAt: "2026-07-23 18:26:45", handlingNote: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", operationHistory: [{ action: "confirm_clear", operator: "赵凯", time: "2026-07-23 18:26:45", description: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", photos: [] }] },
+      { id: "vps03", channelId: "ps02", time: "2026-07-23 15:08:37", title: "临停车辆占用通道", eventType: "channelOccupy", device: "通道监测-02", point: "北门消防通道", duration: "00:04:16", owner: "陈峰", state: "closed", completedAt: "2026-07-23 15:13:21", handlingNote: "已联系驾驶员驶离，现场确认消防通道无车辆和物品占用。", operationHistory: [{ action: "confirm_clear", operator: "陈峰", time: "2026-07-23 15:13:21", description: "已联系驾驶员驶离，现场确认消防通道无车辆和物品占用。", photos: [] }] },
+      { id: "vps04", channelId: "ps12", time: "2026-07-23 09:26:18", title: "卸货车辆短时占用", eventType: "channelOccupy", device: "通道监测-12", point: "西侧装卸通道", duration: "00:03:42", owner: "王晨", state: "closed", completedAt: "2026-07-23 09:30:28", handlingNote: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。", operationHistory: [{ action: "confirm_clear", operator: "王晨", time: "2026-07-23 09:30:28", description: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。", photos: [] }] },
     ],
   },
   flame: {
@@ -367,8 +423,14 @@ const terminalTypeMeta = {
 
 const terminalStatusLabels = { normal: "正常", warning: "预警", alarm: "告警", offline: "离线" };
 const fireAlarmStateLabels = { pending: "待确认", confirmed: "已确认", processing: "处置中", reset: "已复位", false: "误报消警" };
+const fireActionMeta = {
+  confirm: { type: "警情确认", title: "确认警情", icon: "badge-check", prompt: "请填写确认警情的现场依据，照片可选。", placeholder: "例如：已到达现场，确认存在明火，已通知现场人员疏散。" },
+  false: { type: "误报消警", title: "误报消警", icon: "circle-x", prompt: "请填写误报判定依据，照片可选。", placeholder: "例如：经现场核查为设备反光，未发现明火，确认误报并完成消警。" },
+  dispose: { type: "警情处置", title: "警情处置", icon: "radio", prompt: "请填写现场处置过程和结果，照片可选。", placeholder: "例如：已完成断电、疏散和灭火处置，现场温度恢复正常。" },
+  reset: { type: "设备复位", title: "设备复位", icon: "rotate-ccw", prompt: "请填写设备复位前后的状态，照片可选。", placeholder: "例如：现场警情已排除，设备和消防主机复位成功，数据上报正常。" },
+};
 const terminalWarningStateLabels = { pending: "待核查", checking: "核查中", recovered: "已恢复" };
-const terminalFaultStateLabels = { pending: "待处理", processing: "处理中", repaired: "已修复" };
+const terminalFaultStateLabels = { pending: "待处理", processing: "处理中", handled: "已处理待恢复", recovered: "已恢复" };
 const terminalWarningTypeMeta = {
   power: { label: "智能用电", icon: "zap", className: "blue" },
   transmitter: { label: "用户信息传输装置", icon: "radio-tower", className: "cyan" },
@@ -376,6 +438,33 @@ const terminalWarningTypeMeta = {
   level: { label: "远程液位", icon: "waves", className: "cyan" },
   pressure: { label: "远程压力", icon: "gauge", className: "blue" },
   camera: { label: "视频监测", icon: "cctv", className: "purple" },
+};
+
+const assignmentDeadlineRules = {
+  fire: {
+    defaultMinutes: 1,
+    options: [
+      { value: 1, label: "1 分钟" },
+      { value: 3, label: "3 分钟" },
+      { value: 5, label: "5 分钟" },
+    ],
+  },
+  warning: {
+    defaultMinutes: 5,
+    options: [
+      { value: 5, label: "5 分钟" },
+      { value: 10, label: "10 分钟" },
+      { value: 15, label: "15 分钟" },
+    ],
+  },
+  fault: {
+    defaultMinutes: 240,
+    options: [
+      { value: 30, label: "30 分钟" },
+      { value: 240, label: "4 小时" },
+      { value: 1440, label: "24 小时" },
+    ],
+  },
 };
 
 const stateLabels = { pending: "待处置", processing: "处理中", closed: "已闭环" };
@@ -391,16 +480,23 @@ let selectedFireAlarmId = "fa1";
 let selectedFireEvidence = "images";
 let selectedFireImageMode = "visible";
 let selectedFireVideoOffset = "before";
+let selectedFireAction = null;
+let pendingFireActionPhotos = [];
 let assignmentTargetType = "fire";
 let assignmentTargetId = "fa1";
 let selectedTerminalFaultId = "tf1";
 let selectedVideoModule = "offduty";
 let selectedVideoViewMode = "visible";
 let selectedVideoRecordFilter = "all";
+let selectedVideoRecordId = "";
+let selectedOffDutyResolution = "returned";
+let pendingPassageActionPhotos = [];
+let selectedPassageActionRecordId = "";
 const selectedVideoChannelIds = { offduty: "od01", passage: "ps08", flame: "fl01" };
 const CRITICAL_FIRE_SNOOZE_MS = 5 * 60 * 1000;
 const CRITICAL_FIRE_SNOOZE_KEY = "smart-fire-critical-snoozes";
 let videoPlaybackTimer;
+let videoRecordDurationTimer;
 let toastTimer;
 let criticalFireReminderTimer;
 let currentCriticalFireAlarmId = null;
@@ -411,6 +507,9 @@ let criticalFirePreviousFocus = null;
 let alarmSoundMuted = false;
 let alarmAudioContext;
 let alarmToneTimer;
+const currentUser = { name: "Admin" };
+const MAX_FIRE_ACTION_PHOTOS = 6;
+const MAX_FIRE_ACTION_PHOTO_SIZE = 10 * 1024 * 1024;
 
 function getAlert(id) {
   return alerts.find((item) => item.id === id) || alerts[0];
@@ -543,7 +642,34 @@ function renderAlarmTable() {
       openHandleModal(button.dataset.openAlert, true);
     });
   });
+  tbody.querySelectorAll("[data-terminal-fault]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const faultId = button.dataset.terminalFault;
+      switchView("terminal-faults", null, document.querySelector('.nav-subitem[data-view="terminal-faults"]'));
+      requestAnimationFrame(() => openFaultDetail(faultId));
+    });
+  });
   refreshIcons(tbody);
+}
+
+function getTerminalForFault(fault) {
+  if (!fault) return null;
+  return terminals.find((terminal) => terminal.id === fault.terminalId || terminal.serial === fault.serial) || null;
+}
+
+function getActiveFaultForTerminal(terminal) {
+  if (!terminal) return null;
+  return terminalFaults.find((fault) => fault.state !== "recovered" && (fault.terminalId === terminal.id || fault.serial === terminal.serial)) || null;
+}
+
+function isTerminalHealthy(terminal) {
+  return Boolean(terminal && terminal.status === "normal" && terminal.signal > 0);
+}
+
+function getTerminalRuntimeMeta(terminal) {
+  if (!terminal) return { label: "状态未知", icon: "circle-help", className: "unknown", updated: "--" };
+  const icon = terminal.status === "normal" ? "circle-check" : terminal.status === "warning" ? "triangle-alert" : terminal.status === "alarm" ? "siren" : "wifi-off";
+  return { label: terminalStatusLabels[terminal.status], icon, className: terminal.status === "normal" ? "online" : terminal.status, updated: terminal.updated };
 }
 
 function renderDeviceTable(category = "all") {
@@ -584,21 +710,23 @@ function renderTerminalTable() {
     const meta = terminalTypeMeta[item.type];
     const statusIcon = item.status === "normal" ? "circle-check" : item.status === "warning" ? "triangle-alert" : item.status === "alarm" ? "siren" : "wifi-off";
     const isCamera = Boolean(item.alertId);
+    const activeFault = getActiveFaultForTerminal(item);
+    const faultStatus = activeFault ? `<button class="terminal-fault-link ${activeFault.state}" type="button" data-terminal-fault="${activeFault.id}" title="查看关联故障">${terminalFaultStateLabels[activeFault.state]}</button>` : "";
     return `
-      <tr>
+      <tr data-terminal-row="${item.id}">
         <td><div class="terminal-device"><span class="terminal-type-icon ${meta.className}"><i data-lucide="${meta.icon}"></i></span><div><strong>${item.name}</strong><small>${item.serial}</small></div></div></td>
         <td><div class="point-cell"><strong>${item.point}</strong><small>${item.area} · ${item.zone}</small></div></td>
         <td>${meta.label}</td>
         <td><div class="terminal-reading ${item.status}"><span class="reading-icon"><i data-lucide="${statusIcon}"></i></span><div><strong>${item.reading}</strong><small>${item.detail}</small></div></div></td>
         <td><div class="terminal-comms"><span class="signal-bars ${item.signal < 60 ? "weak" : ""} ${item.signal === 0 ? "offline" : ""}"><i></i><i></i><i></i></span><div><strong>${item.signal}%</strong><small>${item.network}</small></div></div></td>
-        <td><span class="status-pill ${item.status === "normal" ? "online" : item.status}">${terminalStatusLabels[item.status]}</span></td>
+        <td><div class="terminal-status-stack"><span class="status-pill ${item.status === "normal" ? "online" : item.status}">${terminalStatusLabels[item.status]}</span>${faultStatus}</div></td>
         <td>${item.updated}</td>
         <td><button class="table-event-action" type="button" title="${isCamera ? "进入告警画面" : "查看设备详情"}" aria-label="${isCamera ? "进入告警画面" : "查看设备详情"}" data-terminal-action="${item.id}"><i data-lucide="${isCamera ? "video" : "arrow-up-right"}"></i></button></td>
       </tr>`;
   }).join("");
 
   document.querySelector("#terminalTableEmpty").hidden = filtered.length > 0;
-  document.querySelector("#terminalCountLabel").textContent = selectedTerminalType === "all" && status === "all" && zone === "all" && !query ? "显示 12 台重点终端，共 57 台" : `当前筛选显示 ${filtered.length} 台终端`;
+  document.querySelector("#terminalCountLabel").textContent = selectedTerminalType === "all" && status === "all" && zone === "all" && !query ? "显示 14 台重点终端，共 57 台" : `当前筛选显示 ${filtered.length} 台终端`;
   tbody.querySelectorAll("[data-terminal-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const terminal = terminals.find((item) => item.id === button.dataset.terminalAction);
@@ -620,6 +748,393 @@ function renderTerminalTable() {
 
 function getFireAlarm(id) {
   return fireAlarms.find((item) => item.id === id) || fireAlarms[0];
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[character]));
+}
+
+function parseAppDateTime(value) {
+  if (!value) return null;
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+  const [, year, month, day, hours, minutes, seconds = "0"] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes), Number(seconds));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatAssignmentDuration(minutes) {
+  if (minutes >= 60 && minutes % 60 === 0) return `${minutes / 60} 小时`;
+  return `${minutes} 分钟`;
+}
+
+function getAssignmentDeadlineMeta(item) {
+  const date = parseAppDateTime(item?.assignmentDeadlineAt);
+  if (!date) return { text: "--", overdue: false, valid: false };
+  const pad = (value) => String(value).padStart(2, "0");
+  return {
+    text: `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`,
+    overdue: date.getTime() < Date.now(),
+    valid: true,
+  };
+}
+
+function renderAssignmentPersonCell(item) {
+  const deadline = getAssignmentDeadlineMeta(item);
+  const unassigned = item.assignee === "待指派";
+  const deadlineText = !deadline.valid ? "截止 --" : deadline.overdue ? `已超时 · ${deadline.text}` : `截止 ${deadline.text}`;
+  return `<div class="assignee-cell ${unassigned ? "unassigned" : ""}"><strong>${escapeHtml(item.assignee)}</strong><small class="assignment-deadline ${deadline.overdue ? "overdue" : ""}" data-assignment-deadline="${escapeHtml(item.assignmentDeadlineAt || "")}" data-deadline-prefix="截止 ">${deadlineText}</small></div>`;
+}
+
+function renderFireAssignmentDeadline(item) {
+  const deadline = getAssignmentDeadlineMeta(item);
+  const text = !deadline.valid ? "接单截止 --" : deadline.overdue ? `已超时 · ${deadline.text}` : `接单截止 ${deadline.text}`;
+  return `<span class="fire-record-deadline"><i data-lucide="clock-3"></i><span class="assignment-deadline ${deadline.overdue ? "overdue" : ""}" data-assignment-deadline="${escapeHtml(item.assignmentDeadlineAt || "")}" data-deadline-prefix="接单截止 ">${text}</span></span>`;
+}
+
+function setAssignmentDeadlineDetail(selector, item) {
+  const node = document.querySelector(selector);
+  if (!node) return;
+  const deadline = getAssignmentDeadlineMeta(item);
+  node.textContent = deadline.valid ? `${deadline.overdue ? "已超时 · " : ""}${deadline.text}` : "--";
+  node.className = deadline.overdue ? "assignment-deadline-detail overdue" : "assignment-deadline-detail";
+  node.dataset.assignmentDeadline = item.assignmentDeadlineAt || "";
+  node.dataset.deadlinePrefix = "";
+}
+
+function refreshAssignmentDeadlineDisplays() {
+  document.querySelectorAll("[data-assignment-deadline]").forEach((node) => {
+    const deadline = getAssignmentDeadlineMeta({ assignmentDeadlineAt: node.dataset.assignmentDeadline });
+    const prefix = node.dataset.deadlinePrefix || "";
+    node.textContent = !deadline.valid ? `${prefix}--` : deadline.overdue ? `已超时 · ${deadline.text}` : `${prefix}${deadline.text}`;
+    node.classList.toggle("overdue", deadline.overdue);
+  });
+}
+
+function updateAssignmentDeadlinePreview() {
+  const select = document.querySelector("#assignmentDeadline");
+  const minutes = Number(select?.value);
+  if (!minutes) return;
+  const previewTarget = { assignmentDeadlineAt: formatClock(new Date(Date.now() + minutes * 60 * 1000)) };
+  document.querySelector("#assignmentDeadlineSummary").textContent = `请在 ${formatAssignmentDuration(minutes)}内接单并开始处置`;
+  document.querySelector("#assignmentDeadlineHint").textContent = `预计截止 ${getAssignmentDeadlineMeta(previewTarget).text} · 超过接单时限需升级通知消防主管`;
+}
+
+function isFireActionAvailable(alarm, action) {
+  if (!alarm) return false;
+  if (action === "confirm") return alarm.stage === 0;
+  if (action === "false") return alarm.stage < 2 && alarm.state !== "false";
+  if (action === "dispose") return alarm.stage === 1;
+  if (action === "reset") return alarm.stage === 2;
+  return false;
+}
+
+function renderFireOperationHistory(alarm) {
+  const list = document.querySelector("#fireOperationHistory");
+  const count = document.querySelector("#fireOperationHistoryCount");
+  if (!list || !count) return;
+  const history = Array.isArray(alarm.operationHistory) ? alarm.operationHistory : [];
+  count.textContent = `${history.length} 条`;
+  if (!history.length) {
+    list.innerHTML = '<div class="fire-history-empty"><i data-lucide="clipboard-list"></i><span>暂无新增操作记录</span><small>提交说明或照片后会显示在这里</small></div>';
+    refreshIcons(list);
+    return;
+  }
+  list.innerHTML = history.map((record) => {
+    const meta = fireActionMeta[record.action] || { type: "警情操作" };
+    const photos = (record.photos || []).map((photo) => `<img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" title="${escapeHtml(photo.name)}" />`).join("");
+    return `<article class="fire-history-item" role="listitem">
+      <header><span class="fire-history-action ${record.action}">${meta.type}</span><span>${escapeHtml(record.operator)} · ${escapeHtml(record.time)}</span></header>
+      <p>${escapeHtml(record.description)}</p>
+      ${photos ? `<div class="fire-history-photos">${photos}</div>` : ""}
+    </article>`;
+  }).join("");
+}
+
+function renderFireActionPhotoPreview() {
+  const preview = document.querySelector("#fireActionPhotoPreview");
+  if (!preview) return;
+  preview.innerHTML = pendingFireActionPhotos.map((photo) => `<div class="photo-preview-item">
+    <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" />
+    <button type="button" data-fire-photo-remove="${photo.id}" title="移除照片" aria-label="移除照片 ${escapeHtml(photo.name)}"><i data-lucide="x"></i></button>
+    <span>${escapeHtml(photo.name)}</span>
+  </div>`).join("");
+  refreshIcons(preview);
+}
+
+function setFireActionPhotoError(message = "") {
+  const error = document.querySelector("#fireActionPhotoError");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = !message;
+}
+
+function readFireActionPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result));
+    reader.addEventListener("error", () => reject(new Error("photo-read-failed")));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFireActionPhotoSelection(event) {
+  const files = [...event.target.files];
+  event.target.value = "";
+  if (!files.length) return;
+  setFireActionPhotoError("");
+  const available = MAX_FIRE_ACTION_PHOTOS - pendingFireActionPhotos.length;
+  if (available <= 0) {
+    setFireActionPhotoError(`最多上传 ${MAX_FIRE_ACTION_PHOTOS} 张照片`);
+    return;
+  }
+  const accepted = [];
+  const errors = [];
+  files.slice(0, available).forEach((file) => {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      errors.push(`${file.name} 格式不支持`);
+    } else if (file.size > MAX_FIRE_ACTION_PHOTO_SIZE) {
+      errors.push(`${file.name} 超过 10 MB`);
+    } else {
+      accepted.push(file);
+    }
+  });
+  if (files.length > available) errors.push(`最多上传 ${MAX_FIRE_ACTION_PHOTOS} 张照片`);
+  const loadedPhotos = await Promise.all(accepted.map(async (file) => ({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    dataUrl: await readFireActionPhoto(file),
+  })).map((promise) => promise.catch(() => null)));
+  pendingFireActionPhotos.push(...loadedPhotos.filter(Boolean));
+  if (errors.length) setFireActionPhotoError(errors.join("；"));
+  renderFireActionPhotoPreview();
+}
+
+function openFireActionModal(action) {
+  const alarm = getFireAlarm(selectedFireAlarmId);
+  const meta = fireActionMeta[action];
+  if (!meta || !isFireActionAvailable(alarm, action)) return;
+  selectedFireAction = action;
+  pendingFireActionPhotos = [];
+  document.querySelector("#fireActionModalType").textContent = meta.type;
+  document.querySelector("#fireActionModalTitle").textContent = meta.title;
+  document.querySelector("#fireActionTargetTitle").textContent = alarm.title;
+  document.querySelector("#fireActionTargetMeta").textContent = `${alarm.location} · ${alarm.no}`;
+  document.querySelector("#fireActionPrompt").textContent = meta.prompt;
+  document.querySelector("#fireActionDescription").value = "";
+  document.querySelector("#fireActionDescription").placeholder = meta.placeholder;
+  document.querySelector("#fireActionDescriptionHint").textContent = `${meta.type}说明会作为本次操作记录保存。`;
+  document.querySelector("#fireActionSubmit").innerHTML = `<i data-lucide="${meta.icon}"></i>${meta.title}`;
+  setFireActionPhotoError("");
+  renderFireActionPhotoPreview();
+  const modal = document.querySelector("#fireActionModal");
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons(modal);
+  document.querySelector("#fireActionDescription").focus();
+}
+
+function closeFireActionModal() {
+  document.querySelector("#fireActionModal").hidden = true;
+  document.querySelector("#fireActionForm").reset();
+  pendingFireActionPhotos = [];
+  selectedFireAction = null;
+  renderFireActionPhotoPreview();
+  setFireActionPhotoError("");
+  document.body.style.overflow = "";
+}
+
+function submitFireAction(event) {
+  event.preventDefault();
+  const description = document.querySelector("#fireActionDescription").value.trim();
+  if (!description) {
+    document.querySelector("#fireActionDescription").focus();
+    showToast("请填写操作说明");
+    return;
+  }
+  const alarm = getFireAlarm(selectedFireAlarmId);
+  const action = selectedFireAction;
+  const meta = fireActionMeta[action];
+  if (!meta || !isFireActionAvailable(alarm, action)) {
+    closeFireActionModal();
+    return;
+  }
+  const now = formatClock(new Date());
+  alarm.operationHistory.unshift({
+    action,
+    operator: "Admin",
+    time: now,
+    description,
+    photos: pendingFireActionPhotos.map(({ name, type, size, dataUrl }) => ({ name, type, size, dataUrl })),
+  });
+  if (action === "confirm") {
+    alarm.state = "confirmed";
+    alarm.stage = 1;
+    if (alarm.operator === "待确认") alarm.operator = "Admin";
+  } else if (action === "false") {
+    alarm.state = "false";
+    alarm.stage = 3;
+    alarm.operator = "Admin";
+  } else if (action === "dispose") {
+    alarm.state = "processing";
+    alarm.stage = 2;
+    if (alarm.operator === "待确认" || alarm.operator === "Admin") alarm.operator = "李明";
+  } else if (action === "reset") {
+    alarm.state = "reset";
+    alarm.stage = 3;
+    alarm.operator = alarm.operator === "待确认" ? "Admin" : alarm.operator;
+  }
+  alarm.note = description;
+  closeFireActionModal();
+  renderFireAlarmList();
+  syncCriticalFireReminderState(alarm);
+  showToast(`${alarm.no}已完成${meta.title}`);
+}
+
+function renderPassageActionPhotoPreview() {
+  const preview = document.querySelector("#passageActionPhotoPreview");
+  if (!preview) return;
+  preview.innerHTML = pendingPassageActionPhotos.map((photo) => `<div class="photo-preview-item">
+    <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" />
+    <button type="button" data-passage-photo-remove="${photo.id}" title="移除照片" aria-label="移除照片 ${escapeHtml(photo.name)}"><i data-lucide="x"></i></button>
+    <span>${escapeHtml(photo.name)}</span>
+  </div>`).join("");
+  refreshIcons(preview);
+}
+
+function setPassageActionPhotoError(message = "") {
+  const error = document.querySelector("#passageActionPhotoError");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = !message;
+}
+
+async function handlePassageActionPhotoSelection(event) {
+  const files = [...event.target.files];
+  event.target.value = "";
+  if (!files.length) return;
+  setPassageActionPhotoError("");
+  const available = MAX_FIRE_ACTION_PHOTOS - pendingPassageActionPhotos.length;
+  if (available <= 0) {
+    setPassageActionPhotoError(`最多上传 ${MAX_FIRE_ACTION_PHOTOS} 张照片`);
+    return;
+  }
+  const accepted = [];
+  const errors = [];
+  files.slice(0, available).forEach((file) => {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      errors.push(`${file.name} 格式不支持`);
+    } else if (file.size > MAX_FIRE_ACTION_PHOTO_SIZE) {
+      errors.push(`${file.name} 超过 10 MB`);
+    } else {
+      accepted.push(file);
+    }
+  });
+  if (files.length > available) errors.push(`最多上传 ${MAX_FIRE_ACTION_PHOTOS} 张照片`);
+  const loadedPhotos = await Promise.all(accepted.map(async (file) => ({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    dataUrl: await readFireActionPhoto(file),
+  })).map((promise) => promise.catch(() => null)));
+  pendingPassageActionPhotos.push(...loadedPhotos.filter(Boolean));
+  if (loadedPhotos.some((photo) => !photo)) errors.push("部分照片读取失败，请重新选择");
+  if (errors.length) setPassageActionPhotoError(errors.join("；"));
+  renderPassageActionPhotoPreview();
+}
+
+function openPassageActionModal(recordId) {
+  const record = videoMonitoringModules.passage.records.find((item) => item.id === recordId);
+  if (!record || record.state !== "active") return;
+  ensurePassageRecordShape(record);
+  selectedPassageActionRecordId = record.id;
+  pendingPassageActionPhotos = [];
+  document.querySelector("#passageActionTargetTitle").textContent = record.title;
+  document.querySelector("#passageActionTargetMeta").textContent = `${record.point} · ${record.device}`;
+  document.querySelector("#passageActionDescription").value = "";
+  setPassageActionPhotoError("");
+  renderPassageActionPhotoPreview();
+  const modal = document.querySelector("#passageActionModal");
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons(modal);
+  document.querySelector("#passageActionDescription").focus();
+}
+
+function closePassageActionModal() {
+  document.querySelector("#passageActionModal").hidden = true;
+  document.querySelector("#passageActionForm").reset();
+  pendingPassageActionPhotos = [];
+  selectedPassageActionRecordId = "";
+  renderPassageActionPhotoPreview();
+  setPassageActionPhotoError("");
+  document.body.style.overflow = "";
+}
+
+function syncCurrentPassageEvent(record) {
+  if (record.id !== "vps01") return;
+  const module = videoMonitoringModules.passage;
+  const channel = module.channels.find((item) => item.id === record.channelId) || module.channels[0];
+  const alert = alerts.find((item) => item.id === "passage");
+  const terminal = terminals.find((item) => item.alertId === "passage");
+  module.event.closed = true;
+  module.event.owner = record.owner;
+  module.event.state = "已恢复";
+  module.event.note = record.handlingNote;
+  channel.active = false;
+  channel.status = "normal";
+  channel.statusLabel = "通道畅通";
+  if (alert) {
+    alert.state = "closed";
+    alert.owner = record.owner;
+    alert.summary = record.handlingNote;
+  }
+  if (terminal) {
+    terminal.status = "normal";
+    terminal.reading = "通道畅通";
+    terminal.detail = `${channel.channel} · channelClear`;
+    terminal.updated = record.completedAt.slice(11);
+  }
+}
+
+function submitPassageAction(event) {
+  event.preventDefault();
+  const description = document.querySelector("#passageActionDescription").value.trim();
+  if (!description) {
+    document.querySelector("#passageActionDescription").focus();
+    showToast("请填写处置说明");
+    return;
+  }
+  const record = videoMonitoringModules.passage.records.find((item) => item.id === selectedPassageActionRecordId);
+  if (!record || record.state !== "active") {
+    closePassageActionModal();
+    return;
+  }
+  ensurePassageRecordShape(record);
+  const completedAt = formatClock(new Date());
+  const photos = pendingPassageActionPhotos.map(({ dataUrl }) => dataUrl);
+  record.state = "closed";
+  record.owner = currentUser.name;
+  record.completedAt = completedAt;
+  record.handlingNote = description;
+  record.operationHistory.unshift({ action: "confirm_clear", operator: currentUser.name, time: completedAt, description, photos });
+  syncCurrentPassageEvent(record);
+  closePassageActionModal();
+  renderVideoMonitoring();
+  renderAlertQueue();
+  renderAlarmTable();
+  renderTerminalTable();
+  openVideoRecordDetail(record);
+  showToast("消防通道已确认恢复畅通");
 }
 
 function parseDurationSeconds(value = "00:00:00") {
@@ -887,6 +1402,7 @@ function renderFireAlarmList() {
       <span class="fire-record-top"><span class="severity-label level-${item.level === 1 ? "one" : "two"}">${item.level}级</span><time>${item.time.slice(11)}</time></span>
       <strong>${item.title}</strong>
       <span class="fire-record-location"><i data-lucide="map-pin"></i>${item.location} · ${item.device}</span>
+      ${renderFireAssignmentDeadline(item)}
       <span class="fire-record-footer"><code>${item.no.slice(-4)}</code><b class="state-pill ${item.state}">${fireAlarmStateLabels[item.state]}</b></span>
     </button>
   `).join("");
@@ -926,7 +1442,9 @@ function updateFireAlarmDetail() {
   setText("#fireDetailEventType", alarm.eventType);
   setText("#fireDetailChannel", alarm.channel);
   setText("#fireDetailOperator", alarm.operator);
+  setAssignmentDeadlineDetail("#fireDetailDeadline", alarm);
   setText("#fireDispositionNote", alarm.note);
+  renderFireOperationHistory(alarm);
   document.querySelector(".fire-reading-strip").hidden = !hasTemperature;
   if (hasTemperature) {
     setText("#fireDetailThreshold", `${alarm.threshold.toFixed(1)}°C`);
@@ -1021,7 +1539,7 @@ function renderTerminalWarningTable() {
         <td>${item.threshold}</td>
         <td>${item.firstTime}</td>
         <td>${item.updated}</td>
-        <td><span class="assignee-cell ${item.assignee === "待指派" ? "unassigned" : ""}">${item.assignee}</span></td>
+        <td>${renderAssignmentPersonCell({ ...item, assignee: item.handledBy || item.assignee })}</td>
         <td><span class="state-dot ${item.state === "recovered" ? "closed" : item.state === "checking" ? "processing" : "pending"}">${terminalWarningStateLabels[item.state]}</span></td>
         <td><div class="table-row-actions"><button class="table-event-action" type="button" title="指派人员" aria-label="指派人员" data-assign-warning="${item.id}" ${item.state === "recovered" ? "disabled" : ""}><i data-lucide="user-plus"></i></button><button class="table-event-action" type="button" title="${actionLabel}" aria-label="${actionLabel}" data-warning-action="${item.id}"><i data-lucide="${actionIcon}"></i></button></div></td>
       </tr>`;
@@ -1061,6 +1579,45 @@ function getTerminalFault(id) {
   return terminalFaults.find((item) => item.id === id) || terminalFaults[0];
 }
 
+function getFaultHistoryRecord(fault, action) {
+  return [...(fault.handlingHistory || [])].reverse().find((record) => record.action === action) || null;
+}
+
+function renderFaultDeviceState(fault) {
+  const terminal = getTerminalForFault(fault);
+  const runtime = getTerminalRuntimeMeta(terminal);
+  return `<div class="fault-runtime-cell"><span class="status-pill ${runtime.className}">${runtime.label}</span><small>${terminal ? `上报 ${runtime.updated}` : "未关联终端"}</small></div>`;
+}
+
+function renderFaultProcess(fault) {
+  const terminal = getTerminalForFault(fault);
+  const assigned = getFaultHistoryRecord(fault, "assign");
+  const handled = getFaultHistoryRecord(fault, "mark_handled");
+  const recovered = getFaultHistoryRecord(fault, "confirm_recovery");
+  const terminalHealthy = isTerminalHealthy(terminal);
+  const steps = [
+    { label: "故障上报", icon: "radio", time: fault.firstTime.slice(11), className: "completed" },
+    { label: "人员指派", icon: "user-check", time: assigned ? assigned.time.slice(11) : handled ? "未指派" : "待指派", className: assigned ? "completed" : handled ? "skipped" : fault.state === "processing" ? "processing" : "" },
+    { label: "标记处理", icon: "clipboard-check", time: handled ? handled.time.slice(11) : "待处理", className: handled ? "completed" : fault.state === "processing" ? "processing" : "" },
+    { label: "设备恢复", icon: "activity", time: terminalHealthy ? `上报 ${terminal.updated}` : "等待正常上报", className: terminalHealthy ? "completed" : fault.state === "handled" ? "processing" : "" },
+    { label: "确认恢复", icon: "badge-check", time: recovered ? recovered.time.slice(11) : "待确认", className: recovered ? "completed" : fault.state === "handled" && terminalHealthy ? "processing" : "" },
+  ];
+  document.querySelector("#faultProcess").innerHTML = steps.map((step, index) => `${index ? '<i data-lucide="chevron-right"></i>' : ""}<div class="${step.className}"><span><i data-lucide="${step.icon}"></i></span><strong>${step.label}</strong><small>${step.time}</small></div>`).join("");
+}
+
+function renderFaultHandlingHistory(fault) {
+  const list = document.querySelector("#faultHandlingHistory");
+  const count = document.querySelector("#faultHandlingHistoryCount");
+  const history = [...(fault.handlingHistory || [])].reverse();
+  const actionLabels = { assign: "人员指派", mark_handled: "标记处理", confirm_recovery: "确认恢复" };
+  count.textContent = `${history.length} 条`;
+  if (!history.length) {
+    list.innerHTML = '<div class="fault-history-empty"><i data-lucide="clipboard-list"></i><span>暂无人工处理记录</span></div>';
+    return;
+  }
+  list.innerHTML = history.map((record) => `<article class="fault-history-item"><header><strong>${actionLabels[record.action] || "故障操作"}</strong><span>${escapeHtml(record.operator)} · ${escapeHtml(record.time)}</span></header><p>${escapeHtml(record.note)}</p></article>`).join("");
+}
+
 function renderTerminalFaultTable() {
   const query = document.querySelector("#terminalFaultSearch")?.value.trim().toLowerCase() || "";
   const type = document.querySelector("#terminalFaultTypeFilter")?.value || "all";
@@ -1073,6 +1630,11 @@ function renderTerminalFaultTable() {
   if (!tbody) return;
   tbody.innerHTML = filtered.map((item) => {
     const meta = terminalTypeMeta[item.type];
+    const terminal = getTerminalForFault(item);
+    const canAssign = item.state === "pending" || item.state === "processing";
+    const canHandle = item.state === "pending" || item.state === "processing";
+    const canRecover = item.state === "handled" && isTerminalHealthy(terminal);
+    const recoverTitle = item.state === "recovered" ? "故障已恢复" : item.state !== "handled" ? "需先标记处理" : canRecover ? "确认设备恢复" : "设备尚未恢复正常";
     return `
       <tr>
         <td><div class="table-event"><span class="type-icon ${meta.className}"><i data-lucide="${meta.icon}"></i></span><div><strong>${item.title}</strong><small>${item.no}</small></div></div></td>
@@ -1081,30 +1643,36 @@ function renderTerminalFaultTable() {
         <td><time>${item.firstTime.slice(5)}</time></td>
         <td><time>${item.updated.slice(5)}</time></td>
         <td><span class="fault-duration">${item.duration}</span></td>
-        <td><span class="assignee-cell ${item.assignee === "待指派" ? "unassigned" : ""}">${item.assignee}</span></td>
-        <td><span class="state-dot ${item.state === "repaired" ? "closed" : item.state}">${terminalFaultStateLabels[item.state]}</span></td>
+        <td>${renderFaultDeviceState(item)}</td>
+        <td>${renderAssignmentPersonCell(item)}</td>
+        <td><span class="state-dot ${item.state === "recovered" ? "closed" : item.state}">${terminalFaultStateLabels[item.state]}</span></td>
         <td><div class="table-row-actions">
-          <button class="table-event-action" type="button" title="${item.state === "processing" ? "重新指派人员" : "指派人员"}" aria-label="${item.state === "processing" ? "重新指派人员" : "指派人员"}" data-assign-fault="${item.id}" ${item.state === "repaired" ? "disabled" : ""}><i data-lucide="user-plus"></i></button>
-          <button class="table-event-action" type="button" title="标记修复" aria-label="标记修复" data-repair-fault="${item.id}" ${item.state !== "processing" ? "disabled" : ""}><i data-lucide="circle-check"></i></button>
+          <button class="table-event-action" type="button" title="${item.state === "processing" ? "重新指派人员" : "指派人员"}" aria-label="${item.state === "processing" ? "重新指派人员" : "指派人员"}" data-assign-fault="${item.id}" ${canAssign ? "" : "disabled"}><i data-lucide="user-plus"></i></button>
+          <button class="table-event-action" type="button" title="标记处理" aria-label="标记处理" data-handle-fault="${item.id}" ${canHandle ? "" : "disabled"}><i data-lucide="clipboard-check"></i></button>
+          <button class="table-event-action" type="button" title="${recoverTitle}" aria-label="${recoverTitle}" data-recover-fault="${item.id}" ${canRecover ? "" : "disabled"}><i data-lucide="badge-check"></i></button>
           <button class="table-event-action" type="button" title="查看故障详情" aria-label="查看故障详情" data-view-fault="${item.id}"><i data-lucide="file-search"></i></button>
         </div></td>
       </tr>`;
   }).join("");
 
-  const activeCount = terminalFaults.filter((item) => item.state !== "repaired").length;
+  const activeCount = terminalFaults.filter((item) => item.state !== "recovered").length;
   document.querySelector("#terminalFaultTableEmpty").hidden = filtered.length > 0;
   document.querySelector("#terminalFaultCountLabel").textContent = `共 ${filtered.length} 条记录`;
   document.querySelector("#faultActiveCount").textContent = activeCount;
   document.querySelector("#faultPendingCount").textContent = terminalFaults.filter((item) => item.state === "pending").length;
-  document.querySelector("#faultProcessingCount").textContent = terminalFaults.filter((item) => item.state === "processing").length;
-  document.querySelector("#faultRepairedCount").textContent = terminalFaults.filter((item) => item.state === "repaired").length;
+  document.querySelector("#faultProcessingCount").textContent = terminalFaults.filter((item) => item.state === "processing" || item.state === "handled").length;
+  document.querySelector("#faultProcessingSummary").textContent = `处理中 ${terminalFaults.filter((item) => item.state === "processing").length} · 待恢复 ${terminalFaults.filter((item) => item.state === "handled").length}`;
+  document.querySelector("#faultRepairedCount").textContent = terminalFaults.filter((item) => item.state === "recovered").length;
   document.querySelector("#faultNavBadge").textContent = activeCount;
 
   tbody.querySelectorAll("[data-assign-fault]").forEach((button) => {
     button.addEventListener("click", () => openAssignmentModal("fault", button.dataset.assignFault));
   });
-  tbody.querySelectorAll("[data-repair-fault]").forEach((button) => {
-    button.addEventListener("click", () => repairTerminalFault(button.dataset.repairFault));
+  tbody.querySelectorAll("[data-handle-fault]").forEach((button) => {
+    button.addEventListener("click", () => openFaultHandleModal(button.dataset.handleFault));
+  });
+  tbody.querySelectorAll("[data-recover-fault]").forEach((button) => {
+    button.addEventListener("click", () => confirmTerminalFaultRecovery(button.dataset.recoverFault));
   });
   tbody.querySelectorAll("[data-view-fault]").forEach((button) => {
     button.addEventListener("click", () => openFaultDetail(button.dataset.viewFault));
@@ -1116,10 +1684,12 @@ function openFaultDetail(id) {
   selectedTerminalFaultId = id;
   const fault = getTerminalFault(id);
   const meta = terminalTypeMeta[fault.type];
+  const terminal = getTerminalForFault(fault);
+  const runtime = getTerminalRuntimeMeta(terminal);
   const modal = document.querySelector("#faultDetailModal");
   const state = document.querySelector("#faultDetailState");
   state.textContent = terminalFaultStateLabels[fault.state];
-  state.className = `state-pill ${fault.state === "repaired" ? "reset" : fault.state}`;
+  state.className = `state-pill ${fault.state === "recovered" ? "reset" : fault.state}`;
   document.querySelector("#faultDetailTitle").textContent = fault.title;
   document.querySelector("#faultDetailMeta").textContent = `${fault.firstTime} · ${fault.faultCode}`;
   document.querySelector("#faultDetailNo").textContent = fault.no;
@@ -1131,25 +1701,34 @@ function openFaultDetail(id) {
   document.querySelector("#faultDetailPoint").textContent = fault.point;
   document.querySelector("#faultDetailType").textContent = fault.faultType;
   document.querySelector("#faultDetailDuration").textContent = fault.duration;
-  document.querySelector("#faultDetailAssignee").textContent = fault.assignee;
-  document.querySelector("#faultDetailRepairedAt").textContent = fault.repairedAt || "--";
+  document.querySelector("#faultDetailAssignee").textContent = fault.handledBy || fault.assignee;
+  setAssignmentDeadlineDetail("#faultDetailDeadline", fault);
+  document.querySelector("#faultDetailRepairedAt").textContent = fault.recoveredAt || "--";
+
+  document.querySelector("#faultDetailDeviceStatus").textContent = runtime.label;
+  document.querySelector("#faultDetailDeviceStatus").className = runtime.className;
+  document.querySelector("#faultDetailDeviceUpdated").textContent = terminal ? `最近上报 ${runtime.updated} · ${terminal.network} · 信号 ${terminal.signal}%` : "未找到关联设备状态";
+  document.querySelector("#faultDetailDeviceStatusIcon").className = `fault-device-status-icon ${runtime.className}`;
+  document.querySelector("#faultDetailDeviceStatusIcon").innerHTML = `<i data-lucide="${runtime.icon}"></i>`;
+  document.querySelector("#faultDetailViewDevice").disabled = !terminal;
 
   const note = document.querySelector("#faultDetailNote");
-  note.classList.toggle("repaired", fault.state === "repaired");
-  note.querySelector("strong").textContent = fault.state === "repaired" ? "修复结论" : "当前处理记录";
+  note.classList.toggle("repaired", fault.state === "recovered");
+  note.classList.toggle("handled", fault.state === "handled");
+  note.querySelector("strong").textContent = fault.state === "recovered" ? "恢复确认" : fault.state === "handled" ? "处理结果" : "当前处理记录";
   note.querySelector("p").textContent = fault.note;
-  document.querySelector("#faultProcessReportedAt").textContent = fault.firstTime.slice(11);
-  document.querySelector("#faultProcessAssignedAt").textContent = fault.assignedAt ? fault.assignedAt.slice(11) : "待指派";
-  document.querySelector("#faultProcessRepairedAt").textContent = fault.repairedAt ? fault.repairedAt.slice(11) : "待完成";
-  document.querySelector("#faultProcessAssigned").className = fault.state === "pending" ? "" : "completed";
-  document.querySelector("#faultProcessRepaired").className = fault.state === "repaired" ? "completed" : fault.state === "processing" ? "processing" : "";
+  renderFaultProcess(fault);
+  renderFaultHandlingHistory(fault);
 
   const assignButton = document.querySelector("#faultDetailAssign");
-  const repairButton = document.querySelector("#faultDetailRepair");
-  assignButton.hidden = fault.state === "repaired";
+  const handleButton = document.querySelector("#faultDetailHandle");
+  const recoverButton = document.querySelector("#faultDetailRecover");
+  assignButton.hidden = fault.state !== "pending" && fault.state !== "processing";
   assignButton.innerHTML = `<i data-lucide="user-plus"></i>${fault.state === "processing" ? "重新指派" : "指派人员"}`;
-  repairButton.hidden = fault.state === "repaired";
-  repairButton.disabled = fault.state !== "processing";
+  handleButton.hidden = fault.state !== "pending" && fault.state !== "processing";
+  recoverButton.hidden = fault.state !== "handled";
+  recoverButton.disabled = fault.state === "handled" && !isTerminalHealthy(terminal);
+  recoverButton.title = recoverButton.disabled ? "设备尚未恢复正常" : "确认设备恢复";
   modal.hidden = false;
   document.body.style.overflow = "hidden";
   refreshIcons(modal);
@@ -1160,25 +1739,92 @@ function closeFaultDetail() {
   document.body.style.overflow = "";
 }
 
-function repairTerminalFault(id) {
+function openFaultHandleModal(id) {
   const fault = getTerminalFault(id);
-  if (fault.state === "pending") {
-    openAssignmentModal("fault", fault.id);
-    showToast("请先指派设备运维人员");
+  if (fault.state !== "pending" && fault.state !== "processing") return;
+  selectedTerminalFaultId = fault.id;
+  document.querySelector("#faultHandleTargetTitle").textContent = fault.title;
+  document.querySelector("#faultHandleTargetMeta").textContent = `${fault.point} · ${fault.no}`;
+  document.querySelector("#faultHandleOperator").textContent = currentUser.name;
+  document.querySelector("#faultHandleNote").value = "";
+  const modal = document.querySelector("#faultHandleModal");
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons(modal);
+  document.querySelector("#faultHandleNote").focus();
+}
+
+function closeFaultHandleModal() {
+  document.querySelector("#faultHandleModal").hidden = true;
+  document.querySelector("#faultHandleForm").reset();
+  document.body.style.overflow = "";
+}
+
+function submitFaultHandle(event) {
+  event.preventDefault();
+  const fault = getTerminalFault(selectedTerminalFaultId);
+  const note = document.querySelector("#faultHandleNote").value.trim();
+  if (!note) {
+    document.querySelector("#faultHandleNote").focus();
+    showToast("请填写处理备注");
     return;
   }
-  if (fault.state === "repaired") {
-    openFaultDetail(fault.id);
-    return;
-  }
-  const repairedAt = formatClock(new Date());
-  fault.state = "repaired";
-  fault.repairedAt = repairedAt;
-  fault.updated = repairedAt;
-  fault.note = `${fault.assignee}已完成设备检修和状态复核，设备数据上报恢复正常。`;
+  const handledAt = formatClock(new Date());
+  fault.state = "handled";
+  fault.handledAt = handledAt;
+  fault.updated = handledAt;
+  fault.note = note;
+  fault.handledBy = currentUser.name;
+  if (fault.assignee === "待指派") fault.assignee = currentUser.name;
+  fault.handlingHistory.push({ action: "mark_handled", operator: currentUser.name, time: handledAt, note });
+  closeFaultHandleModal();
   renderTerminalFaultTable();
+  renderTerminalTable();
   if (!document.querySelector("#faultDetailModal").hidden && selectedTerminalFaultId === fault.id) openFaultDetail(fault.id);
-  showToast(`${fault.device}已标记为修复`);
+  showToast(`${fault.device}已标记处理，等待设备状态恢复`);
+}
+
+function confirmTerminalFaultRecovery(id) {
+  const fault = getTerminalFault(id);
+  const terminal = getTerminalForFault(fault);
+  if (fault.state !== "handled") {
+    showToast("请先标记故障处理结果");
+    return;
+  }
+  if (!isTerminalHealthy(terminal)) {
+    showToast("设备尚未恢复正常，暂不能确认恢复");
+    return;
+  }
+  const recoveredAt = formatClock(new Date());
+  const note = `已核对${terminal.name}在线状态、心跳和数据上报，确认设备恢复正常。`;
+  fault.state = "recovered";
+  fault.recoveredAt = recoveredAt;
+  fault.updated = recoveredAt;
+  fault.note = note;
+  fault.handlingHistory.push({ action: "confirm_recovery", operator: currentUser.name, time: recoveredAt, note });
+  renderTerminalFaultTable();
+  renderTerminalTable();
+  if (!document.querySelector("#faultDetailModal").hidden && selectedTerminalFaultId === fault.id) openFaultDetail(fault.id);
+  showToast(`${fault.device}已确认恢复`);
+}
+
+function openFaultTerminalStatus(id) {
+  const fault = getTerminalFault(id);
+  const terminal = getTerminalForFault(fault);
+  if (!terminal) {
+    showToast("未找到关联设备状态");
+    return;
+  }
+  closeFaultDetail();
+  selectedTerminalType = "all";
+  document.querySelector("#terminalSearch").value = terminal.serial;
+  document.querySelector("#terminalStatusFilter").value = "all";
+  document.querySelector("#terminalZoneFilter").value = "all";
+  document.querySelectorAll("[data-terminal-type]").forEach((item) => item.classList.toggle("active", item.dataset.terminalType === "all"));
+  switchView("terminals", null, document.querySelector('.nav-subitem[data-view="terminals"]'));
+  renderTerminalTable();
+  requestAnimationFrame(() => document.querySelector(`[data-terminal-row="${terminal.id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+  showToast(`已定位${terminal.name}`);
 }
 
 function getVideoModule() {
@@ -1190,10 +1836,352 @@ function getSelectedVideoChannel(module = getVideoModule()) {
   return module.channels.find((item) => item.id === channelId) || module.channels[0];
 }
 
+const offDutyRecordStateLabels = { pending: "待复核", processing: "处置中", recovered_pending: "待确认返岗", closed: "已消警" };
+const offDutyDetectionTrackers = new Map();
+
+function ensurePassageRecordShape(record) {
+  if (!record) return null;
+  record.completedAt ||= "";
+  record.handlingNote ||= "";
+  record.operationHistory = Array.isArray(record.operationHistory) ? record.operationHistory : [];
+  return record;
+}
+
+function isVideoRecordOpen(record) {
+  if (selectedVideoModule === "offduty") return record.state !== "closed";
+  return record.state === "active" || record.state === "processing";
+}
+
 function getVideoRecordState(record) {
+  if (selectedVideoModule === "offduty") {
+    ensureOffDutyRecordShape(record);
+    syncOffDutyRecoveryState(record);
+    return offDutyRecordStateLabels[record.state] || "待复核";
+  }
   if (record.state === "active") return selectedVideoModule === "flame" ? "待确认" : "待处理";
   if (record.state === "processing") return "处置中";
-  return selectedVideoModule === "offduty" ? "已消警" : selectedVideoModule === "passage" ? "已恢复" : "已闭环";
+  return selectedVideoModule === "passage" ? "已恢复" : "已闭环";
+}
+
+function parseDurationSeconds(value) {
+  const parts = String(value || "00:00:00").split(":").map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return 0;
+  return parts[0] * 3600 + parts[1] * 60 + parts[2];
+}
+
+function formatDurationSeconds(value) {
+  const seconds = Math.max(0, Math.floor(value));
+  const pad = (part) => String(part).padStart(2, "0");
+  return `${pad(Math.floor(seconds / 3600))}:${pad(Math.floor((seconds % 3600) / 60))}:${pad(seconds % 60)}`;
+}
+
+function ensureOffDutyRecordShape(record) {
+  if (!record) return null;
+  if (record.state === "active") record.state = "pending";
+  record.requiredCount ??= 2;
+  record.detectedCountAtTrigger ??= 1;
+  record.currentDetectedCount ??= record.state === "closed" ? record.requiredCount : record.detectedCountAtTrigger;
+  record.triggerThresholdSeconds ??= 60;
+  record.recoveryStableSeconds ??= 60;
+  record.underCountStartedAt ||= record.time || record.triggeredAt || "";
+  record.triggeredAt ||= record.time || "";
+  record.reviewedAt ||= "";
+  record.recoveredAt ||= "";
+  record.recoveryStableSince ||= record.recoveredAt || "";
+  record.completedAt ||= "";
+  record.owner ||= "待处置";
+  record.resolution ||= "";
+  record.falseAlarmReason ||= "";
+  record.handlingNote ||= "";
+  record._durationBaseSeconds ??= parseDurationSeconds(record.duration);
+  record._durationTrackingStartedAt ??= Date.now();
+  return record;
+}
+
+function getOffDutyDurationSeconds(record) {
+  ensureOffDutyRecordShape(record);
+  const startedAt = parseAppDateTime(record.underCountStartedAt);
+  const recoveredAt = parseAppDateTime(record.recoveredAt);
+  if (startedAt && recoveredAt && recoveredAt >= startedAt) return Math.floor((recoveredAt - startedAt) / 1000);
+  if (record.state === "closed") return record._durationBaseSeconds;
+  return record._durationBaseSeconds + Math.floor((Date.now() - record._durationTrackingStartedAt) / 1000);
+}
+
+function getOffDutyRecoveryMeta(record) {
+  ensureOffDutyRecordShape(record);
+  if (record.currentDetectedCount < record.requiredCount) {
+    return { ready: false, title: "当前人数尚未恢复", text: `识别到 ${record.currentDetectedCount} / ${record.requiredCount} 人，暂不能按人员返岗消警。`, remaining: record.recoveryStableSeconds };
+  }
+  const stableSince = parseAppDateTime(record.recoveryStableSince);
+  if (!stableSince) {
+    return { ready: false, title: "等待人数稳定", text: `当前已识别到 ${record.currentDetectedCount} / ${record.requiredCount} 人，正在确认持续稳定状态。`, remaining: record.recoveryStableSeconds };
+  }
+  const elapsed = Math.max(0, Math.floor((Date.now() - stableSince.getTime()) / 1000));
+  const remaining = Math.max(0, record.recoveryStableSeconds - elapsed);
+  return remaining === 0
+    ? { ready: true, title: "返岗条件已满足", text: `当前 ${record.currentDetectedCount} / ${record.requiredCount} 人在岗，已连续稳定 ${record.recoveryStableSeconds} 秒。`, remaining: 0 }
+    : { ready: false, title: "等待人数稳定", text: `当前 ${record.currentDetectedCount} / ${record.requiredCount} 人在岗，还需稳定 ${remaining} 秒。`, remaining };
+}
+
+function syncOffDutyRecoveryState(record) {
+  if (!record || record.state === "closed") return;
+  const recovery = getOffDutyRecoveryMeta(record);
+  if (recovery.ready && record.reviewedAt) record.state = "recovered_pending";
+  else if (record.state === "recovered_pending" && !recovery.ready) record.state = record.reviewedAt ? "processing" : "pending";
+}
+
+function getOffDutyRecordConclusion(record) {
+  if (record.resolution === "false_alarm") return `${record.falseAlarmReason || "识别误报"}：${record.handlingNote}`;
+  return `值守人数已恢复为 ${record.currentDetectedCount} / ${record.requiredCount} 人并持续稳定，${record.handlingNote}`;
+}
+
+function getOffDutyRecordMethod(record) {
+  if (record.state !== "closed") return record.reviewedAt ? "视频复核中" : "待开始复核";
+  return record.resolution === "false_alarm" ? "视频复核并误报消警" : "视频复核并确认返岗";
+}
+
+function renderVideoRecordTimeline(record) {
+  const timeline = document.querySelector("#videoRecordTimeline");
+  if (selectedVideoModule === "passage") {
+    ensurePassageRecordShape(record);
+    const completed = record.state === "closed";
+    timeline.innerHTML = `<div class="completed"><span><i data-lucide="radio"></i></span><strong>预警上报</strong><small>${record.time.slice(11)}</small></div><i data-lucide="chevron-right"></i><div class="${completed ? "completed" : "pending"}"><span><i data-lucide="eye"></i></span><strong>现场核查</strong><small>${completed ? record.completedAt.slice(11) : "--"}</small></div><i data-lucide="chevron-right"></i><div class="${completed ? "completed" : "pending"}"><span><i data-lucide="circle-check"></i></span><strong>确认畅通</strong><small>${completed ? record.completedAt.slice(11) : "--"}</small></div>`;
+    return;
+  }
+  if (selectedVideoModule !== "offduty") {
+    timeline.innerHTML = `<div class="completed"><span><i data-lucide="radio"></i></span><strong>预警上报</strong><small>${record.time.slice(11)}</small></div><i data-lucide="chevron-right"></i><div class="completed"><span><i data-lucide="eye"></i></span><strong>现场复核</strong><small>已完成</small></div><i data-lucide="chevron-right"></i><div class="completed"><span><i data-lucide="circle-check"></i></span><strong>完成闭环</strong><small>已完成</small></div>`;
+    return;
+  }
+  const recoveryLabel = record.resolution === "false_alarm" ? "误报确认" : "人数恢复";
+  const recoveryTime = record.resolution === "false_alarm" ? record.completedAt : record.recoveredAt;
+  const steps = [
+    { label: "预警上报", time: record.triggeredAt, icon: "radio", completed: Boolean(record.triggeredAt) },
+    { label: "开始复核", time: record.reviewedAt, icon: "eye", completed: Boolean(record.reviewedAt) },
+    { label: recoveryLabel, time: recoveryTime, icon: record.resolution === "false_alarm" ? "shield-check" : "user-check", completed: Boolean(recoveryTime) },
+    { label: "人工消警", time: record.completedAt, icon: "circle-check", completed: Boolean(record.completedAt) },
+  ];
+  timeline.innerHTML = steps.map((step, index) => `${index ? '<i data-lucide="chevron-right"></i>' : ""}<div class="${step.completed ? "completed" : "pending"}"><span><i data-lucide="${step.icon}"></i></span><strong>${step.label}</strong><small>${step.time ? step.time.slice(11) : "--"}</small></div>`).join("");
+}
+
+function renderPassageOperationHistory(record) {
+  const section = document.querySelector("#passageOperationHistory");
+  const list = document.querySelector("#passageOperationHistoryList");
+  const count = document.querySelector("#passageOperationHistoryCount");
+  const isPassage = selectedVideoModule === "passage";
+  section.hidden = !isPassage;
+  if (!isPassage) return;
+  ensurePassageRecordShape(record);
+  count.textContent = `${record.operationHistory.length} 条`;
+  if (!record.operationHistory.length) {
+    list.innerHTML = '<div class="passage-history-empty"><i data-lucide="clipboard-list"></i><span>暂无处置记录</span><small>确认通道恢复后将显示处置说明和现场照片</small></div>';
+    return;
+  }
+  list.innerHTML = record.operationHistory.map((item) => {
+    const photos = (item.photos || []).map((photo) => {
+      const source = typeof photo === "string" ? photo : photo.dataUrl;
+      const name = typeof photo === "string" ? "现场照片" : photo.name;
+      return `<img src="${source}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}" />`;
+    }).join("");
+    return `<article class="passage-history-item">
+      <header><strong>确认通道畅通</strong><span>${escapeHtml(item.operator)} · ${escapeHtml(item.time)}</span></header>
+      <p>${escapeHtml(item.description)}</p>
+      ${photos ? `<div class="passage-history-photos">${photos}</div>` : ""}
+    </article>`;
+  }).join("");
+}
+
+function getSelectedOffDutyRecord() {
+  return videoMonitoringModules.offduty.records.find((record) => record.id === selectedVideoRecordId) || null;
+}
+
+function setOffDutyResolutionError(message = "") {
+  const node = document.querySelector("#offDutyResolutionError");
+  node.textContent = message;
+  node.hidden = !message;
+}
+
+function renderOffDutyRecoveryGate(record) {
+  if (selectedVideoModule !== "offduty" || !record) return;
+  const recovery = getOffDutyRecoveryMeta(record);
+  const gate = document.querySelector("#offDutyRecoveryGate");
+  gate.hidden = selectedOffDutyResolution !== "returned";
+  gate.className = `offduty-recovery-gate ${recovery.ready ? "ready" : record.currentDetectedCount >= record.requiredCount ? "waiting" : "blocked"}`;
+  document.querySelector("#offDutyRecoveryGateTitle").textContent = recovery.title;
+  document.querySelector("#offDutyRecoveryGateText").textContent = recovery.text;
+  const submit = document.querySelector("#offDutyResolutionSubmit");
+  submit.disabled = selectedOffDutyResolution === "returned" && !recovery.ready;
+  submit.innerHTML = `<i data-lucide="${selectedOffDutyResolution === "returned" ? "user-check" : "shield-check"}"></i>${selectedOffDutyResolution === "returned" ? "确认返岗并消警" : "确认误报并消警"}`;
+}
+
+function renderOffDutyReviewPanel(record) {
+  const isOffDuty = selectedVideoModule === "offduty";
+  const panel = document.querySelector("#offDutyReviewPanel");
+  panel.hidden = !isOffDuty || record.state === "closed";
+  if (!isOffDuty || record.state === "closed") return;
+  const start = document.querySelector("#offDutyReviewStart");
+  const form = document.querySelector("#offDutyResolutionForm");
+  const isPending = record.state === "pending";
+  start.hidden = !isPending;
+  form.hidden = isPending;
+  document.querySelector("#offDutyReviewer").textContent = record.owner === "待处置" ? currentUser.name : record.owner;
+  document.querySelector("#offDutyFalseAlarmReason").value = record.falseAlarmReason || "";
+  document.querySelector("#offDutyHandlingNote").value = record.handlingNote || "";
+  document.querySelectorAll("[data-offduty-resolution]").forEach((button) => button.classList.toggle("active", button.dataset.offdutyResolution === selectedOffDutyResolution));
+  document.querySelector("#offDutyFalseAlarmField").hidden = selectedOffDutyResolution !== "false_alarm";
+  setOffDutyResolutionError("");
+  renderOffDutyRecoveryGate(record);
+}
+
+function syncCurrentOffDutyEvent(record) {
+  if (record.id !== "vod01") return;
+  const module = videoMonitoringModules.offduty;
+  const alert = alerts.find((item) => item.id === "offduty");
+  const terminal = terminals.find((item) => item.alertId === "offduty");
+  module.event.owner = record.owner;
+  module.event.state = getVideoRecordState(record);
+  if (record.state !== "closed") return;
+  module.event.closed = true;
+  const channel = module.channels.find((item) => item.id === record.channelId) || module.channels[0];
+  channel.active = false;
+  channel.status = "normal";
+  channel.statusLabel = record.resolution === "returned" ? "双人在岗" : "预警已复核";
+  if (alert) {
+    alert.state = "closed";
+    alert.owner = record.owner;
+    alert.duration = formatDurationSeconds(getOffDutyDurationSeconds(record));
+    alert.summary = getOffDutyRecordConclusion(record);
+  }
+  if (terminal) {
+    terminal.status = "normal";
+    terminal.reading = record.resolution === "returned" ? "双人在岗" : "预警已人工复核";
+    terminal.detail = `CH 01 · ${record.resolution === "returned" ? "staffOnDuty" : "falseAlarm"}`;
+    terminal.updated = record.completedAt.slice(11);
+  }
+}
+
+function startOffDutyReview() {
+  const record = getSelectedOffDutyRecord();
+  if (!record || record.state !== "pending") return;
+  record.reviewedAt = formatClock(new Date());
+  record.owner = currentUser.name;
+  record.state = "processing";
+  syncOffDutyRecoveryState(record);
+  syncCurrentOffDutyEvent(record);
+  renderVideoMonitoring();
+  openVideoRecordDetail(record);
+  showToast("已开始视频复核");
+}
+
+function selectOffDutyResolution(value) {
+  if (value !== "returned" && value !== "false_alarm") return;
+  selectedOffDutyResolution = value;
+  document.querySelectorAll("[data-offduty-resolution]").forEach((button) => button.classList.toggle("active", button.dataset.offdutyResolution === value));
+  document.querySelector("#offDutyFalseAlarmField").hidden = value !== "false_alarm";
+  setOffDutyResolutionError("");
+  renderOffDutyRecoveryGate(getSelectedOffDutyRecord());
+  refreshIcons(document.querySelector("#offDutyResolutionForm"));
+}
+
+function submitOffDutyResolution(event) {
+  event.preventDefault();
+  const record = getSelectedOffDutyRecord();
+  if (!record || record.state === "pending" || record.state === "closed") return;
+  const note = document.querySelector("#offDutyHandlingNote").value.trim();
+  const falseAlarmReason = document.querySelector("#offDutyFalseAlarmReason").value;
+  if (selectedOffDutyResolution === "returned" && !getOffDutyRecoveryMeta(record).ready) {
+    setOffDutyResolutionError("值守人数尚未恢复并连续稳定 60 秒，不能确认返岗。");
+    return;
+  }
+  if (selectedOffDutyResolution === "false_alarm" && !falseAlarmReason) {
+    setOffDutyResolutionError("请选择误报原因。");
+    document.querySelector("#offDutyFalseAlarmReason").focus();
+    return;
+  }
+  if (!note) {
+    setOffDutyResolutionError("请填写处置说明。");
+    document.querySelector("#offDutyHandlingNote").focus();
+    return;
+  }
+  record.resolution = selectedOffDutyResolution;
+  record.falseAlarmReason = selectedOffDutyResolution === "false_alarm" ? falseAlarmReason : "";
+  record.handlingNote = note;
+  record.owner = currentUser.name;
+  record.completedAt = formatClock(new Date());
+  record.duration = formatDurationSeconds(getOffDutyDurationSeconds(record));
+  record._durationBaseSeconds = parseDurationSeconds(record.duration);
+  record.state = "closed";
+  syncCurrentOffDutyEvent(record);
+  renderVideoMonitoring();
+  openVideoRecordDetail(record);
+  showToast(record.resolution === "returned" ? "已确认人员返岗并完成消警" : "已按误报完成消警");
+}
+
+function refreshOffDutyDurationDisplays() {
+  videoMonitoringModules.offduty.records.forEach((record) => {
+    ensureOffDutyRecordShape(record);
+    syncOffDutyRecoveryState(record);
+    const duration = formatDurationSeconds(getOffDutyDurationSeconds(record));
+    document.querySelectorAll(`[data-offduty-duration="${record.id}"]`).forEach((node) => { node.textContent = duration; });
+    document.querySelectorAll(`[data-offduty-state="${record.id}"]`).forEach((node) => {
+      node.textContent = offDutyRecordStateLabels[record.state];
+      node.className = `state-pill ${record.state === "closed" ? "reset" : record.state === "recovered_pending" ? "recovered-pending" : record.state === "processing" ? "processing" : "pending"}`;
+    });
+  });
+  const record = getSelectedOffDutyRecord();
+  if (record && !document.querySelector("#videoRecordModal").hidden) {
+    document.querySelector("#videoRecordDetailDuration").textContent = formatDurationSeconds(getOffDutyDurationSeconds(record));
+    renderOffDutyRecoveryGate(record);
+    document.querySelector("#videoRecordDetailState").textContent = getVideoRecordState(record);
+    document.querySelector("#videoRecordDetailState").className = `state-pill ${record.state === "closed" ? "reset" : record.state === "recovered_pending" ? "recovered-pending" : record.state === "processing" ? "processing" : "pending"}`;
+  }
+}
+
+function processOffDutyDetection(channelId, detectedCount, observedAt = new Date()) {
+  const module = videoMonitoringModules.offduty;
+  const channel = module.channels.find((item) => item.id === channelId);
+  if (!channel || channel.status === "offline") return null;
+  const observedDate = observedAt instanceof Date ? observedAt : parseAppDateTime(observedAt);
+  if (!observedDate) return null;
+  const requiredCount = 2;
+  const observedTime = formatClock(observedDate);
+  let record = module.records.find((item) => item.channelId === channelId && item.state !== "closed");
+  const tracker = offDutyDetectionTrackers.get(channelId) || { underCountStartedAt: "" };
+  if (detectedCount >= requiredCount) {
+    tracker.underCountStartedAt = "";
+    offDutyDetectionTrackers.set(channelId, tracker);
+    if (record) {
+      record.currentDetectedCount = detectedCount;
+      record.recoveredAt ||= observedTime;
+      record.recoveryStableSince ||= observedTime;
+      syncOffDutyRecoveryState(record);
+    }
+    return record || null;
+  }
+  if (record) {
+    record.currentDetectedCount = detectedCount;
+    record.recoveredAt = "";
+    record.recoveryStableSince = "";
+    if (record.state === "recovered_pending") record.state = record.reviewedAt ? "processing" : "pending";
+    return record;
+  }
+  if (!tracker.underCountStartedAt) {
+    tracker.underCountStartedAt = observedTime;
+    offDutyDetectionTrackers.set(channelId, tracker);
+    return null;
+  }
+  const startedAt = parseAppDateTime(tracker.underCountStartedAt);
+  if (!startedAt || observedDate.getTime() - startedAt.getTime() < 60000) return null;
+  record = {
+    id: `vod${Date.now()}`, channelId, time: observedTime, title: "双人值守人数不足", eventType: "offDuty", device: channel.device, point: channel.point, duration: "00:00:00", owner: "待处置", state: "pending",
+    requiredCount, detectedCountAtTrigger: detectedCount, currentDetectedCount: detectedCount, triggerThresholdSeconds: 60, recoveryStableSeconds: 60,
+    underCountStartedAt: tracker.underCountStartedAt, triggeredAt: observedTime, reviewedAt: "", recoveredAt: "", recoveryStableSince: "", completedAt: "", resolution: "", falseAlarmReason: "", handlingNote: "",
+  };
+  ensureOffDutyRecordShape(record);
+  module.records.unshift(record);
+  channel.active = true;
+  channel.status = "warning";
+  channel.statusLabel = `${detectedCount} / ${requiredCount} 人在岗`;
+  return record;
 }
 
 function openFireAlarmFromVideo(fireAlarmId = "fa1") {
@@ -1248,31 +2236,43 @@ function updatePlaybackTimestamp() {
 
 function openVideoRecordDetail(record) {
   const module = getVideoModule();
-  const durationParts = record.duration.split(":").map(Number);
-  const durationSeconds = durationParts[0] * 3600 + durationParts[1] * 60 + durationParts[2];
-  const closedTime = shiftClockTime(record.time, durationSeconds + 28);
-  const reportedTime = record.time.slice(11);
+  const isOffDuty = selectedVideoModule === "offduty";
+  const isPassage = selectedVideoModule === "passage";
+  selectedVideoRecordId = record.id;
+  selectedOffDutyResolution = "returned";
+  if (isOffDuty) {
+    ensureOffDutyRecordShape(record);
+    syncOffDutyRecoveryState(record);
+  }
+  if (isPassage) ensurePassageRecordShape(record);
   const modulePrefix = selectedVideoModule === "offduty" ? "OD" : selectedVideoModule === "passage" ? "PS" : "FL";
-  const method = selectedVideoModule === "offduty" ? "视频复核并脱岗消警" : selectedVideoModule === "passage" ? "现场确认并恢复通道" : "警情复核并完成闭环";
-  const conclusion = selectedVideoModule === "offduty"
-    ? "值守人员已返回岗位，双人值守状态恢复正常，预警完成消警。"
-    : selectedVideoModule === "passage"
-      ? "占用目标已移除，消防通道恢复畅通，事件完成闭环。"
-      : "现场已完成复核处置，设备状态正常，火灾告警记录已闭环。";
+  const method = isOffDuty ? getOffDutyRecordMethod(record) : isPassage ? record.state === "closed" ? "现场确认并恢复通道" : "待确认通道恢复" : "警情复核并完成闭环";
+  const conclusion = isOffDuty ? getOffDutyRecordConclusion(record) : isPassage ? record.handlingNote : "现场已完成复核处置，设备状态正常，火灾告警记录已闭环。";
+  const eventTime = isOffDuty ? record.triggeredAt : record.time;
   document.querySelector("#videoRecordDetailTitle").textContent = `${module.recordTitle}详情`;
   document.querySelector("#videoRecordDetailState").textContent = getVideoRecordState(record);
+  document.querySelector("#videoRecordDetailState").className = `state-pill ${record.state === "closed" ? "reset" : record.state === "recovered_pending" ? "recovered-pending" : record.state === "processing" ? "processing" : "pending"}`;
   document.querySelector("#videoRecordDetailEvent").textContent = record.title;
-  document.querySelector("#videoRecordDetailMeta").textContent = `${record.time} · ${record.eventType}`;
+  document.querySelector("#videoRecordDetailMeta").textContent = `${eventTime} · ${record.eventType}`;
   document.querySelector("#videoRecordDetailNo").textContent = `REC-${modulePrefix}-20260723-${record.id.slice(-2).padStart(4, "0")}`;
   document.querySelector("#videoRecordDetailPoint").textContent = record.point;
   document.querySelector("#videoRecordDetailDevice").textContent = record.device;
-  document.querySelector("#videoRecordDetailDuration").textContent = record.duration;
+  document.querySelector("#videoRecordDetailDuration").textContent = isOffDuty ? formatDurationSeconds(getOffDutyDurationSeconds(record)) : record.duration;
   document.querySelector("#videoRecordDetailOwner").textContent = record.owner;
   document.querySelector("#videoRecordDetailMethod").textContent = method;
-  document.querySelector("#videoRecordDetailClosedAt").textContent = `${record.time.slice(0, 10)} ${closedTime}`;
+  document.querySelector("#videoRecordDetailClosedAt").textContent = isOffDuty || isPassage ? record.completedAt || "--" : `${record.time.slice(0, 10)} ${shiftClockTime(record.time, parseDurationSeconds(record.duration) + 28)}`;
   document.querySelector("#videoRecordDetailConclusion").textContent = conclusion;
-  document.querySelector("#videoRecordReportedAt").textContent = reportedTime;
-  document.querySelector("#videoRecordCompletedAt").textContent = closedTime;
+  document.querySelector("#videoRecordConclusion").hidden = record.state !== "closed";
+  document.querySelectorAll("[data-offduty-record-only]").forEach((node) => { node.hidden = !isOffDuty; });
+  if (isOffDuty) {
+    document.querySelector("#offDutyRequiredCount").textContent = `${record.requiredCount} 人`;
+    document.querySelector("#offDutyTriggerCount").textContent = `${record.detectedCountAtTrigger} 人`;
+    document.querySelector("#offDutyCurrentCount").textContent = `${record.currentDetectedCount} / ${record.requiredCount} 人`;
+    document.querySelector("#offDutyTriggerRule").textContent = `人数不足持续 ${record.triggerThresholdSeconds} 秒`;
+  }
+  renderVideoRecordTimeline(record);
+  renderOffDutyReviewPanel(record);
+  renderPassageOperationHistory(record);
   document.querySelector("#videoRecordModal").hidden = false;
   document.body.style.overflow = "hidden";
   refreshIcons(document.querySelector("#videoRecordModal"));
@@ -1281,51 +2281,53 @@ function openVideoRecordDetail(record) {
 
 function closeVideoRecordDetail() {
   document.querySelector("#videoRecordModal").hidden = true;
+  selectedVideoRecordId = "";
   document.body.style.overflow = "";
 }
 
 function resolveVideoRecord(recordId) {
   const module = getVideoModule();
   const record = module.records.find((item) => item.id === recordId);
+  if (selectedVideoModule === "offduty" && record) {
+    openVideoRecordDetail(record);
+    return;
+  }
   if (!record || record.state !== "active") {
     showToast("事件处置记录已打开（演示）");
     return;
   }
-  record.state = "closed";
-  record.owner = "Admin";
-  if (record === module.records[0]) {
-    module.event.closed = true;
-    module.event.owner = "Admin";
-    const channel = module.channels[0];
-    channel.active = false;
-    channel.status = "normal";
-    channel.statusLabel = selectedVideoModule === "offduty" ? "双人在岗" : "通道已恢复";
+  if (selectedVideoModule === "passage") {
+    openPassageActionModal(record.id);
+    return;
   }
-  renderVideoMonitoring();
-  showToast(selectedVideoModule === "offduty" ? "脱岗预警已消警并完成留痕" : "消防通道已确认恢复畅通");
+  openVideoRecordDetail(record);
 }
 
 function renderVideoRecordTable() {
   const module = getVideoModule();
   const tbody = document.querySelector("#videoRecordTableBody");
+  const isOffDuty = selectedVideoModule === "offduty";
   const records = module.records.filter((item) => {
-    if (selectedVideoRecordFilter === "active") return item.state !== "closed";
+    if (isOffDuty) ensureOffDutyRecordShape(item);
+    if (selectedVideoRecordFilter === "active") return isOffDuty ? item.state !== "closed" : item.state !== "closed";
     if (selectedVideoRecordFilter === "closed") return item.state === "closed";
     return true;
   });
   tbody.innerHTML = records.map((record) => {
     const isFire = selectedVideoModule === "flame";
-    const isActive = record.state === "active";
-    const actionLabel = isFire && record.state !== "closed" ? "查看告警" : isActive ? module.primaryAction : "查看记录";
+    const isActive = isOffDuty ? record.state !== "closed" : record.state === "active";
+    const actionLabel = isOffDuty ? record.state === "closed" ? "查看记录" : record.state === "pending" ? "查看并复核" : "继续处置" : isFire && record.state !== "closed" ? "查看告警" : isActive ? module.primaryAction : "查看记录";
     const actionClass = isActive ? "video-record-action primary" : "video-record-action";
-    const stateClass = record.state === "active" ? "pending" : record.state === "processing" ? "processing" : "reset";
+    const stateClass = record.state === "pending" || record.state === "active" ? "pending" : record.state === "processing" ? "processing" : record.state === "recovered_pending" ? "recovered-pending" : "reset";
+    const recordTime = isOffDuty ? record.triggeredAt : record.time;
+    const duration = isOffDuty ? formatDurationSeconds(getOffDutyDurationSeconds(record)) : record.duration;
     return `<tr>
-      <td><time>${record.time}</time></td>
+      <td><time>${recordTime}</time></td>
       <td><div class="video-record-event"><strong>${record.title}</strong><small>${record.eventType}</small></div></td>
       <td><div class="video-record-device"><strong>${record.device}</strong><small>${record.point}</small></div></td>
-      <td>${record.duration}</td>
+      <td><span ${isOffDuty ? `data-offduty-duration="${record.id}"` : ""}>${duration}</span></td>
       <td>${record.owner}</td>
-      <td><span class="state-pill ${stateClass}">${getVideoRecordState(record)}</span></td>
+      <td><span class="state-pill ${stateClass}" ${isOffDuty ? `data-offduty-state="${record.id}"` : ""}>${getVideoRecordState(record)}</span></td>
       <td><button class="${actionClass}" type="button" data-video-record-action="${record.id}">${actionLabel}</button></td>
     </tr>`;
   }).join("");
@@ -1335,7 +2337,8 @@ function renderVideoRecordTable() {
     button.addEventListener("click", () => {
       const record = module.records.find((item) => item.id === button.dataset.videoRecordAction);
       if (!record) return;
-      if (selectedVideoModule === "flame" && record.state !== "closed") openFireAlarmFromVideo(record.fireAlarmId);
+      if (isOffDuty) openVideoRecordDetail(record);
+      else if (selectedVideoModule === "flame" && record.state !== "closed") openFireAlarmFromVideo(record.fireAlarmId);
       else if (record.state === "active") resolveVideoRecord(record.id);
       else openVideoRecordDetail(record);
     });
@@ -1345,7 +2348,7 @@ function renderVideoRecordTable() {
 function renderVideoMonitoring() {
   const module = getVideoModule();
   const channel = getSelectedVideoChannel(module);
-  const activeCount = module.records.filter((item) => item.state === "active").length;
+  const activeCount = module.records.filter((item) => isVideoRecordOpen(item)).length;
   const isActiveChannel = channel.active && !module.event.closed;
   const isFlame = selectedVideoModule === "flame";
   if (!isFlame) selectedVideoViewMode = "visible";
@@ -1360,7 +2363,8 @@ function renderVideoMonitoring() {
   document.querySelector("#videoSummaryActiveLabel").textContent = module.activeLabel;
   document.querySelector("#videoSummaryActive").textContent = activeCount;
   document.querySelector("#videoSummaryActive").className = isFlame ? "danger-text" : "warning-text";
-  document.querySelector("#videoSummaryActiveNote").textContent = activeCount ? module.summaryNote : "当前无待处理事件";
+  const currentOffDutyRecord = selectedVideoModule === "offduty" ? module.records.find((item) => item.id === "vod01" && item.state !== "closed") : null;
+  document.querySelector("#videoSummaryActiveNote").textContent = activeCount ? currentOffDutyRecord ? `持续 ${formatDurationSeconds(getOffDutyDurationSeconds(currentOffDutyRecord))}` : module.summaryNote : "当前无待处理事件";
   document.querySelector("#videoSummaryToday").textContent = module.today;
   document.querySelector("#videoSummaryTodayNote").textContent = module.todayNote;
   document.querySelector("#videoRecordHeading").textContent = module.recordTitle;
@@ -1370,7 +2374,7 @@ function renderVideoMonitoring() {
   document.querySelectorAll("[data-video-module-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.videoModuleTab === selectedVideoModule);
     const item = videoMonitoringModules[button.dataset.videoModuleTab];
-    const count = item.records.filter((record) => record.state === "active").length;
+    const count = item.records.filter((record) => button.dataset.videoModuleTab === "offduty" ? record.state !== "closed" : record.state === "active").length;
     button.querySelector("b").textContent = `${count} 条${button.dataset.videoModuleTab === "flame" ? "告警" : "预警"}`;
   });
 
@@ -1509,8 +2513,14 @@ function openAssignmentModal(type, id) {
   document.querySelector(".assignment-summary .summary-icon").innerHTML = `<i data-lucide="${type === "fire" ? "siren" : type === "fault" ? "wrench" : "triangle-alert"}"></i>`;
   const personSelect = document.querySelector("#assignmentPerson");
   personSelect.value = [...personSelect.options].find((option) => option.text.startsWith(currentAssignee))?.value || "";
-  document.querySelector("#assignmentMessage").value = type === "fire" ? "请立即查看现场图片与前后录像，并在 10 分钟内反馈警情。" : type === "fault" ? "请检查设备供电、通信和运行状态，完成检修后及时标记修复。" : "请核查设备状态、当前读数和预警阈值，并及时反馈处理结果。";
+  const deadlineRule = assignmentDeadlineRules[type];
+  const deadlineSelect = document.querySelector("#assignmentDeadline");
+  deadlineSelect.innerHTML = deadlineRule.options.map((option) => `<option value="${option.value}">${option.label}</option>`).join("");
+  const savedWindow = Number(target.assignmentWindowMinutes);
+  deadlineSelect.value = deadlineRule.options.some((option) => option.value === savedWindow) ? String(savedWindow) : String(deadlineRule.defaultMinutes);
+  document.querySelector("#assignmentMessage").value = type === "fire" ? "请立即查看现场图片与前后录像，确认后第一时间反馈警情。" : type === "fault" ? "请检查设备供电、通信和运行状态，完成检查后及时记录处理情况。" : "请核查设备状态、当前读数和预警阈值，并及时反馈处理结果。";
   document.querySelector("#assignmentNotify").checked = true;
+  updateAssignmentDeadlinePreview();
   modal.hidden = false;
   document.body.style.overflow = "hidden";
   refreshIcons(modal);
@@ -1667,35 +2677,7 @@ function bindInteractions() {
   });
   document.querySelectorAll("[data-fire-action]").forEach((button) => {
     button.addEventListener("click", () => {
-      const alarm = getFireAlarm(selectedFireAlarmId);
-      const action = button.dataset.fireAction;
-      if (action === "confirm") {
-        alarm.state = "confirmed";
-        alarm.stage = 1;
-        if (alarm.operator === "待确认") alarm.operator = "Admin";
-        alarm.note = "值班人员已确认真实火警，系统已通知消防主管和现场处置人员。";
-        showToast(`${alarm.no}已确认警情`);
-      } else if (action === "false") {
-        alarm.state = "false";
-        alarm.stage = 3;
-        alarm.operator = "Admin";
-        alarm.note = "经现场图片与前后录像复核，确认为误报，已完成消警留痕。";
-        showToast(`${alarm.no}已按误报消警`);
-      } else if (action === "dispose") {
-        alarm.state = "processing";
-        alarm.stage = 2;
-        if (alarm.operator === "待确认" || alarm.operator === "Admin") alarm.operator = "李明";
-        alarm.note = `${alarm.operator}已接警，现场人员正在执行断电、疏散和灭火处置。`;
-        showToast(`${alarm.no}已进入警情处置`);
-      } else if (action === "reset") {
-        alarm.state = "reset";
-        alarm.stage = 3;
-        alarm.operator = "李明";
-        alarm.note = "现场警情已排除，报警设备和消防主机均已完成复位。";
-        showToast(`${alarm.device}已完成设备复位`);
-      }
-      renderFireAlarmList();
-      syncCriticalFireReminderState(alarm);
+      openFireActionModal(button.dataset.fireAction);
     });
   });
   ["#terminalWarningSearch", "#terminalWarningTypeFilter", "#terminalWarningStateFilter"].forEach((selector) => {
@@ -1725,10 +2707,20 @@ function bindInteractions() {
     closeFaultDetail();
     openAssignmentModal("fault", faultId);
   });
-  document.querySelector("#faultDetailRepair").addEventListener("click", () => repairTerminalFault(selectedTerminalFaultId));
+  document.querySelector("#faultDetailHandle").addEventListener("click", () => {
+    const faultId = selectedTerminalFaultId;
+    closeFaultDetail();
+    openFaultHandleModal(faultId);
+  });
+  document.querySelector("#faultDetailRecover").addEventListener("click", () => confirmTerminalFaultRecovery(selectedTerminalFaultId));
+  document.querySelector("#faultDetailViewDevice").addEventListener("click", () => openFaultTerminalStatus(selectedTerminalFaultId));
+  document.querySelectorAll("[data-fault-handle-close]").forEach((button) => button.addEventListener("click", closeFaultHandleModal));
+  document.querySelector("#faultHandleModal").addEventListener("click", (event) => { if (event.target.id === "faultHandleModal") closeFaultHandleModal(); });
+  document.querySelector("#faultHandleForm").addEventListener("submit", submitFaultHandle);
   document.querySelector("[data-assign-fire]").addEventListener("click", () => openAssignmentModal("fire", selectedFireAlarmId));
   document.querySelectorAll("[data-assignment-close]").forEach((button) => button.addEventListener("click", closeAssignmentModal));
   document.querySelector("#assignmentModal").addEventListener("click", (event) => { if (event.target.id === "assignmentModal") closeAssignmentModal(); });
+  document.querySelector("#assignmentDeadline").addEventListener("change", updateAssignmentDeadlinePreview);
   document.querySelector("#assignmentForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const selectedPerson = document.querySelector("#assignmentPerson").value;
@@ -1739,28 +2731,69 @@ function bindInteractions() {
     }
     const personName = selectedPerson.split("（")[0];
     const taskMessage = document.querySelector("#assignmentMessage").value.trim();
+    const assignmentWindowMinutes = Number(document.querySelector("#assignmentDeadline").value);
+    const assignedDate = new Date();
+    const assignedAt = formatClock(assignedDate);
+    const assignmentDeadlineAt = formatClock(new Date(assignedDate.getTime() + assignmentWindowMinutes * 60 * 1000));
     if (assignmentTargetType === "fire") {
       const alarm = getFireAlarm(assignmentTargetId);
       alarm.operator = personName;
+      alarm.assignedAt = assignedAt;
+      alarm.assignmentWindowMinutes = assignmentWindowMinutes;
+      alarm.assignmentDeadlineAt = assignmentDeadlineAt;
       alarm.note = taskMessage ? `已指派${personName}：${taskMessage}` : `已指派${personName}负责警情确认与处置。`;
       renderFireAlarmList();
     } else if (assignmentTargetType === "warning") {
       const warning = terminalWarnings.find((item) => item.id === assignmentTargetId);
-      if (warning) warning.assignee = personName;
+      if (warning) {
+        warning.assignee = personName;
+        warning.assignedAt = assignedAt;
+        warning.assignmentWindowMinutes = assignmentWindowMinutes;
+        warning.assignmentDeadlineAt = assignmentDeadlineAt;
+      }
       renderTerminalWarningTable();
     } else {
       const fault = getTerminalFault(assignmentTargetId);
-      const assignedAt = formatClock(new Date());
       fault.assignee = personName;
       fault.state = "processing";
       fault.assignedAt = assignedAt;
+      fault.assignmentWindowMinutes = assignmentWindowMinutes;
+      fault.assignmentDeadlineAt = assignmentDeadlineAt;
       fault.updated = assignedAt;
       fault.note = taskMessage ? `已指派${personName}：${taskMessage}` : `已指派${personName}负责设备检修。`;
+      fault.handlingHistory.push({ action: "assign", operator: currentUser.name, time: assignedAt, note: fault.note });
       renderTerminalFaultTable();
+      renderTerminalTable();
     }
     closeAssignmentModal();
     showToast(`任务已指派给${personName}`);
   });
+  document.querySelectorAll("[data-fire-action-close]").forEach((button) => button.addEventListener("click", closeFireActionModal));
+  document.querySelector("#fireActionModal").addEventListener("click", (event) => {
+    if (event.target.id === "fireActionModal") closeFireActionModal();
+  });
+  document.querySelector("#fireActionPhotos").addEventListener("change", handleFireActionPhotoSelection);
+  document.querySelector("#fireActionPhotoPreview").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-fire-photo-remove]");
+    if (!button) return;
+    pendingFireActionPhotos = pendingFireActionPhotos.filter((photo) => photo.id !== button.dataset.firePhotoRemove);
+    setFireActionPhotoError("");
+    renderFireActionPhotoPreview();
+  });
+  document.querySelector("#fireActionForm").addEventListener("submit", submitFireAction);
+  document.querySelectorAll("[data-passage-action-close]").forEach((button) => button.addEventListener("click", closePassageActionModal));
+  document.querySelector("#passageActionModal").addEventListener("click", (event) => {
+    if (event.target.id === "passageActionModal") closePassageActionModal();
+  });
+  document.querySelector("#passageActionPhotos").addEventListener("change", handlePassageActionPhotoSelection);
+  document.querySelector("#passageActionPhotoPreview").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-passage-photo-remove]");
+    if (!button) return;
+    pendingPassageActionPhotos = pendingPassageActionPhotos.filter((photo) => photo.id !== button.dataset.passagePhotoRemove);
+    setPassageActionPhotoError("");
+    renderPassageActionPhotoPreview();
+  });
+  document.querySelector("#passageActionForm").addEventListener("submit", submitPassageAction);
   document.querySelectorAll("[data-video-module-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedVideoModule = button.dataset.videoModuleTab;
@@ -1792,7 +2825,7 @@ function bindInteractions() {
       openFireAlarmFromVideo("fa1");
       return;
     }
-    const activeRecord = getVideoModule().records.find((item) => item.state === "active");
+    const activeRecord = getVideoModule().records.find((item) => selectedVideoModule === "offduty" ? item.id === "vod01" && item.state !== "closed" : item.state === "active");
     if (activeRecord) resolveVideoRecord(activeRecord.id);
     else showToast("当前没有待处理事件");
   });
@@ -1857,9 +2890,18 @@ function bindInteractions() {
     refreshIcons(button);
   });
   document.querySelectorAll("[data-video-record-close]").forEach((button) => button.addEventListener("click", closeVideoRecordDetail));
+  document.querySelector("#videoRecordPlaybackAction").addEventListener("click", () => {
+    closeVideoRecordDetail();
+    openVideoPlayback();
+  });
+  document.querySelector("#offDutyStartReview").addEventListener("click", startOffDutyReview);
+  document.querySelectorAll("[data-offduty-resolution]").forEach((button) => button.addEventListener("click", () => selectOffDutyResolution(button.dataset.offdutyResolution)));
+  document.querySelector("#offDutyResolutionForm").addEventListener("submit", submitOffDutyResolution);
   document.querySelector("#videoRecordModal").addEventListener("click", (event) => {
     if (event.target.id === "videoRecordModal") closeVideoRecordDetail();
   });
+  window.clearInterval(videoRecordDurationTimer);
+  videoRecordDurationTimer = window.setInterval(refreshOffDutyDurationDisplays, 1000);
 }
 
 function withCanvasScale(canvas, callback) {
@@ -2338,6 +3380,9 @@ function bindUtilityActions() {
     }
     if (event.key === "Escape" && !document.querySelector("#handleModal").hidden) closeHandleModal();
     if (event.key === "Escape" && !document.querySelector("#assignmentModal").hidden) closeAssignmentModal();
+    if (event.key === "Escape" && !document.querySelector("#fireActionModal").hidden) closeFireActionModal();
+    if (event.key === "Escape" && !document.querySelector("#passageActionModal").hidden) closePassageActionModal();
+    if (event.key === "Escape" && !document.querySelector("#faultHandleModal").hidden) closeFaultHandleModal();
     if (event.key === "Escape" && !document.querySelector("#faultDetailModal").hidden) closeFaultDetail();
     if (event.key === "Escape" && !document.querySelector("#videoPlaybackModal").hidden) closeVideoPlayback();
     if (event.key === "Escape" && !document.querySelector("#videoRecordModal").hidden) closeVideoRecordDetail();
@@ -2370,6 +3415,7 @@ function startClock() {
     const seconds = String(elapsed % 60).padStart(2, "0");
     document.querySelector("#criticalDuration").textContent = `${hours}:${minutes}:${seconds}`;
     updateCriticalFireDuration();
+    if (now.getSeconds() % 15 === 0) refreshAssignmentDeadlineDisplays();
   }, 1000);
 }
 
