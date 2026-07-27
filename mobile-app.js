@@ -3,12 +3,12 @@ const assignees = ["李明", "王晨", "赵凯", "陈峰"];
 
 const featureApps = [
   { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "" },
-  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "" },
+  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection" },
   { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty" },
-  { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", badge: 5 },
-  { id: "facility-check", label: "消防设施检查", icon: "layers-3", tone: "" },
-  { id: "maintenance", label: "消防设施维保", icon: "settings", tone: "" },
-  { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green" },
+  { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", route: "hazard" },
+  { id: "facility-check", label: "消防设施检查", icon: "layers-3", tone: "", route: "facility-check" },
+  { id: "maintenance", label: "消防设施维保", icon: "settings", tone: "", route: "maintenance" },
+  { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green", route: "evacuation" },
   { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange" },
   { id: "electricity", label: "用电检查", icon: "zap", tone: "" },
   { id: "gas", label: "用气检查", icon: "gauge", tone: "" },
@@ -457,7 +457,7 @@ function restoreRecords(target, initialRecords) {
 function resetModuleState(module) {
   const labels = {
     fire: "火警告警", warning: "设备预警", fault: "设备故障",
-    offduty: "脱岗监测", passage: "消防通道监测", duty: "消控室值班"
+    offduty: "脱岗监测", passage: "消防通道监测", duty: "消控室值班", "inspection-suite": "巡检整改"
   };
   if (module === "fire") {
     restoreRecords(fireAlarms, initialModuleState.fire);
@@ -483,6 +483,8 @@ function resetModuleState(module) {
     dutyHeadcountSelect.value = String(dutyState.requiredHeadcount);
     dutyTimeModeSelect.value = dutyState.demoTimeMode;
     refreshAllDutyHandoverCategories(false);
+  } else if (module === "inspection-suite") {
+    window.InspectionApp?.reset();
   } else return;
   closePreviewControls();
   render();
@@ -517,27 +519,27 @@ function warningOpenCount() { return warnings.filter((item) => item.state !== "r
 function faultOpenCount() { return faults.filter((item) => item.state !== "recovered").length; }
 
 function renderApplications() {
+  const suiteMetrics = window.InspectionApp?.metrics() || { hazardOpen: 0, inspectionCompleted: "0/1" };
   renderHeader("应用中心", "", "", notificationHeaderButton("applications"));
   setBottomNav("applications");
   appMain.innerHTML = `<div class="application-page">
     <div class="search-box"><i data-lucide="search"></i><input id="appSearch" type="search" placeholder="搜索功能..." autocomplete="off" /></div>
     <div class="section-heading"><h2>常用功能</h2><span>共 ${featureApps.length} 项</span></div>
     <div class="feature-grid" id="featureGrid">${featureApps.map((item) => {
-      const badge = item.id === "fire" ? fireOpenCount() : item.id === "warning" ? warningOpenCount() : item.id === "fault" ? faultOpenCount() : item.badge;
+      const suiteBadge = window.InspectionApp?.badge(item.id) || 0;
+      const badge = item.id === "fire" ? fireOpenCount() : item.id === "warning" ? warningOpenCount() : item.id === "fault" ? faultOpenCount() : suiteBadge || item.badge;
       return `<button class="feature-item" type="button" data-feature="${item.id}" data-label="${item.label}">
         <span class="feature-icon ${item.tone}"><i data-lucide="${item.icon}"></i>${badge ? `<b class="entry-badge">${badge}</b>` : ""}</span><span>${item.label}</span>
       </button>`;
     }).join("")}</div>
     <div class="empty-search" id="appSearchEmpty" hidden>没有找到相关功能</div>
     <div class="section-heading"><h2>本月数据</h2><span>数据更新至今日</span></div>
-    <div class="monthly-grid"><div class="monthly-card"><strong>85%</strong><span>巡查完成率</span></div><div class="monthly-card"><strong>1/1</strong><span>检查完成率</span></div><div class="monthly-card"><strong>5</strong><span>待处理隐患</span></div><div class="monthly-card"><strong>12天</strong><span>本月值班</span></div></div>
+    <div class="monthly-grid"><div class="monthly-card"><strong>85%</strong><span>巡查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.inspectionCompleted}</strong><span>检查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.hazardOpen}</strong><span>待处理隐患</span></div><div class="monthly-card"><strong>12天</strong><span>本月值班</span></div></div>
   </div>`;
 }
 
 function renderHome() {
-  renderHeader("首页", "", "", notificationHeaderButton("home"));
-  setBottomNav("home");
-  appMain.innerHTML = "";
+  if (window.InspectionApp) window.InspectionApp.renderHome();
 }
 
 function renderProfile() {
@@ -1500,6 +1502,7 @@ function render() {
   else if (screen === "video") renderVideoList();
   else if (screen === "fault" && sub) renderFaultDetail(sub);
   else if (screen === "fault") renderFaultList();
+  else if (window.InspectionApp?.canRender(screen)) window.InspectionApp.render(parts);
   else renderApplications();
   refreshIcons();
   mobileApp.scrollTop = 0;
@@ -1524,6 +1527,8 @@ document.addEventListener("click", (event) => {
     go(navButton.dataset.nav);
     return;
   }
+
+  if (window.InspectionApp?.handleClick(event)) return;
 
   const resetStateButton = event.target.closest("[data-reset-state]");
   if (resetStateButton) {
@@ -1783,6 +1788,22 @@ window.addEventListener("resize", () => {
   if (canvas) drawVideoScene(canvas, state.videoModule);
 });
 
+window.InspectionApp?.init({
+  appMain,
+  assignees,
+  esc,
+  nowText,
+  routeParts,
+  go,
+  renderHeader,
+  setBottomNav,
+  showToast,
+  refreshIcons,
+  openSheet,
+  closeSheet,
+  notificationHeaderButton,
+  existingData: () => ({ fireAlarms, warnings, faults, dutyState })
+});
 initializePreviewControls();
 if (!location.hash) history.replaceState(null, "", "#/applications");
 render();
