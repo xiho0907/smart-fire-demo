@@ -145,21 +145,56 @@ const appNotifications = [
 
 const initialDutyState = {
   selectedPersonId: "admin",
+  requiredHeadcount: 2,
+  scenario: "normal",
+  demoTimeMode: "handover_0600",
+  currentShiftId: "night",
+  lastCompletedAt: "2026-07-23 08:02:14",
   people: [
-    { id: "li", name: "李明", side: "outgoing", shift: "夜班 18:00-次日08:00", clockInAt: "2026-07-23 17:52:18", clockInMethod: "NFC", clockOutAt: "", clockOutMethod: "" },
-    { id: "zhao", name: "赵凯", side: "outgoing", shift: "夜班 18:00-次日08:00", clockInAt: "2026-07-23 17:55:06", clockInMethod: "二维码", clockOutAt: "", clockOutMethod: "" },
-    { id: "admin", name: "Admin", side: "incoming", shift: "白班 08:00-18:00", clockInAt: "", clockInMethod: "", clockOutAt: "", clockOutMethod: "" },
-    { id: "wang", name: "王晨", side: "incoming", shift: "白班 08:00-18:00", clockInAt: "", clockInMethod: "", clockOutAt: "", clockOutMethod: "" }
+    { id: "admin", name: "Admin", clockInAt: "", clockInMethod: "", clockOutAt: "", clockOutMethod: "" },
+    { id: "wang", name: "王晨", clockInAt: "", clockInMethod: "", clockOutAt: "", clockOutMethod: "" },
+    { id: "li", name: "李明", clockInAt: "2026-07-23 17:52:18", clockInMethod: "NFC", clockOutAt: "", clockOutMethod: "" },
+    { id: "zhao", name: "赵凯", clockInAt: "2026-07-23 17:55:06", clockInMethod: "二维码", clockOutAt: "", clockOutMethod: "" }
   ],
+  activeOnDutyIds: ["li", "zhao"],
+  shiftDefinitions: {
+    day: { id: "day", label: "白班 08:00-18:00", start: "08:00", end: "18:00", clockStart: "06:00", clockEnd: "11:00", handoverStart: "06:00" },
+    night: { id: "night", label: "夜班 18:00-次日08:00", start: "18:00", end: "次日08:00", clockStart: "16:00", clockEnd: "21:00", handoverStart: "16:00" }
+  },
+  shifts: {
+    outgoing: { id: "night", label: "夜班 18:00-次日08:00" },
+    incoming: { id: "day", label: "白班 08:00-18:00", clockWindow: "06:00-11:00" }
+  },
   handover: {
-    state: "waiting_clock_in",
-    items: [
-      { id: "hi-fire-1", category: "fire", title: "一级火警待现场确认", meta: "危化品暂存间 · 09:38", result: "abnormal", note: "红外摄像头识别到明火和持续高温，已通知现场核查。", outgoingConfirmedBy: [], incomingConfirmedBy: [] },
-      { id: "hi-fire-2", category: "fire", title: "配电柜温升火警处置中", meta: "配电设备间 · 08:26", result: "abnormal", note: "现场正在断电处置，需持续关注温度变化。", outgoingConfirmedBy: [], incomingConfirmedBy: [] },
-      { id: "hi-warning-1", category: "warning", title: "可燃气体浓度接近阈值", meta: "锅炉房 · 18% LEL", result: "abnormal", note: "已加强通风，白班需继续核查燃气管路。", outgoingConfirmedBy: [], incomingConfirmedBy: [] },
-      { id: "hi-device-1", category: "device", title: "火灾自动报警系统", meta: "主机在线 · 回路通讯正常", result: "normal", note: "", outgoingConfirmedBy: [], incomingConfirmedBy: [] },
-      { id: "hi-device-2", category: "device", title: "消防水系统", meta: "液位、压力数据正常", result: "normal", note: "", outgoingConfirmedBy: [], incomingConfirmedBy: [] },
-      { id: "hi-device-3", category: "device", title: "用户信息传输装置", meta: "在线 · 最近上报 09:41", result: "normal", note: "", outgoingConfirmedBy: [], incomingConfirmedBy: [] }
+    state: "waiting_arrival",
+    outgoingShiftId: "night",
+    incomingShiftId: "day",
+    windowStartedAt: "2026-07-27 06:00:00",
+    dataSinceAt: "2026-07-23 08:02:14",
+    outgoingIds: ["li", "zhao"],
+    incomingIds: [],
+    preparedBy: "",
+    preparedAt: "",
+    outgoingConfirmedIds: [],
+    incomingConfirmedIds: [],
+    skippedOutgoingIds: [],
+    skippedIncomingIds: [],
+    exceptions: [],
+    categoryRevisions: { fire: 0, warning: 0, device: 0, manual: 0, equipment_check: 1 },
+    categoryConfirmations: {
+      fire: { outgoingIds: [], incomingIds: [] },
+      warning: { outgoingIds: [], incomingIds: [] },
+      device: { outgoingIds: [], incomingIds: [] },
+      manual: { outgoingIds: [], incomingIds: [] },
+      equipment_check: { outgoingIds: [], incomingIds: [] }
+    },
+    items: [],
+    checks: [
+      { id: "check-1", group: "火灾报警控制器检查", title: "自检功能是否正常", result: "normal" },
+      { id: "check-2", group: "火灾报警控制器检查", title: "消音功能是否正常", result: "normal" },
+      { id: "check-3", group: "火灾报警控制器检查", title: "信号输入、输出模块状态", result: "normal" },
+      { id: "check-4", group: "应急广播系统检查", title: "扬声器外观及工作状态", result: "normal" },
+      { id: "check-5", group: "消防专用电话检查", title: "主机、分机及插孔外观正常", result: "normal" }
     ],
     confirmations: [],
     completedAt: ""
@@ -170,8 +205,8 @@ const initialDutyState = {
     { id: "dc3", type: "下班打卡", person: "李明", personId: "li", shift: "夜班 18:00-次日08:00", method: "NFC", time: "2026-07-22 08:01:08", result: "正常" }
   ],
   dutyRecords: [
-    { id: "dl1", title: "夜间设备状态复核", person: "李明", personId: "li", time: "2026-07-23 23:18:20", note: "消防主机、用户信息传输装置及消防水系统运行正常。", photos: [] },
-    { id: "dl2", title: "值班情况记录", person: "王晨", personId: "wang", time: "2026-07-23 15:42:16", note: "完成重点部位视频轮巡，未发现消防通道占用。", photos: [] }
+    { id: "dl1", title: "夜间设备状态复核", person: "李明", personId: "li", time: "2026-07-23 23:18:20", note: "消防主机、用户信息传输装置及消防水系统运行正常。", photos: [], recordType: "manual" },
+    { id: "dl2", title: "值班情况记录", person: "王晨", personId: "wang", time: "2026-07-23 15:42:16", note: "完成重点部位视频轮巡，未发现消防通道占用。", photos: [], recordType: "manual" }
   ],
   handoverRecords: [
     { id: "dr1", time: "2026-07-23 08:02:14", status: "completed", outgoingNames: ["赵凯", "陈峰"], incomingNames: ["王晨", "李明"], confirmations: [{ personId: "zhao", name: "赵凯", side: "outgoing", time: "2026-07-23 07:58:12" }, { personId: "chen", name: "陈峰", side: "outgoing", time: "2026-07-23 07:59:08" }, { personId: "wang", name: "王晨", side: "incoming", time: "2026-07-23 08:01:20" }, { personId: "li", name: "李明", side: "incoming", time: "2026-07-23 08:02:14" }], items: [{ id: "old-1", category: "fire", title: "当班无未闭环火警", meta: "已核对", result: "normal", note: "" }, { id: "old-2", category: "warning", title: "设备预警已完成核查", meta: "1 条已恢复", result: "normal", note: "" }, { id: "old-3", category: "device", title: "主要消防设备运行正常", meta: "在线 12 台", result: "normal", note: "" }] }
@@ -199,7 +234,7 @@ const state = {
   videoChannels: { offduty: "od03", passage: "ps08", flame: "fl01" },
   notificationReadFilter: "all", notificationTypeFilter: "all", notificationBackRoute: "applications",
   detailReturnRoute: "", detailTargetRoute: "", pushNotificationId: "", notificationsEnabled: false,
-  sheetSubmit: null, sheetPhotos: [], toastTimer: null, pushTimer: null,
+  sheetSubmit: null, sheetPhotos: [], sheetPhotoLimit: 6, toastTimer: null, pushTimer: null,
   dutyRecordDateOffset: 0
 };
 
@@ -226,6 +261,8 @@ const previewControlMenu = document.querySelector("#previewControlMenu");
 const deviceShellToggle = document.querySelector("#deviceShellToggle");
 const newNotificationToggle = document.querySelector("#newNotificationToggle");
 const dutyPersonSelect = document.querySelector("#dutyPersonSelect");
+const dutyHeadcountSelect = document.querySelector("#dutyHeadcountSelect");
+const dutyTimeModeSelect = document.querySelector("#dutyTimeModeSelect");
 const mobileApp = document.querySelector("#mobileApp");
 const pushBanner = document.querySelector("#pushBanner");
 const pushBannerOpen = document.querySelector("#pushBannerOpen");
@@ -408,6 +445,9 @@ function initializePreviewControls() {
   state.notificationsEnabled = false;
   newNotificationToggle.checked = false;
   dutyPersonSelect.value = dutyState.selectedPersonId;
+  dutyHeadcountSelect.value = String(dutyState.requiredHeadcount);
+  dutyTimeModeSelect.value = dutyState.demoTimeMode;
+  refreshAllDutyHandoverCategories(false);
 }
 
 function restoreRecords(target, initialRecords) {
@@ -422,12 +462,15 @@ function resetModuleState(module) {
   if (module === "fire") {
     restoreRecords(fireAlarms, initialModuleState.fire);
     state.fireFilter = "open";
+    refreshDutyHandoverCategory("fire");
   } else if (module === "warning") {
     restoreRecords(warnings, initialModuleState.warning);
     state.warningFilter = "open";
+    refreshDutyHandoverCategory("warning");
   } else if (module === "fault") {
     restoreRecords(faults, initialModuleState.fault);
     state.faultFilter = "open";
+    refreshDutyHandoverCategory("device");
   } else if (module === "offduty") {
     restoreRecords(videoModules.offduty.records, initialModuleState.offduty);
   } else if (module === "passage") {
@@ -437,10 +480,36 @@ function resetModuleState(module) {
     Object.assign(dutyState, cloneData(initialDutyState));
     state.dutyRecordDateOffset = 0;
     dutyPersonSelect.value = dutyState.selectedPersonId;
+    dutyHeadcountSelect.value = String(dutyState.requiredHeadcount);
+    dutyTimeModeSelect.value = dutyState.demoTimeMode;
+    refreshAllDutyHandoverCategories(false);
   } else return;
   closePreviewControls();
   render();
   showToast(`${labels[module]}状态已初始化`);
+}
+
+function initializeUnattendedDutyScenario() {
+  Object.keys(dutyState).forEach((key) => delete dutyState[key]);
+  Object.assign(dutyState, cloneData(initialDutyState));
+  dutyState.scenario = "unattended";
+  dutyState.activeOnDutyIds = [];
+  dutyState.handover.outgoingIds = [];
+  dutyState.handover.state = "waiting_arrival";
+  dutyState.people.forEach((person) => {
+    person.clockInAt = "";
+    person.clockInMethod = "";
+    person.clockOutAt = "";
+    person.clockOutMethod = "";
+  });
+  dutyState.selectedPersonId = "admin";
+  dutyPersonSelect.value = "admin";
+  dutyHeadcountSelect.value = String(dutyState.requiredHeadcount);
+  dutyTimeModeSelect.value = dutyState.demoTimeMode;
+  refreshAllDutyHandoverCategories(false);
+  closePreviewControls();
+  render();
+  showToast("已切换为当前无人交班场景");
 }
 
 function fireOpenCount() { return fireAlarms.filter((item) => !["reset", "false"].includes(item.state)).length; }
@@ -486,82 +555,242 @@ function dutyDateInfo(offset = 0) {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, label: `${get("month")}月${get("day")}日`, weekday };
 }
 
+function dutyShift(id) {
+  return dutyState.shiftDefinitions[id] || dutyState.shiftDefinitions.day;
+}
+
+function dutyShiftPair(outgoingId, incomingId) {
+  const outgoing = dutyShift(outgoingId);
+  const incoming = dutyShift(incomingId);
+  dutyState.shifts = {
+    outgoing: { id: outgoing.id, label: outgoing.label, clockWindow: `${outgoing.clockStart}-${outgoing.clockEnd}` },
+    incoming: { id: incoming.id, label: incoming.label, clockWindow: `${incoming.clockStart}-${incoming.clockEnd}` }
+  };
+}
+
+function emptyDutyCategoryConfirmations() {
+  return Object.fromEntries(["fire", "warning", "device", "manual", "equipment_check"].map((category) => [category, { outgoingIds: [], incomingIds: [] }]));
+}
+
+function freshDutyHandover(outgoingShiftId, incomingShiftId, outgoingIds = []) {
+  const incoming = dutyShift(incomingShiftId);
+  return {
+    state: "waiting_arrival",
+    outgoingShiftId,
+    incomingShiftId,
+    windowStartedAt: `${dutyDateInfo().date} ${incoming.handoverStart}:00`,
+    dataSinceAt: dutyState.lastCompletedAt,
+    outgoingIds: [...outgoingIds],
+    incomingIds: [],
+    preparedBy: "",
+    preparedAt: "",
+    outgoingConfirmedIds: [],
+    incomingConfirmedIds: [],
+    skippedOutgoingIds: [],
+    skippedIncomingIds: [],
+    exceptions: [],
+    categoryRevisions: { fire: 0, warning: 0, device: 0, manual: 0, equipment_check: 1 },
+    categoryConfirmations: emptyDutyCategoryConfirmations(),
+    items: [],
+    checks: cloneData(initialDutyState.handover.checks),
+    confirmations: [],
+    completedAt: ""
+  };
+}
+
+function resetDutyAttendance(activeIds, clockTime) {
+  dutyState.people.forEach((person) => {
+    const active = activeIds.includes(person.id);
+    person.clockInAt = active ? `${dutyDateInfo().date} ${clockTime}:00` : "";
+    person.clockInMethod = active ? "NFC" : "";
+    person.clockOutAt = "";
+    person.clockOutMethod = "";
+  });
+}
+
+function applyDutyTimeMode(mode) {
+  const previousActiveIds = [...dutyState.activeOnDutyIds];
+  const previousShiftId = dutyState.currentShiftId;
+  dutyState.demoTimeMode = mode;
+  dutyState.scenario = "normal";
+  if (mode === "on_duty") {
+    dutyState.currentShiftId = "day";
+    dutyState.activeOnDutyIds = previousShiftId === "day" && previousActiveIds.length ? previousActiveIds : ["admin", "wang"];
+    resetDutyAttendance(dutyState.activeOnDutyIds, "07:56");
+    dutyShiftPair("day", "night");
+    dutyState.handover = freshDutyHandover("day", "night", []);
+    dutyState.handover.state = "completed";
+    dutyState.handover.completedAt = dutyState.lastCompletedAt;
+  } else {
+    const outgoingShiftId = mode === "handover_1600" ? "day" : "night";
+    const incomingShiftId = outgoingShiftId === "day" ? "night" : "day";
+    const fallbackIds = outgoingShiftId === "day" ? ["admin", "wang"] : ["li", "zhao"];
+    const outgoingIds = previousShiftId === outgoingShiftId && previousActiveIds.length ? previousActiveIds : fallbackIds;
+    dutyState.currentShiftId = outgoingShiftId;
+    dutyState.activeOnDutyIds = [...outgoingIds];
+    resetDutyAttendance(outgoingIds, outgoingShiftId === "day" ? "07:56" : "17:52");
+    dutyShiftPair(outgoingShiftId, incomingShiftId);
+    dutyState.handover = freshDutyHandover(outgoingShiftId, incomingShiftId, outgoingIds);
+    refreshAllDutyHandoverCategories(false);
+    syncDutyHandoverState();
+  }
+  dutyTimeModeSelect.value = mode;
+}
+
+function latestDutySourceTime(item, fallback = "") {
+  const history = [...(item.operationHistory || []), ...(item.handlingHistory || [])].map((entry) => entry.time).filter(Boolean);
+  return [fallback, ...history].filter(Boolean).sort((a, b) => b.localeCompare(a))[0] || "";
+}
+
+function buildDutyHandoverItems(category) {
+  const since = dutyState.handover.dataSinceAt || "";
+  if (category === "fire") return fireAlarms.filter((item) => latestDutySourceTime(item, item.time) >= since || !["reset", "false"].includes(item.state)).map((item) => ({ id: `fire-${item.id}`, category, title: item.title, meta: `${item.location} · ${item.device}`, note: item.note, status: fireStateLabels[item.state], result: ["reset", "false"].includes(item.state) ? "normal" : "abnormal", targetRoute: `fire/${item.id}`, sourceTime: latestDutySourceTime(item, item.time) }));
+  if (category === "warning") return warnings.filter((item) => latestDutySourceTime(item, item.updated || item.firstTime) >= since || item.state !== "recovered").map((item) => ({ id: `warning-${item.id}`, category, title: item.title, meta: `${item.point} · ${item.device}`, note: item.note, status: warningStateLabels[item.state], result: item.state === "recovered" ? "normal" : "abnormal", targetRoute: `warning/${item.id}`, sourceTime: latestDutySourceTime(item, item.updated || item.firstTime) }));
+  if (category === "device") return faults.filter((item) => latestDutySourceTime(item, item.updated || item.firstTime) >= since || item.state !== "recovered").map((item) => ({ id: `device-${item.id}`, category, title: item.title, meta: `${item.point} · ${item.device}`, note: item.note, status: faultStateLabels[item.state], result: item.state === "recovered" ? "normal" : "abnormal", targetRoute: `fault/${item.id}`, sourceTime: latestDutySourceTime(item, item.updated || item.firstTime) }));
+  if (category === "manual") return dutyState.dutyRecords.filter((item) => item.recordType === "manual" && item.time >= since).map((item) => ({ id: `manual-${item.id}`, category, title: item.title, meta: `${item.person} · ${item.time.slice(5, 16)}`, note: item.note, status: "已记录", result: "normal", targetRoute: `duty/logs/${item.id}`, sourceTime: item.time }));
+  return [];
+}
+
+function categoryConfirmation(category, side) {
+  return dutyState.handover.categoryConfirmations?.[category]?.[`${side}Ids`] || [];
+}
+
+function dutyCategoryConfirmed(person, category) {
+  const role = dutyPersonRole(person);
+  return ["outgoing", "incoming"].includes(role) && categoryConfirmation(category, role).includes(person.id);
+}
+
+function refreshDutyHandoverCategory(category, notify = true) {
+  const handover = dutyState.handover;
+  if (handover.state === "completed" || !["fire", "warning", "device", "manual"].includes(category)) return false;
+  const nextItems = buildDutyHandoverItems(category);
+  const currentItems = handover.items.filter((item) => item.category === category);
+  const signature = (items) => JSON.stringify(items.map((item) => [item.id, item.status, item.note, item.sourceTime]));
+  handover.items = [...handover.items.filter((item) => item.category !== category), ...nextItems];
+  if (signature(currentItems) === signature(nextItems)) return false;
+  handover.categoryRevisions[category] = (handover.categoryRevisions[category] || 0) + 1;
+  const outgoingAffected = [...categoryConfirmation(category, "outgoing")];
+  const incomingAffected = [...categoryConfirmation(category, "incoming")];
+  handover.categoryConfirmations[category] = { outgoingIds: [], incomingIds: [] };
+  if (outgoingAffected.length || incomingAffected.length) {
+    handover.outgoingConfirmedIds = handover.outgoingConfirmedIds.filter((id) => !outgoingAffected.includes(id));
+    handover.incomingConfirmedIds = handover.incomingConfirmedIds.filter((id) => !incomingAffected.includes(id));
+    handover.confirmations = handover.confirmations.filter((entry) => !(entry.side === "outgoing" ? outgoingAffected : incomingAffected).includes(entry.personId));
+    handover.state = handover.outgoingIds.length ? "outgoing_confirming" : "incoming_confirming";
+    if (notify) showToast(`${dutyCategoryMeta[category].label}数据已更新，请重新确认`);
+  }
+  return true;
+}
+
+function refreshAllDutyHandoverCategories(notify = false) {
+  ["fire", "warning", "device", "manual"].forEach((category) => refreshDutyHandoverCategory(category, notify));
+}
+
 function selectedDutyPerson() {
-  return dutyState.people.find((person) => person.id === dutyState.selectedPersonId) || dutyState.people[2];
+  return dutyState.people.find((person) => person.id === dutyState.selectedPersonId) || dutyState.people[0];
+}
+
+function dutyPersonById(id) {
+  return dutyState.people.find((person) => person.id === id);
 }
 
 function dutyPeople(side) {
-  return dutyState.people.filter((person) => person.side === side);
+  const ids = side === "outgoing" ? dutyState.handover.outgoingIds : dutyState.handover.incomingIds;
+  return ids.map(dutyPersonById).filter(Boolean);
 }
 
-function allIncomingClocked() {
-  return dutyPeople("incoming").every((person) => person.clockInAt);
+function dutyPersonRole(person) {
+  if (dutyState.handover.outgoingIds.includes(person.id)) return "outgoing";
+  if (dutyState.activeOnDutyIds.includes(person.id)) return "on_duty";
+  if (dutyState.handover.incomingIds.includes(person.id)) return "incoming";
+  return "available";
 }
 
 function dutyPersonConfirmed(person) {
-  return dutyState.handover.confirmations.some((item) => item.personId === person.id);
+  const role = dutyPersonRole(person);
+  const ids = role === "outgoing" ? dutyState.handover.outgoingConfirmedIds : dutyState.handover.incomingConfirmedIds;
+  return ids.includes(person.id);
 }
 
 function allSideConfirmed(side) {
-  return dutyPeople(side).every(dutyPersonConfirmed);
+  const handover = dutyState.handover;
+  const participantIds = side === "outgoing" ? handover.outgoingIds : handover.incomingIds;
+  const confirmedIds = side === "outgoing" ? handover.outgoingConfirmedIds : handover.incomingConfirmedIds;
+  const skippedIds = side === "outgoing" ? handover.skippedOutgoingIds : handover.skippedIncomingIds;
+  return participantIds.every((id) => confirmedIds.includes(id) || skippedIds.includes(id));
 }
 
 function syncDutyHandoverState() {
-  if (dutyState.handover.state === "waiting_clock_in" && allIncomingClocked()) dutyState.handover.state = "confirming";
+  const handover = dutyState.handover;
+  if (handover.state === "completed") return;
+  if (!handover.outgoingIds.length) {
+    if (!handover.exceptions.some((item) => item.type === "force_takeover")) handover.state = "waiting_arrival";
+    return;
+  }
+  const staffingForced = handover.exceptions.some((item) => item.type === "force_handover" && item.reason === "understaffed");
+  if (!allSideConfirmed("outgoing")) return void (handover.state = "outgoing_confirming");
+  handover.state = handover.incomingIds.length && (handover.incomingIds.length >= dutyState.requiredHeadcount || staffingForced) ? "incoming_confirming" : "waiting_arrival";
 }
 
 function dutyHomeMeta(person) {
+  syncDutyHandoverState();
+  const role = dutyPersonRole(person);
   const confirmed = dutyPersonConfirmed(person);
-  const missingIncomingNames = dutyPeople("incoming").filter((item) => !item.clockInAt).map((item) => item.name).join("、");
-  if (person.side === "incoming") {
-    if (!person.clockInAt) return { eyebrow: "接班准备", title: "等待上班打卡", description: "完成上班打卡后加入本次白班交接", button: "立即上班打卡", route: "duty/clock-in", steps: [false, false, false], active: 0 };
-    if (!allIncomingClocked()) return { eyebrow: "接班准备", title: "等待同班人员打卡", description: `${missingIncomingNames}尚未完成上班打卡`, button: `等待${missingIncomingNames}完成打卡`, steps: [true, false, false], active: 1 };
-    if (dutyState.handover.state !== "completed" && !confirmed) return { eyebrow: "交接进行中", title: allSideConfirmed("outgoing") ? "请确认接收交接事项" : "等待交班方确认事项", description: allSideConfirmed("outgoing") ? "逐项核对火警、预警和设备运行状态" : "交班人员确认完成后可逐项接收", button: allSideConfirmed("outgoing") ? "进入交接确认" : "等待交班方确认", route: allSideConfirmed("outgoing") ? "duty/handover" : "", steps: [true, false, false], active: 1 };
-    if (dutyState.handover.state !== "completed") return { eyebrow: "交接进行中", title: "本人的交接确认已完成", description: "等待其他值班人员完成确认", button: "查看交接进度", route: "duty/handover", steps: [true, true, false], active: 2 };
-    return { eyebrow: "白班值守", title: "交接完成，正在值班", description: "可随时记录本班次警情、预警和设备状态", button: "新增值班记录", action: "add_record", steps: [true, true, true], active: 2 };
+  if (role === "available") {
+    return { eyebrow: "开始上班", title: "打卡上班，完成岗前检查", description: "与交班人员完成交接班流程", button: "立即上班打卡", route: "duty/clock-in", steps: [false, false, false], active: 0 };
   }
-  if (!allIncomingClocked()) return { eyebrow: "夜班交班", title: "等待接班人员到岗", description: "两名接班人员完成上班打卡后开始交接", button: "等待接班方打卡", steps: [true, false, false], active: 1 };
-  if (dutyState.handover.state !== "completed" && !confirmed) return { eyebrow: "夜班交班", title: "请逐项确认交接内容", description: "异常事项需要填写说明，但不会阻断交接", button: "进入交接确认", route: "duty/handover", steps: [true, false, false], active: 1 };
-  if (dutyState.handover.state !== "completed") return { eyebrow: "交接进行中", title: "本人的交班确认已完成", description: "等待其他值班人员完成确认", button: "查看交接进度", route: "duty/handover", steps: [true, true, false], active: 2 };
-  if (!person.clockOutAt) return { eyebrow: "交班完成", title: "可以进行下班打卡", description: "四名值班人员已完成全部交接确认", button: "立即下班打卡", route: "duty/clock-out", steps: [true, true, false], active: 2 };
-  return { eyebrow: "夜班结束", title: "下班打卡已完成", description: "本次夜班和交接记录均已保存", button: "查看打卡记录", route: "duty/clock-records", steps: [true, true, true], active: 3 };
+  if (role === "incoming") {
+    if (dutyState.handover.state === "completed") return { eyebrow: "值班中", title: "交接班已完成", description: "本班次值守工作正在进行", button: "新增值班记录", action: "add_record", steps: [true, true, true], active: 2 };
+    return { eyebrow: "交接班", title: confirmed ? "已完成接班确认" : "当前处于待接班状态", description: confirmed ? "等待其他接班人员完成确认" : "请核对交接事项并完成接班确认", button: "进入交接班", route: "duty/handover", steps: [true, confirmed, false], active: confirmed ? 2 : 1 };
+  }
+  if (role === "on_duty") return { eyebrow: "值班中", title: "本班次正在值守", description: "可记录火警、预警及设备运行情况", button: "查看交接记录", route: "duty/handover-records", steps: [true, true, true], active: 2 };
+  if (person.clockOutAt) return { eyebrow: "交班完成", title: "下班打卡已完成", description: "本次交接和值班记录已保存", button: "返回应用中心", route: "applications", steps: [true, true, true], active: 2 };
+  if (dutyState.handover.state === "completed") return { eyebrow: "交接完成", title: "可以进行下班打卡", description: "接班人员已接收本次交接事项", button: "打卡下班", route: "duty/clock-out", steps: [true, true, false], active: 2 };
+  return { eyebrow: "交接班", title: confirmed ? "已完成交班确认" : "当前处于待交班状态", description: confirmed ? "等待其他人员完成交接确认" : "请确认本班次事项并提交交班", button: "进入交接班", route: "duty/handover", steps: [true, confirmed, false], active: 1 };
 }
 
 function dutyPersonStatus(person) {
-  if (person.side === "incoming") {
-    if (!person.clockInAt) return ["待上班打卡", "pending"];
-    if (dutyState.handover.state === "completed") return ["值班中", "active"];
-    if (dutyPersonConfirmed(person)) return ["已确认接班", "done"];
-    return ["待确认接班", "pending"];
-  }
+  const role = dutyPersonRole(person);
+  const handover = dutyState.handover;
   if (person.clockOutAt) return ["已下班", "done"];
-  if (dutyState.handover.state === "completed") return ["待下班打卡", "pending"];
-  if (dutyPersonConfirmed(person)) return ["已确认交班", "done"];
-  return ["交班中", "active"];
+  if (role === "available") return ["未打卡", "pending"];
+  if (role === "on_duty") return ["值班中", "active"];
+  const skipped = role === "outgoing" ? handover.skippedOutgoingIds.includes(person.id) : handover.skippedIncomingIds.includes(person.id);
+  if (skipped) return ["未确认", "skipped"];
+  if (dutyPersonConfirmed(person)) return [role === "outgoing" ? "已确认交班" : "已确认接班", "done"];
+  if (handover.state === "completed" && role === "outgoing") return ["待下班", "pending"];
+  return [role === "outgoing" ? "待交班" : "待接班", "pending"];
 }
 
 function dutyPeopleGroup(side, title, shift) {
-  return `<section class="duty-team-group"><div class="duty-team-title"><div><small>${title}</small><strong>${shift}</strong></div><b>${side === "incoming" ? "接班" : "交班"}</b></div><div class="duty-person-grid">${dutyPeople(side).map((person) => {
+  const people = dutyPeople(side);
+  return `<section class="duty-team-group"><div class="duty-team-title"><div><small>${title}</small><strong>${shift}</strong></div><b>${side === "incoming" ? "接班" : "交班"}</b></div><div class="duty-person-grid">${people.map((person) => {
     const [label, tone] = dutyPersonStatus(person);
     return `<article class="duty-person ${person.id === dutyState.selectedPersonId ? "selected" : ""}"><span>${esc(person.name.slice(0, 1))}</span><div><strong>${esc(person.name)}</strong><small>${person.clockInAt ? `到岗 ${person.clockInAt.slice(11, 16)}` : "尚未到岗"}</small></div><b class="${tone}">${label}</b></article>`;
-  }).join("")}</div></section>`;
+  }).join("") || `<div class="duty-team-empty">当前暂无人员</div>`}</div></section>`;
 }
 
 function renderDutyHome() {
   syncDutyHandoverState();
   const dateInfo = dutyDateInfo();
   const person = selectedDutyPerson();
+  const role = dutyPersonRole(person);
   const stage = dutyHomeMeta(person);
-  const stepLabels = person.side === "incoming" ? ["上班打卡", "交接确认", "值班中"] : ["夜班值守", "交接确认", "下班打卡"];
+  const isOutgoing = role === "outgoing";
+  const stepLabels = isOutgoing ? ["上班打卡", "交接班", "下班打卡"] : ["上班打卡", "交接班", "值班中"];
   const primary = stage.route ? `data-route="${stage.route}"` : stage.action ? `data-duty-action="${stage.action}"` : "disabled";
-  renderHeader("消控室值班", `${person.name} · ${person.side === "incoming" ? "接班方" : "交班方"}`, "applications");
+  const roleLabels = { available: "未打卡", incoming: "接班方", outgoing: "交班方", on_duty: "值班中" };
+  const clockRoute = role === "available" ? "duty/clock-in" : role === "outgoing" && dutyState.handover.state === "completed" && !person.clockOutAt ? "duty/clock-out" : "";
+  const clockedPeople = ["outgoing", "on_duty"].includes(role) ? dutyState.activeOnDutyIds.map(dutyPersonById).filter(Boolean) : dutyPeople("incoming");
+  const clockedNames = clockedPeople.map((item) => item.name).join("、") || "暂无打卡人员";
+  const shift = role === "outgoing" ? dutyState.shifts.outgoing : role === "incoming" || (role === "available" && dutyState.demoTimeMode !== "on_duty") ? dutyState.shifts.incoming : dutyShift(dutyState.currentShiftId);
+  renderHeader("消控室值班", `${person.name} · ${roleLabels[role]}`, "applications");
   setBottomNav("", false);
   appMain.innerHTML = `<div class="duty-page">
-    <section class="duty-shift-card"><div class="duty-card-heading"><span><i></i>当前班次</span><b>白班&nbsp; 08:00-18:00</b></div><div class="duty-shift-content"><div><h2>${dateInfo.date}</h2><p>${dateInfo.weekday} · 当前身份 ${esc(person.name)}</p></div><span class="duty-role-mark ${person.side}"><i data-lucide="${person.side === "incoming" ? "log-in" : "log-out"}"></i>${person.side === "incoming" ? "接班" : "交班"}</span></div></section>
+    <section class="duty-shift-card"><div class="duty-card-heading"><span><i></i>${role === "available" ? "最近班次信息" : "值班中"}</span><b>${esc(shift.label)}</b></div><div class="duty-shift-content"><div><h2>${dateInfo.date}</h2><p>${dateInfo.weekday} · ${esc(clockedNames)}</p></div><span class="duty-shift-icon"><i data-lucide="shield-check"></i></span></div></section>
     <section class="duty-workflow-card"><small>${stage.eyebrow}</small><h2>${stage.title}</h2><p>${stage.description}</p><div class="duty-steps">${stepLabels.map((label, index) => `<div class="duty-step ${stage.steps[index] ? "done" : index === stage.active ? "active" : ""}"><span>${stage.steps[index] ? `<i data-lucide="check"></i>` : index + 1}</span><b>${label}</b></div>`).join("")}</div><button class="duty-primary-action" type="button" ${primary}>${stage.button}<i data-lucide="arrow-right"></i></button></section>
-    <section class="duty-shortcuts duty-shortcuts-three"><button type="button" data-route="duty/clock-records"><span class="blue"><i data-lucide="scan-face"></i></span><b>打卡记录</b></button><button type="button" data-route="duty/logs"><span class="indigo"><i data-lucide="clipboard-list"></i></span><b>值班记录</b></button><button type="button" data-route="duty/handover-records"><span class="green"><i data-lucide="file-check-2"></i></span><b>交接记录</b></button></section>
-    <section class="duty-summary-section"><div class="section-heading"><h2>本班次摘要</h2><span>独立演示数据</span></div><div class="duty-summary-list"><article><span class="red"><i data-lucide="siren"></i></span><div><strong>火警告警</strong><small>2 条告警，1 条处置中，1 条待确认</small></div><b>2</b></article><article><span class="orange"><i data-lucide="triangle-alert"></i></span><div><strong>设备预警</strong><small>1 条预警待持续核查</small></div><b>1</b></article><article><span class="green"><i data-lucide="monitor-check"></i></span><div><strong>设备运行</strong><small>主要系统 5 项正常运行</small></div><b class="normal">正常</b></article></div><button class="duty-add-record" type="button" data-duty-action="add_record" ${person.clockInAt && !person.clockOutAt ? "" : "disabled"}><i data-lucide="plus"></i>新增值班记录</button></section>
-    <div class="duty-teams">${dutyPeopleGroup("outgoing", "交班班次", "夜班 18:00-次日08:00")}${dutyPeopleGroup("incoming", "接班班次", "白班 08:00-18:00")}</div>
+    <section class="duty-shortcuts"><button type="button" ${clockRoute ? `data-route="${clockRoute}"` : "disabled"}><span class="orange"><i data-lucide="calendar-check"></i></span><b>打卡</b></button><button type="button" data-route="duty/handover" ${role === "available" ? "disabled" : ""}><span class="blue"><i data-lucide="handshake"></i></span><b>交接班</b></button><button type="button" data-route="duty/logs"><span class="indigo"><i data-lucide="clipboard-list"></i></span><b>值班记录</b></button><button type="button" data-route="duty/handover-records"><span class="green"><i data-lucide="file-check-2"></i></span><b>交接记录</b></button></section>
+    ${role === "available" || person.clockOutAt ? "" : `<section class="duty-summary-section"><div class="section-heading"><h2>本班次摘要</h2><span>实时业务数据</span></div><div class="duty-summary-list"><article><span class="red"><i data-lucide="siren"></i></span><div><strong>火警告警</strong><small>${fireOpenCount()} 条未闭环火警</small></div><b>${fireOpenCount()}</b></article><article><span class="orange"><i data-lucide="triangle-alert"></i></span><div><strong>设备预警</strong><small>${warningOpenCount()} 条预警待处理</small></div><b>${warningOpenCount()}</b></article><article><span class="green"><i data-lucide="monitor-check"></i></span><div><strong>设备运行</strong><small>${faultOpenCount()} 台设备存在故障</small></div><b class="${faultOpenCount() ? "" : "normal"}">${faultOpenCount() || "正常"}</b></article></div><button class="duty-add-record" type="button" data-duty-action="add_record"><i data-lucide="plus"></i>新增值班记录</button></section>`}
   </div>`;
 }
 
@@ -570,29 +799,40 @@ function renderDutyClock(type) {
   const isClockIn = type === "clock-in";
   const recordTime = isClockIn ? person.clockInAt : person.clockOutAt;
   const method = isClockIn ? person.clockInMethod : person.clockOutMethod;
-  const roleAllowed = isClockIn ? person.side === "incoming" : person.side === "outgoing";
+  const role = dutyPersonRole(person);
+  const roleAllowed = isClockIn ? role === "available" : role === "outgoing";
   const flowAllowed = isClockIn || dutyState.handover.state === "completed";
   const canClock = roleAllowed && flowAllowed && !recordTime;
+  const targetShift = isClockIn ? (dutyState.demoTimeMode === "on_duty" ? dutyShift(dutyState.currentShiftId) : dutyShift(dutyState.handover.incomingShiftId)) : dutyShift(dutyState.handover.outgoingShiftId);
   renderHeader(isClockIn ? "上班打卡" : "下班打卡", person.name, "duty");
   setBottomNav("", false);
   appMain.innerHTML = `<div class="duty-clock-page">
-    <section class="duty-clock-hero ${recordTime ? "success" : ""}"><small>${dutyDateInfo().date} · ${dutyDateInfo().weekday}</small><strong>${recordTime ? recordTime.slice(11, 16) : isClockIn ? "08:00" : "18:00"}</strong><span>${isClockIn ? "白班 08:00-18:00" : "夜班 18:00-次日08:00"}</span><p>最早打卡时间 ${isClockIn ? "06:00" : "16:00"}　最晚打卡时间 ${isClockIn ? "11:00" : "21:00"}</p></section>
-    ${recordTime ? `<section class="duty-clock-result"><span><i data-lucide="circle-check-big"></i></span><h2>打卡成功</h2><p>${esc(person.name)}已完成${isClockIn ? "上班" : "下班"}打卡</p><dl><div><dt>打卡时间</dt><dd>${recordTime}</dd></div><div><dt>打卡方式</dt><dd>${esc(method)}打卡</dd></div><div><dt>打卡地点</dt><dd>消防控制室</dd></div></dl><button type="button" data-route="duty">返回值班首页</button></section>` : `<section class="duty-clock-panel"><button class="duty-nfc-zone" type="button" data-duty-clock-method="NFC" data-clock-type="${type}" ${canClock ? "" : "disabled"}><span><i data-lucide="radio-tower"></i></span><strong>靠近 NFC 值班点</strong><small>点击模拟手机感应打卡</small></button><div class="duty-clock-methods"><button type="button" data-duty-clock-method="NFC" data-clock-type="${type}" ${canClock ? "" : "disabled"}><i data-lucide="smartphone-nfc"></i><span>NFC 打卡</span></button><button type="button" data-duty-clock-method="二维码" data-clock-type="${type}" ${canClock ? "" : "disabled"}><i data-lucide="scan-line"></i><span>扫码打卡</span></button></div>${!roleAllowed ? `<div class="duty-clock-blocked"><i data-lucide="info"></i>当前身份不执行${isClockIn ? "接班上班" : "交班下班"}打卡</div>` : !flowAllowed ? `<div class="duty-clock-blocked"><i data-lucide="lock-keyhole"></i>四名人员完成交接确认后才能下班打卡</div>` : ""}</section>`}
+    <section class="duty-clock-hero ${recordTime ? "success" : ""}"><small>${dutyDateInfo().date} · ${dutyDateInfo().weekday}</small><strong>${recordTime ? recordTime.slice(11, 16) : targetShift.start}</strong><span>${targetShift.label}</span><p>最早打卡时间 ${targetShift.clockStart}　最晚打卡时间 ${targetShift.clockEnd}</p></section>
+    ${recordTime ? `<section class="duty-clock-result"><span><i data-lucide="circle-check-big"></i></span><h2>打卡成功</h2><p>${esc(person.name)}已完成${isClockIn ? "上班" : "下班"}打卡</p><dl><div><dt>打卡时间</dt><dd>${recordTime}</dd></div><div><dt>打卡方式</dt><dd>${esc(method)}打卡</dd></div><div><dt>班次</dt><dd>${targetShift.label}</dd></div></dl><button type="button" data-route="duty">返回首页</button></section>` : `<section class="duty-clock-panel"><button class="duty-nfc-zone" type="button" data-duty-clock-method="NFC" data-clock-type="${type}" ${canClock ? "" : "disabled"}><span><i data-lucide="radio-tower"></i></span><strong>使用手机贴至 NFC 打卡处</strong><small>点击模拟手机感应打卡</small></button><div class="duty-clock-methods"><button type="button" data-duty-clock-method="NFC" data-clock-type="${type}" ${canClock ? "" : "disabled"}><i data-lucide="smartphone-nfc"></i><span>NFC 打卡</span></button><button type="button" data-duty-clock-method="二维码" data-clock-type="${type}" ${canClock ? "" : "disabled"}><i data-lucide="scan-line"></i><span>扫码打卡</span></button></div>${!roleAllowed ? `<div class="duty-clock-blocked"><i data-lucide="info"></i>当前人员不能执行该打卡操作</div>` : !flowAllowed ? `<div class="duty-clock-blocked"><i data-lucide="lock-keyhole"></i>完成交接班后才能下班打卡</div>` : ""}</section>`}
   </div>`;
 }
 
 function completeDutyClock(type, method) {
   const person = selectedDutyPerson();
   const isClockIn = type === "clock-in";
-  if ((isClockIn && person.side !== "incoming") || (!isClockIn && person.side !== "outgoing")) return showToast("当前身份不能执行该打卡操作");
-  if (!isClockIn && dutyState.handover.state !== "completed") return showToast("完成四人交接确认后才能下班打卡");
+  const role = dutyPersonRole(person);
+  if ((isClockIn && role !== "available") || (!isClockIn && role !== "outgoing")) return showToast("当前人员不能执行该打卡操作");
+  if (!isClockIn && dutyState.handover.state !== "completed") return showToast("完成交接班后才能下班打卡");
   const field = isClockIn ? "clockInAt" : "clockOutAt";
   if (person[field]) return showToast("当前人员已完成本次打卡");
   const time = nowText();
   person[field] = time;
   person[isClockIn ? "clockInMethod" : "clockOutMethod"] = method;
-  dutyState.clockRecords.unshift({ id: `dc-${Date.now()}`, type: isClockIn ? "上班打卡" : "下班打卡", person: person.name, personId: person.id, shift: person.shift, method, time, result: "正常" });
-  if (isClockIn) syncDutyHandoverState();
+  const targetShift = isClockIn ? (dutyState.demoTimeMode === "on_duty" ? dutyShift(dutyState.currentShiftId) : dutyShift(dutyState.handover.incomingShiftId)) : dutyShift(dutyState.handover.outgoingShiftId);
+  dutyState.clockRecords.unshift({ id: `dc-${Date.now()}`, type: isClockIn ? "上班打卡" : "下班打卡", person: person.name, personId: person.id, shift: targetShift.label, method, time, result: "正常" });
+  if (isClockIn) {
+    if (dutyState.handover.state === "completed") {
+      if (!dutyState.activeOnDutyIds.includes(person.id)) dutyState.activeOnDutyIds.push(person.id);
+    } else if (!dutyState.handover.incomingIds.includes(person.id)) {
+      dutyState.handover.incomingIds.push(person.id);
+    }
+    syncDutyHandoverState();
+  }
   render();
   showToast(`${person.name}${isClockIn ? "上班" : "下班"}打卡成功`);
 }
@@ -600,77 +840,122 @@ function completeDutyClock(type, method) {
 const dutyCategoryMeta = {
   fire: { label: "火警告警", icon: "siren", tone: "red" },
   warning: { label: "设备预警", icon: "triangle-alert", tone: "orange" },
-  device: { label: "设备运行状态", icon: "monitor-check", tone: "green" }
+  device: { label: "设备运行状态", icon: "monitor-check", tone: "green" },
+  manual: { label: "手工值班记录", icon: "clipboard-list", tone: "indigo" }
 };
+
+const dutyConfirmationCategories = [...Object.keys(dutyCategoryMeta), "equipment_check"];
 
 function renderDutyHandover() {
   syncDutyHandoverState();
   const person = selectedDutyPerson();
+  const role = dutyPersonRole(person);
+  const handover = dutyState.handover;
+  if (dutyState.demoTimeMode === "on_duty" && handover.state === "completed" && !handover.outgoingIds.length) {
+    renderHeader("交接班", `${dutyShift(dutyState.currentShiftId).label} · 值班中`, "duty");
+    setBottomNav("", false);
+    appMain.innerHTML = `<div class="duty-handover-page"><div class="duty-flow-notice duty-flow-normal"><i data-lucide="shield-check"></i><div><strong>当前未到交接时间</strong><span>本班次正在值守，到下一班最早打卡时间后自动开启新一轮交接。</span></div></div><section class="duty-window-card"><small>下一轮交接</small><strong>${dutyState.currentShiftId === "day" ? "16:00 白班转夜班" : "06:00 夜班转白班"}</strong><p>交接开启后，当前在岗人员自动成为交班方。</p></section><button class="duty-complete-action" type="button" data-route="duty">返回值班首页</button></div>`;
+    return;
+  }
+  if (handover.state === "completed") return renderDutyHandoverComplete();
   const confirmed = dutyPersonConfirmed(person);
-  const outgoingReady = allSideConfirmed("outgoing");
-  const canConfirm = dutyState.handover.state === "confirming" && !confirmed && (person.side === "outgoing" || outgoingReady);
+  const canConfirm = !confirmed && ((role === "outgoing" && handover.state === "outgoing_confirming") || (role === "incoming" && handover.state === "incoming_confirming"));
+  const canPrepareChecks = canConfirm && !handover.preparedBy && (role === "outgoing" || !handover.outgoingIds.length);
+  const editableChecks = canPrepareChecks || (canConfirm && handover.preparedBy === person.id);
   const itemGroups = Object.keys(dutyCategoryMeta).map((category) => {
     const meta = dutyCategoryMeta[category];
-    const items = dutyState.handover.items.filter((item) => item.category === category);
-    return `<section class="duty-handover-group"><header><span class="${meta.tone}"><i data-lucide="${meta.icon}"></i></span><div><strong>${meta.label}</strong><small>${items.length} 项需确认</small></div></header><div class="duty-handover-items">${items.map((item) => {
-      const editable = canConfirm && person.side === "outgoing";
-      return `<article class="duty-handover-item"><div class="duty-item-heading"><div><strong>${esc(item.title)}</strong><small>${esc(item.meta)}</small></div>${editable ? `<span class="duty-result-choice"><label><input type="radio" name="result-${item.id}" value="normal" ${item.result === "normal" ? "checked" : ""} /><b>正常</b></label><label><input type="radio" name="result-${item.id}" value="abnormal" ${item.result === "abnormal" ? "checked" : ""} /><b>异常</b></label></span>` : `<b class="duty-item-result ${item.result}">${item.result === "normal" ? "正常" : "异常"}</b>`}</div>${editable ? `<textarea class="duty-abnormal-note" data-duty-item-note="${item.id}" placeholder="异常事项必须填写交接说明">${esc(item.note)}</textarea>` : item.note ? `<p>${esc(item.note)}</p>` : ""}<label class="duty-item-ack"><input type="checkbox" data-duty-item-ack="${item.id}" ${confirmed ? "checked disabled" : canConfirm ? "" : "disabled"} /><span><i data-lucide="check"></i></span><b>${confirmed ? "本人已确认" : person.side === "incoming" ? "确认已查看并接收" : "确认该项信息准确"}</b></label></article>`;
-    }).join("")}</div></section>`;
+    const items = handover.items.filter((item) => item.category === category);
+    const categoryChecked = dutyCategoryConfirmed(person, category);
+    return `<section class="duty-handover-group"><header><span class="${meta.tone}"><i data-lucide="${meta.icon}"></i></span><div><strong>${meta.label}</strong><small>系统自动同步 · ${items.length} 条</small></div><b class="duty-category-version">V${handover.categoryRevisions[category]}</b></header><div class="duty-handover-items">${items.map((item) => `<article class="duty-handover-item duty-auto-item"><div class="duty-item-heading"><div><strong>${esc(item.title)}</strong><small>${esc(item.meta)}</small></div><b class="duty-item-result ${item.result}">${esc(item.status)}</b></div>${item.note ? `<p>${esc(item.note)}</p>` : ""}</article>`).join("") || `<div class="duty-category-empty">本班次暂无${meta.label}，且无跨班未闭环事项</div>`}</div><label class="duty-category-ack"><input type="checkbox" data-duty-category-ack="${category}" ${categoryChecked ? "checked" : ""} ${canConfirm && !categoryChecked ? "" : "disabled"}><span><i data-lucide="check"></i></span><b>${categoryChecked ? "本人已确认该分类" : role === "incoming" ? "确认已查看并接收该分类" : "确认该分类数据无遗漏"}</b></label></section>`;
   }).join("");
-  const confirmedCount = dutyState.handover.confirmations.length;
-  renderHeader("交接班", `${person.name} · ${person.side === "incoming" ? "接班方" : "交班方"}`, "duty");
+  const equipmentChecked = dutyCategoryConfirmed(person, "equipment_check");
+  const checkGroups = [...new Set(handover.checks.map((item) => item.group))].map((group) => `<div class="duty-check-group"><strong>${esc(group)}</strong>${handover.checks.filter((item) => item.group === group).map((item) => `<div class="duty-check-row"><span>${esc(item.title)}</span>${editableChecks ? `<label><input type="radio" name="check-${item.id}" value="normal" ${item.result === "normal" ? "checked" : ""}>正常</label><label><input type="radio" name="check-${item.id}" value="abnormal" ${item.result === "abnormal" ? "checked" : ""}>异常</label>` : `<b class="${item.result}">${item.result === "normal" ? "正常" : "异常"}</b>`}</div>`).join("")}</div>`).join("");
+  const confirmedCount = handover.outgoingConfirmedIds.length + handover.incomingConfirmedIds.length;
+  const participantCount = handover.outgoingIds.length + handover.incomingIds.length;
+  const notice = !handover.incomingIds.length ? `<div class="duty-flow-notice"><i data-lucide="user-round-x"></i><div><strong>当前无人接班</strong><span>交班方可先确认交接数据，但至少一名接班人员到岗并完成接班后才能下班。</span></div></div>` : handover.incomingIds.length < dutyState.requiredHeadcount ? `<div class="duty-flow-notice"><i data-lucide="users-round"></i><div><strong>接班人数不足</strong><span>当前已打卡 ${handover.incomingIds.length}/${dutyState.requiredHeadcount} 人，交班方确认风险后可按实际到岗人数交接。</span></div></div>` : role === "incoming" && handover.state === "outgoing_confirming" ? `<div class="duty-flow-notice"><i data-lucide="hourglass"></i><div><strong>交班方尚未完成确认</strong><span>请耐心等待，无法继续时可进入“有异议”。</span></div></div>` : "";
+  const exceptionAllowed = (role === "incoming" && handover.state !== "completed") || (role === "outgoing" && (handover.incomingIds.length < dutyState.requiredHeadcount || handover.state === "incoming_confirming"));
+  const exceptionLabel = role === "outgoing" && !handover.incomingIds.length ? "无人接班" : role === "incoming" && handover.state === "incoming_confirming" ? "重新交班" : "有异议";
+  renderHeader("交接班", `${person.name} · ${role === "incoming" ? "接班方" : role === "outgoing" ? "交班方" : "当前人员"}`, "duty");
   setBottomNav("", false);
   appMain.innerHTML = `<div class="duty-handover-page">
-    <section class="duty-handover-overview"><div><small>今日早晚班交接</small><h2>${dutyState.handover.state === "completed" ? "交接班全部完成" : dutyState.handover.state === "waiting_clock_in" ? "等待接班人员到岗" : `${confirmedCount}/4 人已确认`}</h2></div><span class="${dutyState.handover.state}"><i data-lucide="${dutyState.handover.state === "completed" ? "circle-check-big" : "handshake"}"></i></span></section>
-    <div class="duty-handover-teams">${dutyPeopleGroup("outgoing", "交班班次", "夜班 18:00-次日08:00")}${dutyPeopleGroup("incoming", "接班班次", "白班 08:00-18:00")}</div>
-    ${dutyState.handover.state === "waiting_clock_in" ? `<div class="duty-flow-notice"><i data-lucide="clock-3"></i><div><strong>暂不能开始交接</strong><span>Admin 与王晨都完成上班打卡后自动开放。</span></div></div>` : person.side === "incoming" && !outgoingReady && !confirmed ? `<div class="duty-flow-notice"><i data-lucide="hourglass"></i><div><strong>等待交班方确认</strong><span>李明、赵凯确认完交接事项后，接班方才能逐项接收。</span></div></div>` : ""}
+    <div class="duty-handover-teams">${dutyPeopleGroup("outgoing", "交班班次", dutyState.shifts.outgoing.label)}${dutyPeopleGroup("incoming", "接班班次", dutyState.shifts.incoming.label)}</div>
+    ${notice}
+    <div class="duty-section-label"><i></i>交接事项 <span>${confirmedCount}/${participantCount} 人已确认</span></div>
     ${itemGroups}
-    <section class="duty-exception-panel"><h3>异常流程</h3><div>${["有异议", "重新交接", "退回交接", "强制接班"].map((label) => `<button type="button" data-duty-exception="${label}">${label}<i data-lucide="chevron-right"></i></button>`).join("")}</div></section>
-    <div class="duty-handover-submit">${dutyState.handover.state === "completed" ? `<button type="button" data-route="duty/handover-records">查看交接记录</button>` : `<button type="button" data-duty-confirm-handover ${canConfirm ? "" : "disabled"}>${confirmed ? "本人已完成确认" : !canConfirm ? "当前等待其他人员确认" : person.side === "incoming" ? "确认接收全部事项" : "确认提交交接事项"}</button>`}</div>
+    <section class="duty-handover-group duty-device-checks"><header><span class="green"><i data-lucide="clipboard-check"></i></span><div><strong>消防设备检查</strong><small>${editableChecks ? "请填写本次检查结果" : "交班方检查结果"}</small></div><b class="duty-category-version">V${handover.categoryRevisions.equipment_check}</b></header>${checkGroups}<label class="duty-category-ack"><input type="checkbox" data-duty-category-ack="equipment_check" ${equipmentChecked ? "checked" : ""} ${canConfirm && !equipmentChecked ? "" : "disabled"}><span><i data-lucide="check"></i></span><b>${equipmentChecked ? "本人已确认设备检查" : role === "incoming" ? "确认已查看设备检查结果" : "确认设备检查结果"}</b></label></section>
+    <section class="duty-exception-panel"><button type="button" data-route="duty/objection" ${exceptionAllowed ? "" : "disabled"}>${exceptionLabel}<i data-lucide="chevron-right"></i></button></section>
+    <div class="duty-handover-submit"><button type="button" data-duty-confirm-handover ${canConfirm ? "" : "disabled"}>${confirmed ? `我已完成${role === "outgoing" ? "交班" : "接班"}确认` : !canConfirm ? "当前等待其他人员确认" : role === "incoming" ? "确认接收事项" : "确认交接事项"}</button></div>
   </div>`;
 }
 
 function confirmDutyHandover() {
   const person = selectedDutyPerson();
-  if (dutyState.handover.state !== "confirming" || dutyPersonConfirmed(person)) return showToast("当前无需重复确认");
-  if (person.side === "incoming" && !allSideConfirmed("outgoing")) return showToast("请等待交班人员先完成确认");
-  const acknowledgements = [...document.querySelectorAll("[data-duty-item-ack]")];
-  if (acknowledgements.length !== dutyState.handover.items.length || acknowledgements.some((input) => !input.checked)) return showToast("请逐项确认全部交接事项");
-  if (person.side === "outgoing") {
-    for (const item of dutyState.handover.items) {
-      const result = document.querySelector(`input[name="result-${item.id}"]:checked`)?.value;
-      const note = document.querySelector(`[data-duty-item-note="${item.id}"]`)?.value.trim() || "";
-      if (!result) return showToast("请选择每项交接结果");
-      if (result === "abnormal" && !note) return showToast(`请填写“${item.title}”的异常说明`);
-      item.result = result;
-      item.note = result === "abnormal" ? note : "";
-      if (!item.outgoingConfirmedBy.includes(person.id)) item.outgoingConfirmedBy.push(person.id);
-    }
-  } else {
-    dutyState.handover.items.forEach((item) => {
-      if (!item.incomingConfirmedBy.includes(person.id)) item.incomingConfirmedBy.push(person.id);
-    });
+  const role = dutyPersonRole(person);
+  const handover = dutyState.handover;
+  const canConfirm = (role === "outgoing" && handover.state === "outgoing_confirming") || (role === "incoming" && handover.state === "incoming_confirming");
+  if (!canConfirm || dutyPersonConfirmed(person)) return showToast("当前无需重复确认");
+  const acknowledgements = [...document.querySelectorAll("[data-duty-category-ack]")];
+  if (acknowledgements.length !== dutyConfirmationCategories.length || acknowledgements.some((input) => !input.checked)) return showToast("请确认全部交接分类");
+  const editingChecks = !handover.preparedBy || handover.preparedBy === person.id;
+  if (editingChecks && (role === "outgoing" || !handover.outgoingIds.length)) {
+    for (const check of handover.checks) check.result = document.querySelector(`input[name="check-${check.id}"]:checked`)?.value || check.result;
+    handover.preparedBy = person.id;
+    handover.preparedAt = nowText();
   }
   const time = nowText();
-  dutyState.handover.confirmations.push({ personId: person.id, name: person.name, side: person.side, time });
-  if (dutyState.people.every(dutyPersonConfirmed)) {
-    dutyState.handover.state = "completed";
-    dutyState.handover.completedAt = time;
-    dutyState.handoverRecords.unshift({ id: `dr-${Date.now()}`, time, status: "completed", outgoingNames: dutyPeople("outgoing").map((item) => item.name), incomingNames: dutyPeople("incoming").map((item) => item.name), confirmations: cloneData(dutyState.handover.confirmations), items: cloneData(dutyState.handover.items) });
-    dutyState.dutyRecords.unshift({ id: `dl-${Date.now()}`, title: "完成早晚班交接", person: "系统记录", personId: "system", time, note: "四名值班人员已逐项确认火警、预警和设备运行状态。", photos: [] });
-  }
+  dutyConfirmationCategories.forEach((category) => {
+    const ids = handover.categoryConfirmations[category][`${role}Ids`];
+    if (!ids.includes(person.id)) ids.push(person.id);
+  });
+  const confirmedIds = role === "outgoing" ? handover.outgoingConfirmedIds : handover.incomingConfirmedIds;
+  if (!confirmedIds.includes(person.id)) confirmedIds.push(person.id);
+  handover.confirmations.push({ personId: person.id, name: person.name, side: role, time });
+  syncDutyHandoverState();
+  completeDutyHandoverIfReady(time);
   render();
-  showToast(dutyState.handover.state === "completed" ? "四人交接确认已全部完成" : `${person.name}已完成交接确认`);
+  showToast(handover.state === "completed" ? "交接班已全部完成" : `${person.name}已完成${role === "outgoing" ? "交班" : "接班"}确认`);
+}
+
+function completeDutyHandoverIfReady(time = nowText()) {
+  const handover = dutyState.handover;
+  if (!handover.incomingIds.length || !allSideConfirmed("outgoing") || !allSideConfirmed("incoming")) return false;
+  handover.state = "completed";
+  handover.completedAt = time;
+  dutyState.activeOnDutyIds = [...handover.incomingIds];
+  dutyState.currentShiftId = handover.incomingShiftId;
+  dutyState.lastCompletedAt = time;
+  dutyState.demoTimeMode = "on_duty";
+  dutyTimeModeSelect.value = "on_duty";
+  const record = { id: `dr-${Date.now()}`, time, status: "completed", outgoingNames: dutyPeople("outgoing").map((item) => item.name), incomingNames: dutyPeople("incoming").map((item) => item.name), confirmations: cloneData(handover.confirmations), categoryRevisions: cloneData(handover.categoryRevisions), categoryConfirmations: cloneData(handover.categoryConfirmations), items: cloneData(handover.items), checks: cloneData(handover.checks), exceptions: cloneData(handover.exceptions.filter((item) => item.type !== "restart")), skippedOutgoingIds: [...handover.skippedOutgoingIds], skippedIncomingIds: [...handover.skippedIncomingIds] };
+  dutyState.handoverRecords.unshift(record);
+  dutyState.dutyRecords.unshift({ id: `dl-${Date.now()}`, title: "交接班完成", person: "系统记录", personId: "system", time, note: `交班人员 ${record.outgoingNames.join("、") || "无"}，接班人员 ${record.incomingNames.join("、")}。`, photos: [], recordType: "system" });
+  return true;
+}
+
+function dutyExceptionMessages(record = dutyState.handover) {
+  return (record.exceptions || []).filter((item) => item.type !== "restart").map((item) => item.message);
+}
+
+function renderDutyHandoverComplete() {
+  const person = selectedDutyPerson();
+  const role = dutyPersonRole(person);
+  const handover = dutyState.handover;
+  const exceptionMessages = dutyExceptionMessages();
+  renderHeader("交接班", "交接班全部完成", "duty");
+  setBottomNav("", false);
+  appMain.innerHTML = `<div class="duty-complete-page"><section class="duty-complete-hero"><i data-lucide="circle-check-big"></i><h1>交接班全部完成</h1></section><section class="duty-complete-card"><div class="duty-record-people"><div><small>交班人</small><strong>${dutyPeople("outgoing").map((item) => item.name).join("、") || "当前无人交班"}</strong></div><i data-lucide="arrow-right"></i><div><small>接班人</small><strong>${dutyPeople("incoming").map((item) => item.name).join("、")}</strong></div></div><dl><div><dt>交班时间</dt><dd>${handover.preparedAt || handover.completedAt}</dd></div><div><dt>接班时间</dt><dd>${handover.completedAt}</dd></div></dl>${exceptionMessages.length ? `<div class="duty-complete-exceptions"><strong>交接异议</strong>${exceptionMessages.map((item) => `<p>${esc(item)}</p>`).join("")}</div>` : ""}</section><div class="duty-section-label"><i></i>交接事项</div>${Object.keys(dutyCategoryMeta).map((category) => { const meta = dutyCategoryMeta[category]; const items = handover.items.filter((item) => item.category === category); return `<section class="duty-complete-items"><h3><i data-lucide="${meta.icon}"></i>${meta.label}</h3>${items.map((item) => `<div><span>${esc(item.title)}</span><b class="${item.result}">${esc(item.status || (item.result === "normal" ? "正常" : "异常"))}</b></div>`).join("") || `<div><span>本班次无相关记录</span><b class="normal">已确认</b></div>`}</section>`; }).join("")}<button class="duty-complete-action" type="button" data-route="${role === "outgoing" && !person.clockOutAt ? "duty/clock-out" : "duty"}">${role === "outgoing" && !person.clockOutAt ? "打卡下班" : "返回首页"}</button></div>`;
 }
 
 function dutyActionSheet(action) {
   if (action === "add_record") {
     const person = selectedDutyPerson();
-    if (!person.clockInAt || person.clockOutAt) return showToast("当前身份不在值班状态");
-    openSheet({ eyebrow: "消控室值班", title: "新增值班记录", submitText: "提交值班记录", body: `${eventSummary("本班次值班情况", `${person.name} · ${person.shift}`, "clipboard-plus")}<label class="form-field"><span class="form-label">记录内容 <em>必填</em></span><textarea id="dutyRecordNote" placeholder="请描述警情、预警、设备运行或其他需留痕事项。"></textarea></label>${uploadField()}`, onSubmit: () => {
+    if (dutyPersonRole(person) === "available" || person.clockOutAt) return showToast("当前人员不在值班状态");
+    state.sheetPhotoLimit = 9;
+    openSheet({ eyebrow: "值班记录", title: "新增值班记录", submitText: "提交", body: `<label class="form-field"><span class="form-label">记录内容 <em>必填</em></span><textarea id="dutyRecordNote" placeholder="请描述值班期间发现的问题或需要记录的事项。"></textarea></label>${uploadField()}`, onSubmit: () => {
       const note = document.querySelector("#dutyRecordNote").value.trim();
       if (!note) return showToast("请填写值班记录内容");
-      dutyState.dutyRecords.unshift({ id: `dl-${Date.now()}`, title: "值班情况记录", person: person.name, personId: person.id, time: nowText(), note, photos: [...state.sheetPhotos] });
+      dutyState.dutyRecords.unshift({ id: `dl-${Date.now()}`, title: `值班记录（${person.name}）`, person: person.name, personId: person.id, time: nowText(), note, photos: [...state.sheetPhotos], recordType: "manual" });
+      refreshDutyHandoverCategory("manual");
       closeSheet();
       render();
       showToast("值班记录已保存");
@@ -678,16 +963,78 @@ function dutyActionSheet(action) {
   }
 }
 
-function dutyExceptionSheet(label) {
-  const copy = { "有异议": "接班人员发现交接内容与现场情况不一致时使用。", "重新交接": "交接内容调整后，由交班双方重新发起确认。", "退回交接": "接班方拒绝当前交接内容并退回交班方处理。", "强制接班": "紧急情况下由授权人员跳过未完成确认并接班。" }[label];
-  openSheet({ eyebrow: "异常交接说明", title: label, submitText: "知道了", body: `${eventSummary(label, copy, "info")}<div class="note-box">当前静态演示版仅展示该流程入口，不记录原因，也不会改变交接状态。</div>`, onSubmit: closeSheet });
+function renderDutyObjection() {
+  const person = selectedDutyPerson();
+  const role = dutyPersonRole(person);
+  const handover = dutyState.handover;
+  let action = "";
+  let title = "当前没有可处理的交接异议";
+  let description = "请返回交接班页面继续当前流程。";
+  let button = "返回交接班";
+  if (role === "incoming" && handover.state === "incoming_confirming") {
+    action = "restart"; title = "接班人员不认可交接信息"; description = "交接信息有误，确认后将重新退回交班信息确认。"; button = "确认退回交班";
+  } else if (role === "incoming" && (!handover.outgoingIds.length || !allSideConfirmed("outgoing"))) {
+    action = "force_takeover"; title = "交班人员无法确认交接信息"; description = "上一班次人员无法完成交班确认，无法正常交班。"; button = "确认强制接班";
+  } else if (role === "outgoing" && !handover.incomingIds.length) {
+    title = "当前无人接班"; description = "下一班尚无人员完成上班打卡，请联系负责人协调人员到岗。至少一名接班人员完成接班前，本班人员不能下班。";
+  } else if (role === "outgoing" && handover.incomingIds.length < dutyState.requiredHeadcount) {
+    action = "force_handover_understaffed"; title = "接班人数不足"; description = `当前接班人数 ${handover.incomingIds.length}/${dutyState.requiredHeadcount}，无法满足定岗人数。`; button = "确认强制交班";
+  } else if (role === "outgoing" && handover.state === "incoming_confirming" && !allSideConfirmed("incoming")) {
+    action = "force_handover"; title = "接班人员无法确认交接信息"; description = "下一班次人员无法完成接班确认，无法正常接班。"; button = "确认强制交班";
+  }
+  renderHeader("有异议", "异常交接处理", "duty/handover");
+  setBottomNav("", false);
+  appMain.innerHTML = `<div class="duty-objection-page"><section class="duty-objection-summary"><span><i data-lucide="user-round-x"></i></span><div><strong>${esc(title)}</strong><p>${esc(description)}</p></div></section>${action ? `<section class="duty-objection-card"><div><span><i data-lucide="user-round-x"></i></span><div><h2>${esc(title)}</h2><p>${esc(description)} 请确认后继续当前交接流程。</p></div></div><div class="duty-risk-box"><strong><i data-lucide="triangle-alert"></i>风险提示</strong><p>强制操作将跳过对方未完成的确认，您需要自行检查设备状态。</p></div><label class="duty-risk-check"><input id="dutyRiskAck" type="checkbox"><span><i data-lucide="check"></i></span>我已知晓风险，确认进行${button.replace("确认", "")}操作</label></section><button class="duty-objection-submit" type="button" data-duty-objection-confirm="${action}">${button}</button>` : `<button class="duty-objection-submit neutral" type="button" data-route="duty/handover">${button}</button>`}</div>`;
+}
+
+function confirmDutyObjection(action) {
+  if (!document.querySelector("#dutyRiskAck")?.checked) return showToast("请先确认已知晓风险");
+  const person = selectedDutyPerson();
+  const handover = dutyState.handover;
+  const time = nowText();
+  if (action === "restart") {
+    handover.outgoingConfirmedIds = [];
+    handover.incomingConfirmedIds = [];
+    handover.skippedOutgoingIds = [];
+    handover.skippedIncomingIds = [];
+    handover.confirmations = [];
+    handover.preparedBy = "";
+    handover.preparedAt = "";
+    handover.categoryConfirmations = emptyDutyCategoryConfirmations();
+    handover.exceptions = [{ type: "restart", operatorId: person.id, affectedPersonIds: [], time, message: `${person.name}退回交接信息，双方重新确认。` }];
+    handover.state = handover.outgoingIds.length ? "outgoing_confirming" : "waiting_arrival";
+  } else if (action === "force_takeover") {
+    const missing = handover.outgoingIds.filter((id) => !handover.outgoingConfirmedIds.includes(id));
+    handover.skippedOutgoingIds = [...new Set([...handover.skippedOutgoingIds, ...missing])];
+    const names = missing.map(dutyPersonById).filter(Boolean).map((item) => item.name).join("、") || "当前无人交班";
+    handover.exceptions.push({ type: "force_takeover", operatorId: person.id, affectedPersonIds: missing, time, message: `交班人员（${names}）未确认交班信息，已由${person.name}强制接班。` });
+    handover.state = "incoming_confirming";
+  } else {
+    const understaffed = action === "force_handover_understaffed";
+    if (understaffed && !handover.incomingIds.length) return showToast("当前无人接班，不能结束本班值守");
+    const missing = understaffed ? [] : handover.incomingIds.filter((id) => !handover.incomingConfirmedIds.includes(id));
+    handover.skippedIncomingIds = [...new Set([...handover.skippedIncomingIds, ...missing])];
+    const names = missing.map(dutyPersonById).filter(Boolean).map((item) => item.name).join("、");
+    const message = understaffed ? `接班人数不足定岗人数，已由${person.name}确认按实际到岗人员交班。` : `接班人员（${names}）未确认接班信息，已由${person.name}强制交班。`;
+    handover.exceptions.push({ type: "force_handover", reason: understaffed ? "understaffed" : "unconfirmed", operatorId: person.id, affectedPersonIds: missing, time, message });
+    if (understaffed) handover.state = "outgoing_confirming";
+  }
+  completeDutyHandoverIfReady(time);
+  go("duty/handover");
+  showToast(action === "restart" ? "交接已退回，请重新确认" : "强制交接条件已确认");
+}
+
+function dutyBusinessRecords() {
+  const fireRecords = fireAlarms.map((item) => ({ id: `fire-${item.id}`, businessId: item.id, recordType: "fire", title: `设备告警 · ${item.device}`, person: item.operator, time: item.operationHistory?.[0]?.time || item.time, note: `${item.title} · ${fireStateLabels[item.state]}`, targetRoute: `fire/${item.id}`, source: item }));
+  const warningRecords = warnings.map((item) => ({ id: `warning-${item.id}`, businessId: item.id, recordType: "warning", title: `设备预警 · ${item.device}`, person: item.assignee, time: item.handlingHistory?.[0]?.time || item.updated || item.firstTime, note: `${item.title} · ${warningStateLabels[item.state]}`, targetRoute: `warning/${item.id}`, source: item }));
+  const faultRecords = faults.map((item) => ({ id: `device-${item.id}`, businessId: item.id, recordType: "device", title: `设备运行 · ${item.device}`, person: item.assignee, time: item.handlingHistory?.[0]?.time || item.updated || item.firstTime, note: `${item.title} · ${faultStateLabels[item.state]}`, targetRoute: `fault/${item.id}`, source: item }));
+  return [...fireRecords, ...warningRecords, ...faultRecords, ...dutyState.dutyRecords];
 }
 
 function renderDutyRecords(kind, id = "") {
   const config = {
-    "clock-records": { title: "打卡记录", subtitle: "上下班打卡", icon: "scan-face", records: dutyState.clockRecords },
-    logs: { title: "值班记录", subtitle: "值班过程留痕", icon: "clipboard-list", records: dutyState.dutyRecords },
-    "handover-records": { title: "交接记录", subtitle: "早晚班交接档案", icon: "file-check-2", records: dutyState.handoverRecords }
+    logs: { title: "值班记录", subtitle: "火警、预警、设备运行及手工记录", icon: "clipboard-list", records: dutyBusinessRecords() },
+    "handover-records": { title: "交接记录", subtitle: "已完成交接档案", icon: "file-check-2", records: dutyState.handoverRecords }
   }[kind];
   if (!config) return go("duty");
   const record = id ? config.records.find((item) => item.id === id) : null;
@@ -697,22 +1044,33 @@ function renderDutyRecords(kind, id = "") {
   renderHeader(config.title, config.subtitle, "duty");
   setBottomNav("", false);
   const cards = records.map((item) => {
-    if (kind === "clock-records") return `<button class="duty-record-card" type="button" data-route="duty/${kind}/${item.id}"><span class="duty-record-icon blue"><i data-lucide="${item.type === "上班打卡" ? "log-in" : "log-out"}"></i></span><div><h3>${item.type}</h3><p>${esc(item.person)} · ${item.time.slice(11)}</p><small>${esc(item.shift)} · ${esc(item.method)}打卡</small></div><b class="duty-record-state done">${item.result}</b></button>`;
-    if (kind === "logs") return `<button class="duty-record-card" type="button" data-route="duty/${kind}/${item.id}"><span class="duty-record-icon indigo"><i data-lucide="clipboard-list"></i></span><div><h3>${esc(item.title)}</h3><p>${esc(item.person)} · ${item.time.slice(11)}</p><small>${esc(item.note)}</small></div>${item.photos?.length ? `<b class="duty-record-photo-count"><i data-lucide="image"></i>${item.photos.length}</b>` : ""}</button>`;
-    return `<button class="duty-record-card" type="button" data-route="duty/${kind}/${item.id}"><span class="duty-record-icon green"><i data-lucide="handshake"></i></span><div><h3>${item.outgoingNames.join("、")} → ${item.incomingNames.join("、")}</h3><p>${item.time.slice(11)} · 四人确认</p><small>${item.items.filter((entry) => entry.result === "abnormal").length} 项异常已完成交接</small></div><b class="duty-record-state done">已交接</b></button>`;
+    if (kind === "logs") {
+      const meta = { fire: ["siren", "red"], warning: ["triangle-alert", "orange"], device: ["monitor-check", "green"], manual: ["clipboard-list", "indigo"], system: ["handshake", "blue"] }[item.recordType] || ["clipboard-list", "indigo"];
+      return `<button class="duty-record-card" type="button" data-route="duty/${kind}/${item.id}"><span class="duty-record-icon ${meta[1]}"><i data-lucide="${meta[0]}"></i></span><div><h3>${esc(item.title)}</h3><p>${esc(item.person || "系统自动")} · ${item.time.slice(11)}</p><small>${esc(item.note)}</small></div>${item.photos?.length ? `<b class="duty-record-photo-count"><i data-lucide="image"></i>${item.photos.length}</b>` : ""}</button>`;
+    }
+    const exceptionCount = (item.exceptions || []).filter((entry) => entry.type !== "restart").length;
+    return `<button class="duty-record-card" type="button" data-route="duty/${kind}/${item.id}"><span class="duty-record-icon green"><i data-lucide="handshake"></i></span><div><h3>${item.outgoingNames.join("、") || "无人交班"} → ${item.incomingNames.join("、")}</h3><p>${item.time.slice(11)} · ${item.confirmations.length} 人确认</p><small>${exceptionCount ? `${exceptionCount} 条交接异议` : "双方已完成全部交接确认"}</small></div><b class="duty-record-state ${exceptionCount ? "pending" : "done"}">${exceptionCount ? "强制完成" : "已交接"}</b></button>`;
   }).join("");
-  appMain.innerHTML = `<div class="duty-record-page"><div class="duty-date-nav"><button type="button" data-duty-date-shift="-1" aria-label="前一天"><i data-lucide="chevron-left"></i></button><div><strong>${date.label}</strong><span>${date.weekday}</span></div><button type="button" data-duty-date-shift="1" aria-label="后一天" ${state.dutyRecordDateOffset >= 0 ? "disabled" : ""}><i data-lucide="chevron-right"></i></button></div><div class="duty-record-summary"><span><i data-lucide="${config.icon}"></i></span><div><small>${config.subtitle}</small><strong>${records.length} 条记录</strong></div></div><div class="duty-record-list">${cards || `<div class="duty-record-empty"><i data-lucide="calendar-x"></i><strong>当天暂无记录</strong><span>可切换日期查看历史数据</span></div>`}</div></div>`;
+  const summary = kind === "logs" ? `<div class="duty-record-overview"><small>今日值班汇总</small><div><span><strong>${records.filter((item) => item.recordType === "fire").length}</strong>火警告警</span><span><strong>${records.filter((item) => item.recordType === "warning").length}</strong>设备预警</span><span><strong>${records.filter((item) => item.recordType === "device").length}</strong>设备运行</span></div></div>` : "";
+  appMain.innerHTML = `<div class="duty-record-page"><div class="duty-date-nav"><button type="button" data-duty-date-shift="-1" aria-label="前一天"><i data-lucide="chevron-left"></i></button><div><strong>${date.label}</strong><span>${date.weekday}</span></div><button type="button" data-duty-date-shift="1" aria-label="后一天" ${state.dutyRecordDateOffset >= 0 ? "disabled" : ""}><i data-lucide="chevron-right"></i></button></div>${summary}<div class="duty-section-label"><i></i>${config.title}<span>${records.length} 条</span></div><div class="duty-record-list">${cards || `<div class="duty-record-empty"><i data-lucide="calendar-x"></i><strong>当天暂无记录</strong><span>可切换日期查看历史数据</span></div>`}</div></div>`;
 }
 
 function renderDutyRecordDetail(kind, record) {
   if (!record) return go(`duty/${kind}`);
-  const title = kind === "clock-records" ? "打卡详情" : kind === "logs" ? "值班记录详情" : "交接记录详情";
+  const title = kind === "logs" ? "值班记录详情" : "查看交接项";
   renderHeader(title, record.time, `duty/${kind}`);
   setBottomNav("", false);
   let body = "";
-  if (kind === "clock-records") body = `<section class="duty-detail-card"><span class="duty-detail-icon blue"><i data-lucide="${record.type === "上班打卡" ? "log-in" : "log-out"}"></i></span><h2>${record.type}</h2><p>${esc(record.person)} · ${record.result}</p><dl><div><dt>打卡时间</dt><dd>${record.time}</dd></div><div><dt>打卡方式</dt><dd>${esc(record.method)}打卡</dd></div><div><dt>所属班次</dt><dd>${esc(record.shift)}</dd></div><div><dt>打卡地点</dt><dd>消防控制室</dd></div></dl></section>`;
-  else if (kind === "logs") body = `<section class="duty-detail-card align-left"><span class="duty-detail-icon indigo"><i data-lucide="clipboard-list"></i></span><h2>${esc(record.title)}</h2><p>${esc(record.person)} · ${record.time}</p><div class="duty-detail-note">${esc(record.note)}</div>${record.photos?.length ? `<div class="photo-history">${record.photos.map((photo) => `<button type="button" data-photo-view="${photo}"><img src="${photo}" alt="值班记录照片" /></button>`).join("")}</div>` : `<div class="duty-no-photo">未上传现场照片</div>`}</section>`;
-  else body = `<section class="duty-detail-card align-left"><span class="duty-detail-icon green"><i data-lucide="handshake"></i></span><h2>早晚班交接已完成</h2><p>${record.time}</p><div class="duty-record-people"><div><small>交班人员</small><strong>${record.outgoingNames.join("、")}</strong></div><i data-lucide="arrow-right"></i><div><small>接班人员</small><strong>${record.incomingNames.join("、")}</strong></div></div></section><section class="duty-detail-section"><h3>人员确认时间</h3>${record.confirmations.map((item) => `<div class="duty-confirm-row"><span>${esc(item.name)}</span><b>${item.side === "outgoing" ? "交班" : "接班"}</b><time>${item.time.slice(11)}</time></div>`).join("")}</section><section class="duty-detail-section"><h3>交接事项</h3>${record.items.map((item) => `<article class="duty-detail-item"><div><strong>${esc(item.title)}</strong><small>${esc(item.meta)}</small></div><b class="${item.result}">${item.result === "normal" ? "正常" : "异常"}</b>${item.note ? `<p>${esc(item.note)}</p>` : ""}</article>`).join("")}</section>`;
+  if (kind === "logs") {
+    if (["fire", "warning", "device"].includes(record.recordType)) {
+      const labels = { fire: "设备告警", warning: "设备预警", device: "设备运行" };
+      const states = { fire: fireStateLabels[record.source.state], warning: warningStateLabels[record.source.state], device: faultStateLabels[record.source.state] };
+      body = `<section class="duty-detail-card align-left"><span class="duty-detail-icon indigo"><i data-lucide="${record.recordType === "fire" ? "siren" : record.recordType === "warning" ? "triangle-alert" : "monitor-check"}"></i></span><h2>${esc(labels[record.recordType])}</h2><p>${record.time}</p><div class="duty-detail-note">${esc(record.note)}</div><dl><div><dt>当前状态</dt><dd>${esc(states[record.recordType])}</dd></div><div><dt>记录来源</dt><dd>业务模块自动同步</dd></div></dl><button class="duty-linked-record" type="button" data-route="${record.targetRoute}">查看关联记录<i data-lucide="chevron-right"></i></button></section>`;
+    } else body = `<section class="duty-detail-card align-left"><span class="duty-detail-icon indigo"><i data-lucide="clipboard-list"></i></span><h2>${esc(record.title)}</h2><p>${esc(record.person)} · ${record.time}</p><div class="duty-detail-note">${esc(record.note)}</div>${record.photos?.length ? `<div class="photo-history">${record.photos.map((photo) => `<button type="button" data-photo-view="${photo}"><img src="${photo}" alt="值班记录照片" /></button>`).join("")}</div>` : `<div class="duty-no-photo">未上传现场照片</div>`}</section>`;
+  } else {
+    const exceptions = (record.exceptions || []).filter((item) => item.type !== "restart");
+    body = `<section class="duty-detail-card align-left"><span class="duty-detail-icon green"><i data-lucide="handshake"></i></span><h2>交接班已完成</h2><p>${record.time}</p><div class="duty-record-people"><div><small>交班人员</small><strong>${record.outgoingNames.join("、") || "当前无人交班"}</strong></div><i data-lucide="arrow-right"></i><div><small>接班人员</small><strong>${record.incomingNames.join("、")}</strong></div></div>${exceptions.length ? `<div class="duty-complete-exceptions"><strong>交接异议</strong>${exceptions.map((item) => `<p>${esc(item.message)}</p>`).join("")}</div>` : ""}</section><section class="duty-detail-section"><h3>人员确认时间</h3>${record.confirmations.map((item) => `<div class="duty-confirm-row"><span>${esc(item.name)}</span><b>${item.side === "outgoing" ? "交班" : "接班"}</b><time>${item.time.slice(11)}</time></div>`).join("")}</section><section class="duty-detail-section"><h3>交接事项</h3>${record.items.map((item) => `<article class="duty-detail-item"><div><strong>${esc(item.title)}</strong><small>${esc(item.meta)}</small></div><b class="${item.result}">${esc(item.status || (item.result === "normal" ? "正常" : "异常"))}</b>${item.note ? `<p>${esc(item.note)}</p>` : ""}</article>`).join("")}</section>${record.checks?.length ? `<section class="duty-detail-section"><h3>消防设备检查</h3>${record.checks.map((item) => `<div class="duty-confirm-row"><span>${esc(item.title)}</span><b>${item.result === "normal" ? "正常" : "异常"}</b><time>${esc(item.group)}</time></div>`).join("")}</section>` : ""}`;
+  }
   appMain.innerHTML = `<div class="duty-record-detail">${body}</div>`;
 }
 
@@ -820,6 +1178,7 @@ function warningAction(warning, action) {
     warning.note = "已开始核查设备状态、当前读数和现场环境。";
     warning.handlingHistory.push({ action: "start_check", operator: currentUser, time: warning.checkedAt, note: warning.note });
     publishNotification("warning", "status_changed", "预警已开始核查", `${warning.title}由${currentUser}开始核查。`, `warning/${warning.id}`);
+    refreshDutyHandoverCategory("warning");
     render();
     return showToast("预警已进入核查流程");
   }
@@ -833,6 +1192,7 @@ function warningAction(warning, action) {
       warning.note = note;
       warning.handlingHistory.push({ action: "recover", operator: currentUser, time: warning.recoveredAt, note });
       publishNotification("warning", "closed", "设备预警已恢复", `${warning.title}已完成核查并闭环。`, `warning/${warning.id}`);
+      refreshDutyHandoverCategory("warning");
       closeSheet(); render(); showToast("设备预警已恢复并闭环");
     }});
   }
@@ -862,17 +1222,18 @@ function closeSheet() {
   document.body.style.overflow = "";
   state.sheetSubmit = null;
   state.sheetPhotos = [];
+  state.sheetPhotoLimit = 6;
 }
 
 function uploadField() {
-  return `<div class="form-field"><span class="form-label">现场照片 <em>选填，最多 6 张</em></span><div class="photo-source-grid"><button type="button" data-photo-source="camera"><i data-lucide="camera"></i><span>拍照</span></button><button type="button" data-photo-source="gallery"><i data-lucide="images"></i><span>从相册选择</span></button></div><input class="photo-source-input" id="sheetCameraPhotos" data-photo-input type="file" accept="image/*" capture="environment" /><input class="photo-source-input" id="sheetGalleryPhotos" data-photo-input type="file" accept="image/jpeg,image/png,image/webp" multiple /><small class="field-hint">JPG、PNG、WebP，单张不超过 10 MB</small><span class="photo-preview-grid" id="sheetPhotoPreview"></span></div>`;
+  return `<div class="form-field"><span class="form-label">现场照片 <em>选填，最多 ${state.sheetPhotoLimit} 张</em></span><div class="photo-source-grid"><button type="button" data-photo-source="camera"><i data-lucide="camera"></i><span>拍照</span></button><button type="button" data-photo-source="gallery"><i data-lucide="images"></i><span>从相册选择</span></button></div><input class="photo-source-input" id="sheetCameraPhotos" data-photo-input type="file" accept="image/*" capture="environment" /><input class="photo-source-input" id="sheetGalleryPhotos" data-photo-input type="file" accept="image/jpeg,image/png,image/webp" multiple /><small class="field-hint">JPG、PNG、WebP，单张不超过 10 MB</small><span class="photo-preview-grid" id="sheetPhotoPreview"></span></div>`;
 }
 
 function renderSheetPhotos() {
   const wrap = document.querySelector("#sheetPhotoPreview");
   if (!wrap) return;
   wrap.innerHTML = state.sheetPhotos.map((photo, index) => `<span class="photo-preview"><img src="${photo}" alt="待上传照片 ${index + 1}" /><button type="button" data-photo-remove="${index}" aria-label="删除照片"><i data-lucide="x"></i></button></span>`).join("");
-  document.querySelectorAll("[data-photo-source]").forEach((button) => { button.disabled = state.sheetPhotos.length >= 6; });
+  document.querySelectorAll("[data-photo-source]").forEach((button) => { button.disabled = state.sheetPhotos.length >= state.sheetPhotoLimit; });
   refreshIcons(wrap);
 }
 
@@ -907,6 +1268,7 @@ function assignmentSheet(item, type) {
       const taskName = isFire ? "火警处置任务" : isWarning ? "预警核查任务" : "故障处理任务";
       const windowLabel = options.find(([value]) => value === minutes)?.[1] || `${minutes} 分钟`;
       publishNotification(category, "assigned", `${taskName}已指派`, `${item.title}已指派给${person}，接单时限：${windowLabel}。`, `${category}/${item.id}`);
+      refreshDutyHandoverCategory(isFire ? "fire" : isWarning ? "warning" : "device");
       closeSheet(); render(); showToast(`已指派给${person}`);
     }
   });
@@ -932,6 +1294,7 @@ function fireActionSheet(alarm, action) {
       alarm.operationHistory.unshift({ action, operator: currentUser, time: nowText(), description, photos: [...state.sheetPhotos] });
       const closed = ["false", "reset"].includes(action);
       publishNotification("fire", closed ? "closed" : "status_changed", `${config[0]}已提交`, `${alarm.title}：${description}`, `fire/${alarm.id}`);
+      refreshDutyHandoverCategory("fire");
       closeSheet(); render(); showToast(`${config[0]}已提交`);
     }
   });
@@ -1040,6 +1403,7 @@ function faultActionSheet(fault, action) {
       fault.state = "handled"; fault.handledAt = nowText(); fault.note = note;
       fault.handlingHistory.unshift({ action: "mark_handled", operator: currentUser, operatorSide: "机构端", time: fault.handledAt, note });
       publishNotification("fault", "status_changed", "设备故障已标记处理", `${fault.title}已处理，等待设备状态恢复。`, `fault/${fault.id}`);
+      refreshDutyHandoverCategory("device");
       closeSheet(); render(); showToast("已标记处理，等待设备恢复确认");
     }});
   }
@@ -1049,6 +1413,7 @@ function faultActionSheet(fault, action) {
       fault.state = "recovered"; fault.recoveredAt = nowText(); fault.note = "设备在线、心跳与数据上报均正常，已人工确认恢复。";
       fault.handlingHistory.unshift({ action: "confirm_recovery", operator: currentUser, operatorSide: "机构端", time: fault.recoveredAt, note: fault.note });
       publishNotification("fault", "closed", "设备故障已恢复", `${fault.title}已人工确认恢复并完成闭环。`, `fault/${fault.id}`);
+      refreshDutyHandoverCategory("device");
       closeSheet(); render(); showToast("设备故障已确认恢复");
     }});
   }
@@ -1123,6 +1488,7 @@ function render() {
   else if (screen === "profile") renderProfile();
   else if (screen === "notifications") renderNotifications();
   else if (screen === "duty" && ["clock-in", "clock-out"].includes(sub)) renderDutyClock(sub);
+  else if (screen === "duty" && sub === "objection") renderDutyObjection();
   else if (screen === "duty" && sub === "handover") renderDutyHandover();
   else if (screen === "duty" && sub) renderDutyRecords(sub, id);
   else if (screen === "duty") renderDutyHome();
@@ -1162,6 +1528,11 @@ document.addEventListener("click", (event) => {
   const resetStateButton = event.target.closest("[data-reset-state]");
   if (resetStateButton) {
     resetModuleState(resetStateButton.dataset.resetState);
+    return;
+  }
+
+  if (event.target.closest("[data-duty-scenario=\"unattended\"]")) {
+    initializeUnattendedDutyScenario();
     return;
   }
 
@@ -1230,9 +1601,9 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const dutyException = event.target.closest("[data-duty-exception]");
-  if (dutyException) {
-    dutyExceptionSheet(dutyException.dataset.dutyException);
+  const dutyObjectionConfirm = event.target.closest("[data-duty-objection-confirm]");
+  if (dutyObjectionConfirm) {
+    confirmDutyObjection(dutyObjectionConfirm.dataset.dutyObjectionConfirm);
     return;
   }
 
@@ -1348,7 +1719,7 @@ document.addEventListener("input", (event) => {
 document.addEventListener("change", async (event) => {
   if (!event.target.matches("[data-photo-input]")) return;
   const files = [...event.target.files];
-  if (state.sheetPhotos.length + files.length > 6) { showToast("最多只能上传 6 张照片"); event.target.value = ""; return; }
+  if (state.sheetPhotos.length + files.length > state.sheetPhotoLimit) { showToast(`最多只能上传 ${state.sheetPhotoLimit} 张照片`); event.target.value = ""; return; }
   for (const file of files) {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { showToast(`${file.name} 格式不支持`); continue; }
     if (file.size > 10 * 1024 * 1024) { showToast(`${file.name} 超过 10 MB`); continue; }
@@ -1386,6 +1757,20 @@ dutyPersonSelect.addEventListener("change", () => {
   closePreviewControls();
   if (currentRoute().startsWith("duty")) render();
   showToast(`已切换为${selectedDutyPerson().name}视角`);
+});
+dutyHeadcountSelect.addEventListener("change", () => {
+  dutyState.requiredHeadcount = Number(dutyHeadcountSelect.value);
+  syncDutyHandoverState();
+  closePreviewControls();
+  if (currentRoute().startsWith("duty")) render();
+  showToast(`班次定岗人数已调整为 ${dutyState.requiredHeadcount} 人`);
+});
+dutyTimeModeSelect.addEventListener("change", () => {
+  applyDutyTimeMode(dutyTimeModeSelect.value);
+  closePreviewControls();
+  if (currentRoute().startsWith("duty")) render();
+  const labels = { on_duty: "值班中", handover_0600: "06:00 夜班转白班", handover_1600: "16:00 白班转夜班" };
+  showToast(`已切换为${labels[dutyState.demoTimeMode]}场景`);
 });
 
 document.addEventListener("keydown", (event) => {

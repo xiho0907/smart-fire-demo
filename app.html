@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#ffffff" />
     <title>消防安全机构端 App</title>
-    <link rel="stylesheet" href="app.css?v=20260724-duty-flow" />
+    <link rel="stylesheet" href="app.css?v=20260727-duty-rotation" />
   </head>
   <body class="device-shell-enabled">
     <aside class="preview-controls" aria-label="预览设置">
@@ -17,7 +17,9 @@
         <div class="preview-control-heading"><strong>预览设置</strong><small>页面显示方式</small></div>
         <label class="preview-toggle"><span><i data-lucide="smartphone"></i><b>手机外壳</b></span><input id="deviceShellToggle" type="checkbox" checked /><i></i></label>
         <label class="preview-toggle"><span><i data-lucide="bell-ring"></i><b>新通知</b></span><input id="newNotificationToggle" type="checkbox" /><i></i></label>
-        <label class="preview-person-field"><span><i data-lucide="users-round"></i><b>值班身份</b></span><select id="dutyPersonSelect" aria-label="选择值班演示身份"><optgroup label="接班方"><option value="admin">Admin</option><option value="wang">王晨</option></optgroup><optgroup label="交班方"><option value="li">李明</option><option value="zhao">赵凯</option></optgroup></select></label>
+        <label class="preview-person-field"><span><i data-lucide="users-round"></i><b>当前操作人员</b></span><select id="dutyPersonSelect" aria-label="选择值班演示人员"><option value="admin">Admin</option><option value="wang">王晨</option><option value="li">李明</option><option value="zhao">赵凯</option></select></label>
+        <label class="preview-person-field preview-headcount-field"><span><i data-lucide="user-round-check"></i><b>班次定岗人数</b></span><select id="dutyHeadcountSelect" aria-label="选择班次定岗人数"><option value="1">1 人</option><option value="2" selected>2 人</option><option value="3">3 人</option></select></label>
+        <label class="preview-person-field"><span><i data-lucide="clock-3"></i><b>值班时间场景</b></span><select id="dutyTimeModeSelect" aria-label="选择值班时间场景"><option value="on_duty">值班中</option><option value="handover_0600" selected>06:00 夜班转白班</option><option value="handover_1600">16:00 白班转夜班</option></select></label>
         <div class="preview-reset-actions">
           <button type="button" data-reset-state="fire"><i data-lucide="siren"></i><span>火警告警状态初始化</span></button>
           <button type="button" data-reset-state="warning"><i data-lucide="triangle-alert"></i><span>设备预警状态初始化</span></button>
@@ -25,6 +27,7 @@
           <button type="button" data-reset-state="offduty"><i data-lucide="users-round"></i><span>脱岗监测状态初始化</span></button>
           <button type="button" data-reset-state="passage"><i data-lucide="traffic-cone"></i><span>消防通道监测状态初始化</span></button>
           <button type="button" data-reset-state="duty"><i data-lucide="monitor-check"></i><span>消控室值班状态初始化</span></button>
+          <button type="button" data-duty-scenario="unattended"><i data-lucide="user-round-x"></i><span>初始化为无人交班场景</span></button>
         </div>
       </div>
     </aside>
@@ -72,6 +75,6 @@
     </div>
 
     <script src="assets/vendor/lucide.min.js"></script>
-    <script src="mobile-app.js?v=20260724-duty-flow"></script>
+    <script src="mobile-app.js?v=20260727-duty-rotation"></script>
   </body>
 </html>
