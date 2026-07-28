@@ -3,18 +3,16 @@ const assignees = ["李明", "王晨", "赵凯", "陈峰"];
 
 const featureGroups = [
   { id: "facility", label: "设施运行" },
-  { id: "daily", label: "日常防火" },
+  { id: "daily", label: "日常管理" },
   { id: "hazard", label: "隐患整改" },
   { id: "terminal", label: "智能终端" }
 ];
 
 const featureApps = [
-  { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty", group: "facility" },
   { id: "facility-check", label: "消防设施检查", icon: "layers-3", tone: "", route: "facility-check", group: "facility" },
   { id: "maintenance", label: "消防设施维保", icon: "settings", tone: "", route: "maintenance", group: "facility" },
   { id: "micro-station", label: "微型消防站", icon: "shield", tone: "red", group: "facility" },
-  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "", group: "daily" },
-  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection", group: "daily" },
+  { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty", group: "daily" },
   { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green", route: "evacuation", group: "daily" },
   { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange", group: "daily" },
   { id: "electricity", label: "用电检查", icon: "zap", tone: "", group: "daily" },
@@ -22,6 +20,8 @@ const featureApps = [
   { id: "duct", label: "油烟管道清洗", icon: "panels-top-left", tone: "indigo", group: "daily" },
   { id: "hot-work", label: "动火作业", icon: "wrench", tone: "orange", group: "daily" },
   { id: "renovation", label: "装修装饰检查", icon: "briefcase", tone: "green", group: "daily" },
+  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "", group: "hazard" },
+  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection", group: "hazard" },
   { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", route: "hazard", group: "hazard" },
   { id: "fire", label: "火警告警", icon: "siren", tone: "red", route: "fire", group: "terminal" },
   { id: "warning", label: "设备预警", icon: "triangle-alert", tone: "orange", route: "warning", group: "terminal" },
