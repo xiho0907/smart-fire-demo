@@ -1,24 +1,32 @@
 const currentUser = "Admin";
 const assignees = ["李明", "王晨", "赵凯", "陈峰"];
 
+const featureGroups = [
+  { id: "facility", label: "设施运行" },
+  { id: "daily", label: "日常防火" },
+  { id: "hazard", label: "隐患整改" },
+  { id: "terminal", label: "智能终端" }
+];
+
 const featureApps = [
-  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "" },
-  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection" },
-  { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty" },
-  { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", route: "hazard" },
-  { id: "facility-check", label: "消防设施检查", icon: "layers-3", tone: "", route: "facility-check" },
-  { id: "maintenance", label: "消防设施维保", icon: "settings", tone: "", route: "maintenance" },
-  { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green", route: "evacuation" },
-  { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange" },
-  { id: "electricity", label: "用电检查", icon: "zap", tone: "" },
-  { id: "gas", label: "用气检查", icon: "gauge", tone: "" },
-  { id: "duct", label: "油烟管道清洗", icon: "panels-top-left", tone: "indigo" },
-  { id: "hot-work", label: "动火作业", icon: "wrench", tone: "orange" },
-  { id: "renovation", label: "装修装饰检查", icon: "briefcase", tone: "green" },
-  { id: "fire", label: "火警告警", icon: "siren", tone: "red", route: "fire" },
-  { id: "warning", label: "设备预警", icon: "triangle-alert", tone: "orange", route: "warning" },
-  { id: "video", label: "视频监控", icon: "video", tone: "indigo", route: "video" },
-  { id: "fault", label: "设备故障", icon: "wrench", tone: "orange", route: "fault" }
+  { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty", group: "facility" },
+  { id: "facility-check", label: "消防设施检查", icon: "layers-3", tone: "", route: "facility-check", group: "facility" },
+  { id: "maintenance", label: "消防设施维保", icon: "settings", tone: "", route: "maintenance", group: "facility" },
+  { id: "micro-station", label: "微型消防站", icon: "shield", tone: "red", group: "facility" },
+  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "", group: "daily" },
+  { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection", group: "daily" },
+  { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green", route: "evacuation", group: "daily" },
+  { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange", group: "daily" },
+  { id: "electricity", label: "用电检查", icon: "zap", tone: "", group: "daily" },
+  { id: "gas", label: "用气检查", icon: "gauge", tone: "", group: "daily" },
+  { id: "duct", label: "油烟管道清洗", icon: "panels-top-left", tone: "indigo", group: "daily" },
+  { id: "hot-work", label: "动火作业", icon: "wrench", tone: "orange", group: "daily" },
+  { id: "renovation", label: "装修装饰检查", icon: "briefcase", tone: "green", group: "daily" },
+  { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", route: "hazard", group: "hazard" },
+  { id: "fire", label: "火警告警", icon: "siren", tone: "red", route: "fire", group: "terminal" },
+  { id: "warning", label: "设备预警", icon: "triangle-alert", tone: "orange", route: "warning", group: "terminal" },
+  { id: "video", label: "视频监控", icon: "video", tone: "indigo", route: "video", group: "terminal" },
+  { id: "fault", label: "设备故障", icon: "wrench", tone: "orange", route: "fault", group: "terminal" }
 ];
 
 const fireAlarms = [
@@ -420,6 +428,7 @@ function lockScrollBoundary(element) {
     touchX = touch.clientX;
     touchY = touch.clientY;
     if (Math.abs(deltaY) <= Math.abs(deltaX)) return;
+    if (element !== mobileApp) event.stopPropagation();
 
     const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
     const cannotScroll = maxScrollTop <= 1;
@@ -430,6 +439,7 @@ function lockScrollBoundary(element) {
 
   element.addEventListener("wheel", (event) => {
     if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    if (element !== mobileApp) event.stopPropagation();
     const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
     const cannotScroll = maxScrollTop <= 1;
     const scrollingPastTop = element.scrollTop <= 0 && event.deltaY < 0;
@@ -524,13 +534,18 @@ function renderApplications() {
   setBottomNav("applications");
   appMain.innerHTML = `<div class="application-page">
     <div class="search-box"><i data-lucide="search"></i><input id="appSearch" type="search" placeholder="搜索功能..." autocomplete="off" /></div>
-    <div class="section-heading"><h2>常用功能</h2><span>共 ${featureApps.length} 项</span></div>
-    <div class="feature-grid" id="featureGrid">${featureApps.map((item) => {
-      const suiteBadge = window.InspectionApp?.badge(item.id) || 0;
-      const badge = item.id === "fire" ? fireOpenCount() : item.id === "warning" ? warningOpenCount() : item.id === "fault" ? faultOpenCount() : suiteBadge || item.badge;
-      return `<button class="feature-item" type="button" data-feature="${item.id}" data-label="${item.label}">
-        <span class="feature-icon ${item.tone}"><i data-lucide="${item.icon}"></i>${badge ? `<b class="entry-badge">${badge}</b>` : ""}</span><span>${item.label}</span>
-      </button>`;
+    <div class="feature-groups" id="featureGrid">${featureGroups.map((group) => {
+      const items = featureApps.filter((item) => item.group === group.id);
+      return `<section class="feature-group" data-feature-group="${group.id}">
+        <div class="feature-group-heading"><h2>${group.label}</h2><span>${items.length} 项</span></div>
+        <div class="feature-grid">${items.map((item) => {
+          const suiteBadge = window.InspectionApp?.badge(item.id) || 0;
+          const badge = item.id === "fire" ? fireOpenCount() : item.id === "warning" ? warningOpenCount() : item.id === "fault" ? faultOpenCount() : suiteBadge || item.badge;
+          return `<button class="feature-item" type="button" data-feature="${item.id}" data-label="${item.label}">
+            <span class="feature-icon ${item.tone}"><i data-lucide="${item.icon}"></i>${badge ? `<b class="entry-badge">${badge}</b>` : ""}</span><span>${item.label}</span>
+          </button>`;
+        }).join("")}</div>
+      </section>`;
     }).join("")}</div>
     <div class="empty-search" id="appSearchEmpty" hidden>没有找到相关功能</div>
     <div class="section-heading"><h2>本月数据</h2><span>数据更新至今日</span></div>
@@ -764,12 +779,17 @@ function dutyPersonStatus(person) {
   return [role === "outgoing" ? "待交班" : "待接班", "pending"];
 }
 
-function dutyPeopleGroup(side, title, shift) {
+function dutyPeopleGroup(side, shift) {
   const people = dutyPeople(side);
-  return `<section class="duty-team-group"><div class="duty-team-title"><div><small>${title}</small><strong>${shift}</strong></div><b>${side === "incoming" ? "接班" : "交班"}</b></div><div class="duty-person-grid">${people.map((person) => {
+  const roleLabel = side === "incoming" ? "接班方" : "交班方";
+  const emptyText = side === "incoming" ? "暂无接班人员" : "暂无交班人员";
+  const confirmedIds = side === "incoming" ? dutyState.handover.incomingConfirmedIds : dutyState.handover.outgoingConfirmedIds;
+  const confirmedCount = people.filter((person) => confirmedIds.includes(person.id)).length;
+  const progress = people.length ? `已确认 ${confirmedCount}/${people.length}` : "等待人员到岗";
+  return `<section class="duty-team-group"><div class="duty-team-title"><div class="duty-team-title-line"><strong>${roleLabel} ${people.length} 人</strong><em>${progress}</em></div><small>${shift}</small></div><div class="duty-person-grid ${people.length > 2 ? "scrollable" : ""}" data-duty-person-list>${people.map((person) => {
     const [label, tone] = dutyPersonStatus(person);
-    return `<article class="duty-person ${person.id === dutyState.selectedPersonId ? "selected" : ""}"><span>${esc(person.name.slice(0, 1))}</span><div><strong>${esc(person.name)}</strong><small>${person.clockInAt ? `到岗 ${person.clockInAt.slice(11, 16)}` : "尚未到岗"}</small></div><b class="${tone}">${label}</b></article>`;
-  }).join("") || `<div class="duty-team-empty">当前暂无人员</div>`}</div></section>`;
+    return `<article class="duty-person" aria-label="${esc(person.name)}，${label}"><strong>${esc(person.name)}</strong><b class="${tone}">${label}</b></article>`;
+  }).join("") || `<div class="duty-team-empty">${emptyText}</div>`}</div></section>`;
 }
 
 function renderDutyHome() {
@@ -872,22 +892,25 @@ function renderDutyHandover() {
   }).join("");
   const equipmentChecked = dutyCategoryConfirmed(person, "equipment_check");
   const checkGroups = [...new Set(handover.checks.map((item) => item.group))].map((group) => `<div class="duty-check-group"><strong>${esc(group)}</strong>${handover.checks.filter((item) => item.group === group).map((item) => `<div class="duty-check-row"><span>${esc(item.title)}</span>${editableChecks ? `<label><input type="radio" name="check-${item.id}" value="normal" ${item.result === "normal" ? "checked" : ""}>正常</label><label><input type="radio" name="check-${item.id}" value="abnormal" ${item.result === "abnormal" ? "checked" : ""}>异常</label>` : `<b class="${item.result}">${item.result === "normal" ? "正常" : "异常"}</b>`}</div>`).join("")}</div>`).join("");
-  const confirmedCount = handover.outgoingConfirmedIds.length + handover.incomingConfirmedIds.length;
-  const participantCount = handover.outgoingIds.length + handover.incomingIds.length;
+  const outgoingConfirmedCount = handover.outgoingConfirmedIds.length;
+  const incomingConfirmedCount = handover.incomingConfirmedIds.length;
+  const outgoingCount = handover.outgoingIds.length;
+  const incomingCount = handover.incomingIds.length;
   const notice = !handover.incomingIds.length ? `<div class="duty-flow-notice"><i data-lucide="user-round-x"></i><div><strong>当前无人接班</strong><span>交班方可先确认交接数据，但至少一名接班人员到岗并完成接班后才能下班。</span></div></div>` : handover.incomingIds.length < dutyState.requiredHeadcount ? `<div class="duty-flow-notice"><i data-lucide="users-round"></i><div><strong>接班人数不足</strong><span>当前已打卡 ${handover.incomingIds.length}/${dutyState.requiredHeadcount} 人，交班方确认风险后可按实际到岗人数交接。</span></div></div>` : role === "incoming" && handover.state === "outgoing_confirming" ? `<div class="duty-flow-notice"><i data-lucide="hourglass"></i><div><strong>交班方尚未完成确认</strong><span>请耐心等待，无法继续时可进入“有异议”。</span></div></div>` : "";
   const exceptionAllowed = (role === "incoming" && handover.state !== "completed") || (role === "outgoing" && (handover.incomingIds.length < dutyState.requiredHeadcount || handover.state === "incoming_confirming"));
   const exceptionLabel = role === "outgoing" && !handover.incomingIds.length ? "无人接班" : role === "incoming" && handover.state === "incoming_confirming" ? "重新交班" : "有异议";
   renderHeader("交接班", `${person.name} · ${role === "incoming" ? "接班方" : role === "outgoing" ? "交班方" : "当前人员"}`, "duty");
   setBottomNav("", false);
   appMain.innerHTML = `<div class="duty-handover-page">
-    <div class="duty-handover-teams">${dutyPeopleGroup("outgoing", "交班班次", dutyState.shifts.outgoing.label)}${dutyPeopleGroup("incoming", "接班班次", dutyState.shifts.incoming.label)}</div>
+    <div class="duty-handover-teams">${dutyPeopleGroup("outgoing", dutyState.shifts.outgoing.label)}${dutyPeopleGroup("incoming", dutyState.shifts.incoming.label)}</div>
     ${notice}
-    <div class="duty-section-label"><i></i>交接事项 <span>${confirmedCount}/${participantCount} 人已确认</span></div>
+    <div class="duty-section-label"><i></i><strong>交接事项</strong><span class="duty-confirmation-summary"><b>交班 ${outgoingConfirmedCount}/${outgoingCount}</b><b>接班 ${incomingConfirmedCount}/${incomingCount}</b></span></div>
     ${itemGroups}
     <section class="duty-handover-group duty-device-checks"><header><span class="green"><i data-lucide="clipboard-check"></i></span><div><strong>消防设备检查</strong><small>${editableChecks ? "请填写本次检查结果" : "交班方检查结果"}</small></div><b class="duty-category-version">V${handover.categoryRevisions.equipment_check}</b></header>${checkGroups}<label class="duty-category-ack"><input type="checkbox" data-duty-category-ack="equipment_check" ${equipmentChecked ? "checked" : ""} ${canConfirm && !equipmentChecked ? "" : "disabled"}><span><i data-lucide="check"></i></span><b>${equipmentChecked ? "本人已确认设备检查" : role === "incoming" ? "确认已查看设备检查结果" : "确认设备检查结果"}</b></label></section>
     <section class="duty-exception-panel"><button type="button" data-route="duty/objection" ${exceptionAllowed ? "" : "disabled"}>${exceptionLabel}<i data-lucide="chevron-right"></i></button></section>
     <div class="duty-handover-submit"><button type="button" data-duty-confirm-handover ${canConfirm ? "" : "disabled"}>${confirmed ? `我已完成${role === "outgoing" ? "交班" : "接班"}确认` : !canConfirm ? "当前等待其他人员确认" : role === "incoming" ? "确认接收事项" : "确认交接事项"}</button></div>
   </div>`;
+  document.querySelectorAll("[data-duty-person-list].scrollable").forEach(lockScrollBoundary);
 }
 
 function confirmDutyHandover() {
@@ -1708,10 +1731,17 @@ document.addEventListener("input", (event) => {
   if (event.target.id === "appSearch") {
     const keyword = event.target.value.trim().toLowerCase();
     let visible = 0;
-    document.querySelectorAll("#featureGrid .feature-item").forEach((item) => {
-      const match = !keyword || item.dataset.label.toLowerCase().includes(keyword);
-      item.hidden = !match;
-      if (match) visible += 1;
+    document.querySelectorAll("#featureGrid [data-feature-group]").forEach((group) => {
+      let groupVisible = 0;
+      group.querySelectorAll(".feature-item").forEach((item) => {
+        const match = !keyword || item.dataset.label.toLowerCase().includes(keyword);
+        item.hidden = !match;
+        if (match) {
+          visible += 1;
+          groupVisible += 1;
+        }
+      });
+      group.hidden = groupVisible === 0;
     });
     document.querySelector("#appSearchEmpty").hidden = visible !== 0;
   }
