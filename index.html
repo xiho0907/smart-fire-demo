@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>智慧消防综合管理平台</title>
-    <link rel="stylesheet" href="styles.css?v=20260724-fault-handling" />
+    <link rel="stylesheet" href="styles.css?v=20260728-warning-record" />
   </head>
   <body>
     <div class="app-shell">
@@ -350,6 +350,8 @@
               <div class="table-footer"><span id="terminalCountLabel">显示 12 台重点终端，共 57 台</span><div class="terminal-legend"><span><i class="normal"></i>正常</span><span><i class="warning"></i>预警</span><span><i class="alarm"></i>告警</span><span><i class="offline"></i>离线</span></div></div>
             </div>
           </section>
+
+          <section class="app-view terminal-detail-view" id="view-terminal-detail" data-view-panel="terminal-detail" hidden></section>
 
           <section class="app-view terminal-event-view" id="view-terminal-alarms" data-view-panel="terminal-alarms" hidden>
             <div class="page-heading">
@@ -843,6 +845,54 @@
       </section>
     </div>
 
+    <div class="modal-backdrop" id="warningRecordModal" hidden>
+      <section class="handle-modal warning-record-modal" role="dialog" aria-modal="true" aria-labelledby="warningRecordModalTitle">
+        <header>
+          <div><span class="assignment-badge warning-record-badge"><i data-lucide="clipboard-check"></i>预警闭环档案</span><h2 id="warningRecordModalTitle">设备预警处置记录</h2></div>
+          <button class="icon-button" type="button" data-warning-record-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="record-detail-summary warning-record-summary">
+          <div><span class="risk-pill medium" id="warningRecordRisk">中风险</span><strong id="warningRecordTitle">配电回路温度接近阈值</strong><small id="warningRecordMeta">智能用电 · 厨房动力配电箱</small></div>
+          <code id="warningRecordNo">WRN-20260723-0118</code>
+        </div>
+        <div class="warning-record-focus">
+          <div><span>触发监测值</span><strong id="warningRecordValue">68.2°C</strong><small>设备触发时上报值</small></div>
+          <i data-lucide="arrow-right"></i>
+          <div><span>预警阈值</span><strong id="warningRecordThreshold">≥ 70.0°C</strong><small>平台配置的风险规则</small></div>
+          <span class="warning-record-recovered"><i data-lucide="circle-check"></i>已确认恢复</span>
+        </div>
+        <div class="warning-record-grid">
+          <dl class="record-detail-list warning-record-list">
+            <div><dt>设备名称</dt><dd id="warningRecordDevice">智能用电采集终端-05</dd></div>
+            <div><dt>设备编号</dt><dd><code id="warningRecordSerial">PW-05-A2361</code></dd></div>
+            <div><dt>安装点位</dt><dd id="warningRecordPoint">厨房动力配电箱</dd></div>
+            <div><dt>预警类型</dt><dd id="warningRecordType">智能用电</dd></div>
+            <div><dt>首次发生</dt><dd id="warningRecordFirstTime">2026-07-23 19:31:08</dd></div>
+          </dl>
+          <dl class="record-detail-list warning-record-list">
+            <div><dt>指派时间</dt><dd id="warningRecordAssignedAt">2026-07-23 19:32:10</dd></div>
+            <div><dt>开始核查</dt><dd id="warningRecordCheckingAt">2026-07-23 19:34:26</dd></div>
+            <div><dt>恢复时间</dt><dd id="warningRecordRecoveredAt">2026-07-23 19:42:58</dd></div>
+            <div><dt>处置人员</dt><dd id="warningRecordHandler">王晨</dd></div>
+            <div><dt>处置状态</dt><dd><span class="state-dot closed">已恢复</span></dd></div>
+          </dl>
+        </div>
+        <div class="warning-record-notes">
+          <article><span><i data-lucide="shield-alert"></i></span><div><strong>风险说明与阈值依据</strong><p id="warningRecordRiskReason"></p></div></article>
+          <article class="success"><span><i data-lucide="badge-check"></i></span><div><strong>处置结论</strong><p id="warningRecordConclusion"></p></div></article>
+        </div>
+        <div class="fault-process warning-record-process" id="warningRecordProcess" aria-label="预警处置过程"></div>
+        <section class="fault-handling-history warning-record-history" aria-labelledby="warningRecordHistoryTitle">
+          <div class="fault-history-heading"><div><strong id="warningRecordHistoryTitle">处置留痕</strong><small>系统触发、指派、核查和恢复全过程</small></div><span id="warningRecordHistoryCount">0 条</span></div>
+          <div class="fault-history-list" id="warningRecordHistory"></div>
+        </section>
+        <footer class="fault-detail-actions">
+          <button class="secondary-button" type="button" data-warning-record-close>关闭</button>
+          <button class="primary-button" type="button" id="warningRecordViewDevice"><i data-lucide="cpu"></i>查看设备状态</button>
+        </footer>
+      </section>
+    </div>
+
     <div class="modal-backdrop" id="videoPlaybackModal" hidden>
       <section class="handle-modal video-playback-modal" role="dialog" aria-modal="true" aria-labelledby="videoPlaybackTitle">
         <header>
@@ -939,6 +989,6 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden><i data-lucide="circle-check"></i><span>操作成功</span></div>
 
     <script src="assets/vendor/lucide.min.js"></script>
-    <script src="app.js?v=20260724-passage-action"></script>
+    <script src="app.js?v=20260728-warning-record"></script>
   </body>
 </html>

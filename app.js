@@ -243,7 +243,46 @@ terminalFaults.forEach((fault) => {
 });
 
 terminalWarnings.forEach((warning) => {
-  warning.assignedAt = "";
+  const completedDemo = {
+    tw5: {
+      assignedAt: "2026-07-23 17:22:06",
+      checkingStartedAt: "2026-07-23 17:25:18",
+      recoveredAt: "2026-07-23 18:56:14",
+      riskReason: "视频监测链路信号质量连续低于 60%，可能造成画面卡顿或事件识别延迟。",
+      handlingNote: "现场检查摄像头供电和园区交换机端口，重新压接网线后信号质量恢复稳定。",
+    },
+    tw6: {
+      assignedAt: "2026-07-23 15:45:32",
+      checkingStartedAt: "2026-07-23 15:48:09",
+      recoveredAt: "2026-07-23 16:08:22",
+      riskReason: "镜头遮挡比例达到 62%，超过 50% 预警阈值，可能影响火焰与高温目标识别。",
+      handlingNote: "清理镜头表面灰尘并调整防护罩，复核可见光和热成像画面均恢复清晰。",
+    },
+    tw7: {
+      assignedAt: "2026-07-23 12:16:04",
+      checkingStartedAt: "2026-07-23 12:18:36",
+      recoveredAt: "2026-07-23 12:28:46",
+      riskReason: "备电电压低于 22.0 V，持续欠压可能导致断电后设备无法维持正常上报。",
+      handlingNote: "检查备用电池组接线并恢复充电，备电电压回升且连续上报正常。",
+    },
+  }[warning.id];
+  const checkingDemo = warning.id === "tw3" ? {
+    assignedAt: "2026-07-23 18:56:03",
+    checkingStartedAt: "2026-07-23 18:58:21",
+    riskReason: "终端电池电量低于 20%，可能影响液位数据持续上报。",
+  } : null;
+  warning.assignedAt = completedDemo?.assignedAt || checkingDemo?.assignedAt || "";
+  warning.checkingStartedAt = completedDemo?.checkingStartedAt || checkingDemo?.checkingStartedAt || "";
+  warning.recoveredAt = completedDemo?.recoveredAt || "";
+  warning.handledBy = warning.state === "recovered" ? warning.assignee : "";
+  warning.riskReason = completedDemo?.riskReason || checkingDemo?.riskReason || `${warning.title}，监测值 ${warning.value} 已触发预警规则 ${warning.threshold}，需核查设备和现场状态。`;
+  warning.handlingNote = completedDemo?.handlingNote || "";
+  warning.handlingHistory = [
+    { action: "created", operator: "系统", time: `2026-07-23 ${warning.firstTime}`, note: `监测值 ${warning.value} 触发预警阈值 ${warning.threshold}，系统生成设备预警。` },
+  ];
+  if (warning.assignedAt) warning.handlingHistory.push({ action: "assign", operator: "Admin", time: warning.assignedAt, note: `指派${warning.assignee}负责预警核查。` });
+  if (warning.checkingStartedAt) warning.handlingHistory.push({ action: "start_check", operator: warning.assignee, time: warning.checkingStartedAt, note: "已接收任务并开始核查设备数据与现场状态。" });
+  if (warning.recoveredAt) warning.handlingHistory.push({ action: "confirm_recovery", operator: warning.assignee, time: warning.recoveredAt, note: warning.handlingNote });
   warning.assignmentWindowMinutes = 0;
   warning.assignmentDeadlineAt = "";
 });
@@ -421,6 +460,17 @@ const terminalTypeMeta = {
   flame: { label: "可视化红外火焰探测器", icon: "flame", className: "red" },
 };
 
+const terminalTypeProfiles = {
+  power: { model: "EC-PW200", firmware: "V2.4.8", protocol: "MQTT / 4G", power: "AC 220V", interval: "60 秒", threshold: "温度 70.0°C · 漏电 300 mA" },
+  transmitter: { model: "UT-9000", firmware: "V3.8.2", protocol: "ISUP / 以太网", power: "主电 + 备电", interval: "30 秒", threshold: "主备电、线路及上报状态" },
+  level: { model: "WL-NB100", firmware: "V1.9.6", protocol: "CoAP / NB-IoT", power: "锂电池供电", interval: "5 分钟", threshold: "液位低限 60% · 电量低限 20%" },
+  pressure: { model: "WP-NB300", firmware: "V2.1.3", protocol: "CoAP / NB-IoT", power: "锂电池供电", interval: "5 分钟", threshold: "压力 0.30 - 0.60 MPa" },
+  gas: { model: "GD-485", firmware: "V4.2.1", protocol: "Modbus / RS-485", power: "DC 24V", interval: "10 秒", threshold: "预警 20% LEL · 告警 25% LEL" },
+  offduty: { model: "DS-2CD7A", firmware: "V5.8.12", protocol: "ISUP / 以太网", power: "PoE", interval: "实时", threshold: "人数不足持续 60 秒" },
+  passage: { model: "DS-2CD7T", firmware: "V5.7.18", protocol: "ISUP / 以太网", power: "PoE", interval: "实时", threshold: "占用持续 60 秒" },
+  flame: { model: "DS-2TD2637", firmware: "V5.6.35", protocol: "ISUP / 以太网", power: "DC 12V", interval: "实时", threshold: "高温 70.0°C · 火焰识别" },
+};
+
 const terminalStatusLabels = { normal: "正常", warning: "预警", alarm: "告警", offline: "离线" };
 const fireAlarmStateLabels = { pending: "待确认", confirmed: "已确认", processing: "处置中", reset: "已复位", false: "误报消警" };
 const fireActionMeta = {
@@ -468,14 +518,15 @@ const assignmentDeadlineRules = {
 };
 
 const stateLabels = { pending: "待处置", processing: "处理中", closed: "已闭环" };
-const viewLabels = { dashboard: "消防安全看板", alarms: "告警中心", devices: "设备管理", terminals: "设备运行状态", "terminal-alarms": "设备告警列表", "terminal-warnings": "设备预警列表", "terminal-faults": "设备故障记录", "video-monitoring": "视频监控", access: "海康设备接入状态" };
-const viewIcons = { dashboard: "flame", alarms: "siren", devices: "cctv", terminals: "cpu", "terminal-alarms": "siren", "terminal-warnings": "triangle-alert", "terminal-faults": "wrench", "video-monitoring": "video", access: "network" };
+const viewLabels = { dashboard: "消防安全看板", alarms: "告警中心", devices: "设备管理", terminals: "设备运行状态", "terminal-detail": "设备运行详情", "terminal-alarms": "设备告警列表", "terminal-warnings": "设备预警列表", "terminal-faults": "设备故障记录", "video-monitoring": "视频监控", access: "海康设备接入状态" };
+const viewIcons = { dashboard: "flame", alarms: "siren", devices: "cctv", terminals: "cpu", "terminal-detail": "panel-top-open", "terminal-alarms": "siren", "terminal-warnings": "triangle-alert", "terminal-faults": "wrench", "video-monitoring": "video", access: "network" };
 
 let selectedAlertId = "flame";
 let dashboardFilter = "pending";
 let cameraMode = "thermal";
 let selectedDisposal = "现场核查";
 let selectedTerminalType = "all";
+let selectedTerminalId = "t01";
 let selectedFireAlarmId = "fa1";
 let selectedFireEvidence = "images";
 let selectedFireImageMode = "visible";
@@ -485,6 +536,7 @@ let pendingFireActionPhotos = [];
 let assignmentTargetType = "fire";
 let assignmentTargetId = "fa1";
 let selectedTerminalFaultId = "tf1";
+let selectedTerminalWarningId = "tw5";
 let selectedVideoModule = "offduty";
 let selectedVideoViewMode = "visible";
 let selectedVideoRecordFilter = "all";
@@ -709,7 +761,6 @@ function renderTerminalTable() {
   tbody.innerHTML = filtered.map((item) => {
     const meta = terminalTypeMeta[item.type];
     const statusIcon = item.status === "normal" ? "circle-check" : item.status === "warning" ? "triangle-alert" : item.status === "alarm" ? "siren" : "wifi-off";
-    const isCamera = Boolean(item.alertId);
     const activeFault = getActiveFaultForTerminal(item);
     const faultStatus = activeFault ? `<button class="terminal-fault-link ${activeFault.state}" type="button" data-terminal-fault="${activeFault.id}" title="查看关联故障">${terminalFaultStateLabels[activeFault.state]}</button>` : "";
     return `
@@ -721,29 +772,120 @@ function renderTerminalTable() {
         <td><div class="terminal-comms"><span class="signal-bars ${item.signal < 60 ? "weak" : ""} ${item.signal === 0 ? "offline" : ""}"><i></i><i></i><i></i></span><div><strong>${item.signal}%</strong><small>${item.network}</small></div></div></td>
         <td><div class="terminal-status-stack"><span class="status-pill ${item.status === "normal" ? "online" : item.status}">${terminalStatusLabels[item.status]}</span>${faultStatus}</div></td>
         <td>${item.updated}</td>
-        <td><button class="table-event-action" type="button" title="${isCamera ? "进入告警画面" : "查看设备详情"}" aria-label="${isCamera ? "进入告警画面" : "查看设备详情"}" data-terminal-action="${item.id}"><i data-lucide="${isCamera ? "video" : "arrow-up-right"}"></i></button></td>
+        <td><button class="table-event-action" type="button" title="查看设备详情" aria-label="查看设备详情" data-terminal-action="${item.id}"><i data-lucide="arrow-up-right"></i></button></td>
       </tr>`;
   }).join("");
 
   document.querySelector("#terminalTableEmpty").hidden = filtered.length > 0;
   document.querySelector("#terminalCountLabel").textContent = selectedTerminalType === "all" && status === "all" && zone === "all" && !query ? "显示 14 台重点终端，共 57 台" : `当前筛选显示 ${filtered.length} 台终端`;
   tbody.querySelectorAll("[data-terminal-action]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const terminal = terminals.find((item) => item.id === button.dataset.terminalAction);
-      if (!terminal) return;
-      if (terminal.alertId) {
-        selectedAlertId = terminal.alertId;
-        dashboardFilter = "pending";
-        cameraMode = terminal.type === "flame" ? "thermal" : "visible";
-        renderAlertQueue();
-        switchView("dashboard");
-        requestAnimationFrame(() => document.querySelector(".operations-section")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-      } else {
-        showToast(`${terminal.name}状态详情已打开（演示）`);
-      }
-    });
+    button.addEventListener("click", () => openTerminalDetail(button.dataset.terminalAction));
   });
   refreshIcons(tbody);
+}
+
+function terminalTimeOffset(time, minutes) {
+  const [hour, minute, second] = time.split(":").map(Number);
+  const total = (hour * 3600 + minute * 60 + second - minutes * 60 + 86400) % 86400;
+  return [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
+function terminalHistoryRows(terminal) {
+  const currentLabel = terminal.status === "normal" ? "状态周期上报" : terminal.status === "offline" ? "通信心跳异常" : terminal.status === "warning" ? "监测值触发预警" : "设备事件上报";
+  return [
+    { time: terminal.updated, event: currentLabel, value: terminal.reading, state: terminal.status },
+    { time: terminalTimeOffset(terminal.updated, 30), event: terminal.signal ? "通信心跳" : "心跳等待恢复", value: terminal.signal ? `${terminal.network} · 信号 ${terminal.signal}%` : `${terminal.network} · 未收到心跳`, state: terminal.signal ? "normal" : "offline" },
+    { time: terminalTimeOffset(terminal.updated, 60), event: "数据采集", value: terminal.detail, state: terminal.status === "offline" ? "offline" : "normal" },
+    { time: terminalTimeOffset(terminal.updated, 120), event: "设备自检", value: "采集、存储与通信模块检查完成", state: "normal" },
+  ];
+}
+
+function getTerminalRelatedEvent(terminal) {
+  const fault = getActiveFaultForTerminal(terminal);
+  if (fault) return { kind: "fault", id: fault.id, tone: "fault", icon: "wrench", label: "关联故障", title: fault.title, no: fault.no, state: terminalFaultStateLabels[fault.state], time: fault.updated };
+  const warning = terminalWarnings.find((item) => item.serial === terminal.serial && item.state !== "recovered");
+  if (warning) return { kind: "warning", id: warning.id, tone: "warning", icon: "triangle-alert", label: "关联预警", title: warning.title, no: warning.no, state: terminalWarningStateLabels[warning.state], time: warning.updated };
+  if (terminal.alertId) {
+    const alert = getAlert(terminal.alertId);
+    return { kind: "alert", id: alert.id, tone: "alarm", icon: "siren", label: "关联告警", title: alert.title, no: alert.eventType, state: stateLabels[alert.state], time: alert.dateTime };
+  }
+  return null;
+}
+
+function openTerminalDetail(id) {
+  if (!terminals.some((item) => item.id === id)) return;
+  selectedTerminalId = id;
+  switchView("terminal-detail", null, document.querySelector('.nav-subitem[data-view="terminals"]'));
+}
+
+function returnToTerminalList() {
+  const terminalId = selectedTerminalId;
+  switchView("terminals", null, document.querySelector('.nav-subitem[data-view="terminals"]'));
+  requestAnimationFrame(() => document.querySelector(`[data-terminal-row="${terminalId}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+}
+
+function openTerminalRelatedEvent(terminal, related) {
+  if (!related) return;
+  if (related.kind === "fault") {
+    switchView("terminal-faults", null, document.querySelector('.nav-subitem[data-view="terminal-faults"]'));
+    requestAnimationFrame(() => openFaultDetail(related.id));
+    return;
+  }
+  if (related.kind === "warning") {
+    document.querySelector("#terminalWarningSearch").value = terminal.serial;
+    document.querySelector("#terminalWarningTypeFilter").value = "all";
+    document.querySelector("#terminalWarningStateFilter").value = "all";
+    switchView("terminal-warnings", null, document.querySelector('.nav-subitem[data-view="terminal-warnings"]'));
+    showToast("已定位关联设备预警");
+    return;
+  }
+  selectedAlertId = terminal.alertId;
+  dashboardFilter = "pending";
+  cameraMode = terminal.type === "flame" ? "thermal" : "visible";
+  renderAlertQueue();
+  switchView("dashboard");
+  requestAnimationFrame(() => document.querySelector(".operations-section")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+}
+
+function renderTerminalDetail() {
+  const terminal = terminals.find((item) => item.id === selectedTerminalId) || terminals[0];
+  const panel = document.querySelector("#view-terminal-detail");
+  if (!panel || !terminal) return;
+  const typeMeta = terminalTypeMeta[terminal.type];
+  const runtimeMeta = getTerminalRuntimeMeta(terminal);
+  const profile = terminalTypeProfiles[terminal.type];
+  const related = getTerminalRelatedEvent(terminal);
+  const healthy = isTerminalHealthy(terminal);
+  const history = terminalHistoryRows(terminal);
+  const statusCopy = terminal.status === "normal" ? "设备采集、通信和数据上报均正常" : terminal.status === "warning" ? "监测数据接近阈值，请持续关注" : terminal.status === "alarm" ? "设备已产生业务告警，请及时处置" : "设备通信中断，请检查供电和网络";
+  panel.innerHTML = `<div class="page-heading terminal-detail-heading">
+    <div class="terminal-detail-title"><button class="icon-button" type="button" data-terminal-detail-back title="返回设备列表" aria-label="返回设备列表"><i data-lucide="arrow-left"></i></button><div><div class="eyebrow"><span>设备运行状态</span><span>${escapeHtml(typeMeta.label)}</span></div><h1>${escapeHtml(terminal.name)}</h1></div></div>
+    <div class="page-actions"><span class="updated-at">最近上报 <b>${terminal.updated}</b></span><button class="secondary-button" type="button" data-terminal-detail-sync><i data-lucide="refresh-cw"></i>同步状态</button></div>
+  </div>
+  <section class="terminal-detail-overview ${runtimeMeta.className}">
+    <div class="terminal-detail-identity"><span class="terminal-detail-device-icon ${typeMeta.className}"><i data-lucide="${typeMeta.icon}"></i></span><div><span class="status-pill ${terminal.status === "normal" ? "online" : terminal.status}">${runtimeMeta.label}</span><strong>${escapeHtml(terminal.serial)}</strong><small>${escapeHtml(terminal.point)} · ${escapeHtml(terminal.area)}</small></div></div>
+    <div><span>当前读数</span><strong>${escapeHtml(terminal.reading)}</strong><small>${escapeHtml(terminal.detail)}</small></div>
+    <div><span>通信质量</span><strong class="${terminal.signal < 60 ? "danger-text" : "success-text"}">${terminal.signal}%</strong><small>${escapeHtml(terminal.network)}</small></div>
+    <div><span>运行状态</span><strong class="terminal-runtime-${terminal.status}">${runtimeMeta.label}</strong><small>${statusCopy}</small></div>
+  </section>
+  <div class="terminal-detail-grid">
+    <section class="terminal-detail-panel"><header><div><i data-lucide="file-text"></i><span><strong>设备档案</strong><small>安装与通信配置信息</small></span></div></header><dl class="terminal-detail-list">
+      <div><dt>设备名称</dt><dd>${escapeHtml(terminal.name)}</dd></div><div><dt>设备编号</dt><dd><code>${escapeHtml(terminal.serial)}</code></dd></div><div><dt>设备类型</dt><dd>${escapeHtml(typeMeta.label)}</dd></div><div><dt>设备型号</dt><dd>${profile.model}</dd></div><div><dt>固件版本</dt><dd>${profile.firmware}</dd></div><div><dt>安装点位</dt><dd>${escapeHtml(terminal.point)}</dd></div><div><dt>所属区域</dt><dd>${escapeHtml(terminal.zone)} · ${escapeHtml(terminal.area)}</dd></div><div><dt>供电方式</dt><dd>${profile.power}</dd></div>
+    </dl></section>
+    <section class="terminal-detail-panel"><header><div><i data-lucide="activity"></i><span><strong>数据与阈值</strong><small>当前采集配置及上报状态</small></span></div></header><div class="terminal-reading-focus ${terminal.status}"><span><i data-lucide="${runtimeMeta.icon}"></i></span><div><small>实时监测数据</small><strong>${escapeHtml(terminal.reading)}</strong><p>${escapeHtml(terminal.detail)}</p></div></div><dl class="terminal-detail-list compact"><div><dt>通信协议</dt><dd>${profile.protocol}</dd></div><div><dt>上报周期</dt><dd>${profile.interval}</dd></div><div><dt>监测阈值</dt><dd>${profile.threshold}</dd></div><div><dt>最近同步</dt><dd>2026-07-23 ${terminal.updated}</dd></div></dl></section>
+  </div>
+  <section class="terminal-detail-panel terminal-history-panel"><header><div><i data-lucide="history"></i><span><strong>最近状态记录</strong><small>设备上报、心跳及自检记录</small></span></div><b>最近 4 条</b></header><div class="data-table-wrap"><table class="data-table terminal-history-table"><thead><tr><th>时间</th><th>记录类型</th><th>上报内容</th><th>状态</th></tr></thead><tbody>${history.map((item) => `<tr><td>2026-07-23 ${item.time}</td><td>${item.event}</td><td>${escapeHtml(item.value)}</td><td><span class="status-pill ${item.state === "normal" ? "online" : item.state}">${terminalStatusLabels[item.state]}</span></td></tr>`).join("")}</tbody></table></div></section>
+  <section class="terminal-related-section ${related ? related.tone : "normal"}"><div class="terminal-related-icon"><i data-lucide="${related ? related.icon : "shield-check"}"></i></div><div><small>${related ? related.label : "关联事件"}</small><strong>${related ? escapeHtml(related.title) : "当前无关联告警、预警或故障"}</strong><p>${related ? `${escapeHtml(related.no)} · ${escapeHtml(related.state)} · ${escapeHtml(related.time)}` : "设备运行状态稳定，最近数据和通信记录均正常。"}</p></div>${related ? `<button class="secondary-button" type="button" data-terminal-related-action><i data-lucide="arrow-up-right"></i>查看${related.label}</button>` : ""}</section>`;
+  panel.querySelector("[data-terminal-detail-back]").addEventListener("click", returnToTerminalList);
+  panel.querySelector("[data-terminal-detail-sync]").addEventListener("click", () => {
+    terminal.updated = formatClock(new Date());
+    document.querySelector("#terminalSyncTime").textContent = terminal.updated;
+    renderTerminalTable();
+    renderTerminalDetail();
+    showToast(`${terminal.name}状态已同步`);
+  });
+  panel.querySelector("[data-terminal-related-action]")?.addEventListener("click", () => openTerminalRelatedEvent(terminal, related));
+  refreshIcons(panel);
 }
 
 function getFireAlarm(id) {
@@ -1559,14 +1701,24 @@ function renderTerminalWarningTable() {
           return;
         }
         warning.state = "checking";
+        warning.checkingStartedAt = formatClock(new Date());
+        warning.updated = warning.checkingStartedAt.slice(11);
+        warning.handlingHistory.push({ action: "start_check", operator: warning.assignee, time: warning.checkingStartedAt, note: "已接收任务并开始核查设备数据与现场状态。" });
         showToast(`${warning.device}预警已进入核查流程`);
       } else if (warning.state === "checking") {
         warning.state = "recovered";
-        showToast(`${warning.device}状态已恢复`);
+        warning.recoveredAt = formatClock(new Date());
+        warning.updated = warning.recoveredAt.slice(11);
+        warning.handledBy = warning.assignee === "待指派" ? currentUser.name : warning.assignee;
+        warning.handlingNote = getWarningRecoveryConclusion(warning);
+        warning.handlingHistory.push({ action: "confirm_recovery", operator: warning.handledBy, time: warning.recoveredAt, note: warning.handlingNote });
+        showToast(`${warning.device}状态已恢复，处置记录已生成`);
       } else {
-        showToast(`${warning.no}处置记录已打开（演示）`);
+        openWarningRecord(warning.id);
+        return;
       }
       renderTerminalWarningTable();
+      if (warning.state === "recovered") openWarningRecord(warning.id);
     });
   });
   tbody.querySelectorAll("[data-assign-warning]").forEach((button) => {
@@ -1737,6 +1889,90 @@ function openFaultDetail(id) {
 function closeFaultDetail() {
   document.querySelector("#faultDetailModal").hidden = true;
   document.body.style.overflow = "";
+}
+
+function getWarningRecoveryConclusion(warning) {
+  const conclusions = {
+    power: "已完成配电回路和测温点复核，监测值恢复至预警阈值以内，连续数据上报正常。",
+    gas: "已完成现场通风和探测器复核，可燃气体浓度回落至预警阈值以内，设备上报正常。",
+    level: "已完成终端电池和液位采集检查，监测数据恢复稳定，终端通信正常。",
+    pressure: "已完成管网和压力终端核查，压力恢复至正常范围，连续上报稳定。",
+    camera: "已完成视频设备及通信链路核查，画面和数据质量恢复正常。",
+    transmitter: "已完成传输装置供电和上报链路核查，设备状态恢复正常。",
+  };
+  return conclusions[warning.type] || "已完成设备和现场状态核查，监测值恢复至阈值以内，确认预警闭环。";
+}
+
+function getTerminalForWarning(warning) {
+  return terminals.find((terminal) => terminal.serial === warning.serial) || null;
+}
+
+function renderWarningRecordProcess(warning) {
+  const steps = [
+    { label: "预警触发", icon: "triangle-alert", time: warning.firstTime, completed: true },
+    { label: "人员指派", icon: "user-check", time: warning.assignedAt ? warning.assignedAt.slice(11) : "未单独指派", completed: true },
+    { label: "开始核查", icon: "clipboard-check", time: warning.checkingStartedAt ? warning.checkingStartedAt.slice(11) : "直接核查", completed: true },
+    { label: "确认恢复", icon: "badge-check", time: warning.recoveredAt ? warning.recoveredAt.slice(11) : "--", completed: Boolean(warning.recoveredAt) },
+  ];
+  document.querySelector("#warningRecordProcess").innerHTML = steps.map((step, index) => `${index ? '<i data-lucide="chevron-right"></i>' : ""}<div class="${step.completed ? "completed" : ""}"><span><i data-lucide="${step.icon}"></i></span><strong>${step.label}</strong><small>${step.time}</small></div>`).join("");
+}
+
+function renderWarningRecordHistory(warning) {
+  const history = [...warning.handlingHistory].reverse();
+  const labels = { created: "系统生成预警", assign: "人员指派", start_check: "开始核查", confirm_recovery: "确认恢复" };
+  document.querySelector("#warningRecordHistoryCount").textContent = `${history.length} 条`;
+  document.querySelector("#warningRecordHistory").innerHTML = history.map((record) => `<article class="fault-history-item"><header><strong>${labels[record.action] || "预警操作"}</strong><span>${escapeHtml(record.operator)} · ${escapeHtml(record.time)}</span></header><p>${escapeHtml(record.note)}</p></article>`).join("");
+}
+
+function openWarningRecord(id) {
+  const warning = terminalWarnings.find((item) => item.id === id);
+  if (!warning || warning.state !== "recovered") return;
+  selectedTerminalWarningId = warning.id;
+  const terminal = getTerminalForWarning(warning);
+  const meta = terminalWarningTypeMeta[warning.type];
+  const riskLabel = warning.risk === "high" ? "高风险" : warning.risk === "medium" ? "中风险" : "低风险";
+  document.querySelector("#warningRecordRisk").textContent = riskLabel;
+  document.querySelector("#warningRecordRisk").className = `risk-pill ${warning.risk}`;
+  document.querySelector("#warningRecordTitle").textContent = warning.title;
+  document.querySelector("#warningRecordMeta").textContent = `${meta.label} · ${warning.point}`;
+  document.querySelector("#warningRecordNo").textContent = warning.no;
+  document.querySelector("#warningRecordValue").textContent = warning.value;
+  document.querySelector("#warningRecordThreshold").textContent = warning.threshold;
+  document.querySelector("#warningRecordDevice").textContent = warning.device;
+  document.querySelector("#warningRecordSerial").textContent = warning.serial;
+  document.querySelector("#warningRecordPoint").textContent = warning.point;
+  document.querySelector("#warningRecordType").textContent = meta.label;
+  document.querySelector("#warningRecordFirstTime").textContent = `2026-07-23 ${warning.firstTime}`;
+  document.querySelector("#warningRecordAssignedAt").textContent = warning.assignedAt || "未单独指派";
+  document.querySelector("#warningRecordCheckingAt").textContent = warning.checkingStartedAt || "--";
+  document.querySelector("#warningRecordRecoveredAt").textContent = warning.recoveredAt || "--";
+  document.querySelector("#warningRecordHandler").textContent = warning.handledBy || warning.assignee;
+  document.querySelector("#warningRecordRiskReason").textContent = warning.riskReason;
+  document.querySelector("#warningRecordConclusion").textContent = warning.handlingNote || getWarningRecoveryConclusion(warning);
+  document.querySelector("#warningRecordViewDevice").disabled = !terminal;
+  renderWarningRecordProcess(warning);
+  renderWarningRecordHistory(warning);
+  const modal = document.querySelector("#warningRecordModal");
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons(modal);
+}
+
+function closeWarningRecord() {
+  document.querySelector("#warningRecordModal").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function openWarningTerminalStatus() {
+  const warning = terminalWarnings.find((item) => item.id === selectedTerminalWarningId);
+  const terminal = warning ? getTerminalForWarning(warning) : null;
+  if (!terminal) {
+    showToast("未找到关联设备状态");
+    return;
+  }
+  closeWarningRecord();
+  selectedTerminalId = terminal.id;
+  switchView("terminal-detail");
 }
 
 function openFaultHandleModal(id) {
@@ -2467,6 +2703,7 @@ function switchView(view, scrollTarget, sourceButton = null) {
   if (view === "alarms") renderAlarmTable();
   if (view === "devices") renderDeviceTable(document.querySelector("[data-device-type].active")?.dataset.deviceType || "all");
   if (view === "terminals") renderTerminalTable();
+  if (view === "terminal-detail") renderTerminalDetail();
   if (view === "terminal-alarms") renderFireAlarmList();
   if (view === "terminal-warnings") renderTerminalWarningTable();
   if (view === "terminal-faults") renderTerminalFaultTable();
@@ -2702,6 +2939,9 @@ function bindInteractions() {
   });
   document.querySelectorAll("[data-fault-detail-close]").forEach((button) => button.addEventListener("click", closeFaultDetail));
   document.querySelector("#faultDetailModal").addEventListener("click", (event) => { if (event.target.id === "faultDetailModal") closeFaultDetail(); });
+  document.querySelectorAll("[data-warning-record-close]").forEach((button) => button.addEventListener("click", closeWarningRecord));
+  document.querySelector("#warningRecordModal").addEventListener("click", (event) => { if (event.target.id === "warningRecordModal") closeWarningRecord(); });
+  document.querySelector("#warningRecordViewDevice").addEventListener("click", openWarningTerminalStatus);
   document.querySelector("#faultDetailAssign").addEventListener("click", () => {
     const faultId = selectedTerminalFaultId;
     closeFaultDetail();
@@ -2750,6 +2990,7 @@ function bindInteractions() {
         warning.assignedAt = assignedAt;
         warning.assignmentWindowMinutes = assignmentWindowMinutes;
         warning.assignmentDeadlineAt = assignmentDeadlineAt;
+        warning.handlingHistory.push({ action: "assign", operator: currentUser.name, time: assignedAt, note: taskMessage ? `指派${personName}负责预警核查：${taskMessage}` : `指派${personName}负责预警核查。` });
       }
       renderTerminalWarningTable();
     } else {
@@ -3384,6 +3625,7 @@ function bindUtilityActions() {
     if (event.key === "Escape" && !document.querySelector("#passageActionModal").hidden) closePassageActionModal();
     if (event.key === "Escape" && !document.querySelector("#faultHandleModal").hidden) closeFaultHandleModal();
     if (event.key === "Escape" && !document.querySelector("#faultDetailModal").hidden) closeFaultDetail();
+    if (event.key === "Escape" && !document.querySelector("#warningRecordModal").hidden) closeWarningRecord();
     if (event.key === "Escape" && !document.querySelector("#videoPlaybackModal").hidden) closeVideoPlayback();
     if (event.key === "Escape" && !document.querySelector("#videoRecordModal").hidden) closeVideoRecordDetail();
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
