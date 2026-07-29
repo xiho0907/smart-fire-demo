@@ -3601,6 +3601,10 @@ kbd {
   width: min(570px, 100%);
 }
 
+#passageActionModal {
+  z-index: 60;
+}
+
 .passage-action-badge {
   color: #9a5c05;
 }
@@ -5657,6 +5661,29 @@ kbd {
   padding-top: 14px;
 }
 
+.passage-action-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding: 14px 18px;
+  background: #f8fafc;
+}
+
+.passage-action-panel strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.passage-action-panel p {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 9px;
+}
+
 .offduty-resolution-heading {
   display: flex;
   align-items: flex-start;
@@ -5752,6 +5779,17 @@ kbd {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+}
+
+.passage-resolution-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.passage-resolution-buttons button {
+  min-width: 128px;
 }
 
 .form-error {

@@ -364,9 +364,9 @@ const videoMonitoringModules = {
     today: 4,
     summaryNote: "车辆占用 02:13",
     todayNote: "已恢复 3 条",
-    recordTitle: "通道拥堵预警记录",
-    recordSubtitle: "保留占用目标、持续时长、录像和恢复确认记录",
-    primaryAction: "确认通道畅通",
+    recordTitle: "通道占用预警记录",
+    recordSubtitle: "保留占用目标、事件抓拍、人工处置和闭环结果",
+    primaryAction: "查看并处置",
     channels: [
       { id: "ps08", name: "东侧消防通道", device: "通道监测-08", point: "园区东侧", channel: "CH 08", status: "warning", statusLabel: "车辆持续占用", active: true },
       { id: "ps02", name: "北门消防通道", device: "通道监测-02", point: "园区北门", channel: "CH 02", status: "normal", statusLabel: "通道畅通", active: false },
@@ -377,14 +377,14 @@ const videoMonitoringModules = {
     event: {
       title: "消防通道车辆拥堵",
       level: "拥堵预警",
-      state: "待恢复",
+      state: "待处理",
       description: "车辆持续占用东侧消防通道超过 120 秒，已影响消防车辆通行。",
       eventType: "channelOccupy",
       metricLabel: "占用时长",
       metricValue: "00:02:13",
       time: "19:41:03",
       owner: "待处置",
-      note: "确认车辆驶离并恢复通行后，可完成通道事件消警。",
+      note: "请根据事件抓拍、前后录像和现场实际情况完成处置。",
       liveSummary: "检测区域 R-02 内车辆持续占用消防通道",
       sceneState: "车辆占用 02:13",
       sceneClass: "warning",
@@ -392,10 +392,25 @@ const videoMonitoringModules = {
       closed: false,
     },
     records: [
-      { id: "vps01", channelId: "ps08", time: "2026-07-23 19:41:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:02:13", owner: "待处置", state: "active", completedAt: "", handlingNote: "", operationHistory: [] },
-      { id: "vps02", channelId: "ps12", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", owner: "赵凯", state: "closed", completedAt: "2026-07-23 18:26:45", handlingNote: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", operationHistory: [{ action: "confirm_clear", operator: "赵凯", time: "2026-07-23 18:26:45", description: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", photos: [] }] },
-      { id: "vps03", channelId: "ps02", time: "2026-07-23 15:08:37", title: "临停车辆占用通道", eventType: "channelOccupy", device: "通道监测-02", point: "北门消防通道", duration: "00:04:16", owner: "陈峰", state: "closed", completedAt: "2026-07-23 15:13:21", handlingNote: "已联系驾驶员驶离，现场确认消防通道无车辆和物品占用。", operationHistory: [{ action: "confirm_clear", operator: "陈峰", time: "2026-07-23 15:13:21", description: "已联系驾驶员驶离，现场确认消防通道无车辆和物品占用。", photos: [] }] },
-      { id: "vps04", channelId: "ps12", time: "2026-07-23 09:26:18", title: "卸货车辆短时占用", eventType: "channelOccupy", device: "通道监测-12", point: "西侧装卸通道", duration: "00:03:42", owner: "王晨", state: "closed", completedAt: "2026-07-23 09:30:28", handlingNote: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。", operationHistory: [{ action: "confirm_clear", operator: "王晨", time: "2026-07-23 09:30:28", description: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。", photos: [] }] },
+      {
+        id: "vps01", channelId: "ps08", time: "2026-07-23 19:41:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:02:13", owner: "待处置", state: "pending",
+        detectionState: "occupied", occupiedTarget: "vehicle", detectedObjectLabel: "车辆", lastDetectedAt: "2026-07-23 19:41:03", triggerThresholdSeconds: 120, clearStableSeconds: 60, reviewedAt: "", clearDetectedAt: "", clearStableSince: "", resolution: "", falseAlarmReason: "", completedAt: "", handlingNote: "", operationHistory: [],
+      },
+      {
+        id: "vps02", channelId: "ps12", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", owner: "赵凯", state: "closed",
+        detectionState: "clear", occupiedTarget: "object", detectedObjectLabel: "卸货物品", lastDetectedAt: "2026-07-23 18:24:58", triggerThresholdSeconds: 60, clearStableSeconds: 60, reviewedAt: "2026-07-23 18:18:12", clearDetectedAt: "2026-07-23 18:24:58", clearStableSince: "2026-07-23 18:24:58", resolution: "cleared", falseAlarmReason: "", completedAt: "2026-07-23 18:26:45", handlingNote: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。",
+        operationHistory: [{ action: "confirm_clear", operator: "赵凯", time: "2026-07-23 18:26:45", description: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", photos: [] }, { action: "detection_clear", operator: "系统", time: "2026-07-23 18:24:58", description: "设备识别通道已畅通，开始计算稳定时间。", photos: [] }, { action: "start_review", operator: "赵凯", time: "2026-07-23 18:18:12", description: "开始核对事件抓拍与前后录像。", photos: [] }],
+      },
+      {
+        id: "vps03", channelId: "ps02", time: "2026-07-23 15:08:37", title: "临停车辆占用通道", eventType: "channelOccupy", device: "通道监测-02", point: "北门消防通道", duration: "00:04:16", owner: "陈峰", state: "closed",
+        detectionState: "occupied", occupiedTarget: "vehicle", detectedObjectLabel: "临停车辆", lastDetectedAt: "2026-07-23 15:08:37", triggerThresholdSeconds: 60, clearStableSeconds: 60, reviewedAt: "2026-07-23 15:09:02", clearDetectedAt: "", clearStableSince: "", resolution: "false_alarm", falseAlarmReason: "非消防通道区域", completedAt: "2026-07-23 15:13:21", handlingNote: "识别区域包含临时停车位，现场核对未占用消防通道。",
+        operationHistory: [{ action: "false_alarm", operator: "陈峰", time: "2026-07-23 15:13:21", description: "非消防通道区域：识别区域包含临时停车位，现场核对未占用消防通道。", photos: [] }, { action: "start_review", operator: "陈峰", time: "2026-07-23 15:09:02", description: "开始核对事件抓拍与前后录像。", photos: [] }],
+      },
+      {
+        id: "vps04", channelId: "ps12", time: "2026-07-23 09:26:18", title: "卸货车辆短时占用", eventType: "channelOccupy", device: "通道监测-12", point: "西侧装卸通道", duration: "00:03:42", owner: "王晨", state: "closed",
+        detectionState: "clear", occupiedTarget: "vehicle", detectedObjectLabel: "卸货车辆", lastDetectedAt: "2026-07-23 09:28:52", triggerThresholdSeconds: 60, clearStableSeconds: 60, reviewedAt: "2026-07-23 09:26:40", clearDetectedAt: "2026-07-23 09:28:52", clearStableSince: "2026-07-23 09:28:52", resolution: "cleared", falseAlarmReason: "", completedAt: "2026-07-23 09:30:28", handlingNote: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。",
+        operationHistory: [{ action: "confirm_clear", operator: "王晨", time: "2026-07-23 09:30:28", description: "卸货车辆已驶离，通道标线范围内无障碍物，确认恢复通行。", photos: [] }, { action: "detection_clear", operator: "系统", time: "2026-07-23 09:28:52", description: "设备识别通道已畅通，开始计算稳定时间。", photos: [] }, { action: "start_review", operator: "王晨", time: "2026-07-23 09:26:40", description: "开始核对事件抓拍与前后录像。", photos: [] }],
+      },
     ],
   },
   flame: {
@@ -544,6 +559,7 @@ let selectedVideoViewMode = "visible";
 let selectedVideoRecordFilter = "all";
 let selectedVideoRecordId = "";
 let selectedOffDutyResolution = "returned";
+let selectedPassageResolution = "cleared";
 let pendingPassageActionPhotos = [];
 let selectedPassageActionRecordId = "";
 const selectedVideoChannelIds = { offduty: "od01", passage: "ps08", flame: "fl01" };
@@ -1208,17 +1224,33 @@ async function handlePassageActionPhotoSelection(event) {
   renderPassageActionPhotoPreview();
 }
 
-function openPassageActionModal(recordId) {
+function setPassageActionError(message = "") {
+  const error = document.querySelector("#passageActionError");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = !message;
+}
+
+function openPassageActionModal(recordId, resolution = "cleared") {
   const record = videoMonitoringModules.passage.records.find((item) => item.id === recordId);
-  if (!record || record.state !== "active") return;
+  if (!record || record.state === "closed") return;
   ensurePassageRecordShape(record);
+  selectedPassageResolution = resolution === "false_alarm" ? "false_alarm" : "cleared";
   selectedPassageActionRecordId = record.id;
   pendingPassageActionPhotos = [];
+  document.querySelector("#passageActionModalTitle").textContent = selectedPassageResolution === "false_alarm" ? "误报消警" : "确认通道顺畅";
   document.querySelector("#passageActionTargetTitle").textContent = record.title;
   document.querySelector("#passageActionTargetMeta").textContent = `${record.point} · ${record.device}`;
+  document.querySelector("#passageActionContextText").textContent = selectedPassageResolution === "false_alarm" ? "请选择误报原因，并填写处置说明。" : "设备识别结果仅供参考，请根据现场实际情况填写处置说明。";
+  document.querySelector("#passageFalseAlarmField").hidden = selectedPassageResolution !== "false_alarm";
+  document.querySelector("#passageFalseAlarmReason").value = "";
   document.querySelector("#passageActionDescription").value = "";
   setPassageActionPhotoError("");
+  setPassageActionError("");
   renderPassageActionPhotoPreview();
+  const submit = document.querySelector("#passageActionSubmit");
+  submit.disabled = false;
+  submit.innerHTML = `<i data-lucide="${selectedPassageResolution === "false_alarm" ? "shield-check" : "badge-check"}"></i>${selectedPassageResolution === "false_alarm" ? "确认误报并消警" : "确认通道顺畅"}`;
   const modal = document.querySelector("#passageActionModal");
   modal.hidden = false;
   document.body.style.overflow = "hidden";
@@ -1233,6 +1265,7 @@ function closePassageActionModal() {
   selectedPassageActionRecordId = "";
   renderPassageActionPhotoPreview();
   setPassageActionPhotoError("");
+  setPassageActionError("");
   document.body.style.overflow = "";
 }
 
@@ -1244,20 +1277,20 @@ function syncCurrentPassageEvent(record) {
   const terminal = terminals.find((item) => item.alertId === "passage");
   module.event.closed = true;
   module.event.owner = record.owner;
-  module.event.state = "已恢复";
-  module.event.note = record.handlingNote;
+  module.event.state = "已闭环";
+  module.event.note = getPassageRecordConclusion(record);
   channel.active = false;
   channel.status = "normal";
-  channel.statusLabel = "通道畅通";
+  channel.statusLabel = record.resolution === "false_alarm" ? "预警已复核" : "通道畅通";
   if (alert) {
     alert.state = "closed";
     alert.owner = record.owner;
-    alert.summary = record.handlingNote;
+    alert.summary = getPassageRecordConclusion(record);
   }
   if (terminal) {
     terminal.status = "normal";
-    terminal.reading = "通道畅通";
-    terminal.detail = `${channel.channel} · channelClear`;
+    terminal.reading = record.resolution === "false_alarm" ? "预警已人工复核" : "通道畅通";
+    terminal.detail = `${channel.channel} · ${record.resolution === "false_alarm" ? "falseAlarm" : "channelClear"}`;
     terminal.updated = record.completedAt.slice(11);
   }
 }
@@ -1265,24 +1298,34 @@ function syncCurrentPassageEvent(record) {
 function submitPassageAction(event) {
   event.preventDefault();
   const description = document.querySelector("#passageActionDescription").value.trim();
-  if (!description) {
-    document.querySelector("#passageActionDescription").focus();
-    showToast("请填写处置说明");
-    return;
-  }
+  const falseAlarmReason = document.querySelector("#passageFalseAlarmReason").value;
   const record = videoMonitoringModules.passage.records.find((item) => item.id === selectedPassageActionRecordId);
-  if (!record || record.state !== "active") {
+  if (!record || record.state === "closed") {
     closePassageActionModal();
     return;
   }
   ensurePassageRecordShape(record);
+  if (selectedPassageResolution === "false_alarm" && !falseAlarmReason) {
+    setPassageActionError("请选择误报原因。");
+    document.querySelector("#passageFalseAlarmReason").focus();
+    return;
+  }
+  if (!description) {
+    setPassageActionError("请填写处置说明。");
+    document.querySelector("#passageActionDescription").focus();
+    return;
+  }
   const completedAt = formatClock(new Date());
-  const photos = pendingPassageActionPhotos.map(({ dataUrl }) => dataUrl);
+  const photos = pendingPassageActionPhotos.map(({ name, type, size, dataUrl }) => ({ name, type, size, dataUrl }));
   record.state = "closed";
   record.owner = currentUser.name;
   record.completedAt = completedAt;
+  record.resolution = selectedPassageResolution;
+  record.falseAlarmReason = selectedPassageResolution === "false_alarm" ? falseAlarmReason : "";
   record.handlingNote = description;
-  record.operationHistory.unshift({ action: "confirm_clear", operator: currentUser.name, time: completedAt, description, photos });
+  const action = selectedPassageResolution === "false_alarm" ? "false_alarm" : "confirm_clear";
+  const historyDescription = selectedPassageResolution === "false_alarm" ? `${falseAlarmReason}：${description}` : description;
+  record.operationHistory.unshift({ action, operator: currentUser.name, time: completedAt, description: historyDescription, photos });
   syncCurrentPassageEvent(record);
   closePassageActionModal();
   renderVideoMonitoring();
@@ -1290,7 +1333,7 @@ function submitPassageAction(event) {
   renderAlarmTable();
   renderTerminalTable();
   openVideoRecordDetail(record);
-  showToast("消防通道已确认恢复畅通");
+  showToast(selectedPassageResolution === "false_alarm" ? "通道预警已按误报完成消警" : "消防通道已确认顺畅并完成闭环");
 }
 
 function parseDurationSeconds(value = "00:00:00") {
@@ -2139,17 +2182,52 @@ function getSelectedVideoChannel(module = getVideoModule()) {
 
 const offDutyRecordStateLabels = { pending: "待复核", processing: "处置中", recovered_pending: "待确认返岗", closed: "已消警" };
 const offDutyDetectionTrackers = new Map();
+const passageRecordStateLabels = { pending: "待处理", closed: "已闭环" };
 
 function ensurePassageRecordShape(record) {
   if (!record) return null;
+  if (record.state !== "closed") record.state = "pending";
+  record.detectionState ||= record.state === "closed" && record.resolution !== "false_alarm" ? "clear" : "occupied";
+  record.occupiedTarget ||= record.eventType === "fireEscapeDetection" ? "object" : "vehicle";
+  record.detectedObjectLabel ||= record.occupiedTarget === "object" ? "物品" : "车辆";
+  record.lastDetectedAt ||= record.clearDetectedAt || record.time || "";
+  record.triggerThresholdSeconds ??= 60;
+  record.resolution ||= "";
+  record.falseAlarmReason ||= "";
   record.completedAt ||= "";
   record.handlingNote ||= "";
   record.operationHistory = Array.isArray(record.operationHistory) ? record.operationHistory : [];
   return record;
 }
 
+function getPassageRecordMethod(record) {
+  ensurePassageRecordShape(record);
+  if (record.state !== "closed") return "待人工处置";
+  return record.resolution === "false_alarm" ? "误报消警" : "人工确认通道顺畅";
+}
+
+function getPassageRecordConclusion(record) {
+  ensurePassageRecordShape(record);
+  if (record.resolution === "false_alarm") return `${record.falseAlarmReason || "识别误报"}：${record.handlingNote}`;
+  return record.handlingNote || "已人工确认通道顺畅。";
+}
+
+function getSelectedPassageRecord() {
+  return videoMonitoringModules.passage.records.find((record) => record.id === selectedVideoRecordId) || null;
+}
+
+function renderPassageActionPanel(record) {
+  const isPassage = selectedVideoModule === "passage";
+  const panel = document.querySelector("#passageActionPanel");
+  panel.hidden = !isPassage || record.state === "closed";
+}
+
 function isVideoRecordOpen(record) {
   if (selectedVideoModule === "offduty") return record.state !== "closed";
+  if (selectedVideoModule === "passage") {
+    ensurePassageRecordShape(record);
+    return record.state !== "closed";
+  }
   return record.state === "active" || record.state === "processing";
 }
 
@@ -2158,6 +2236,10 @@ function getVideoRecordState(record) {
     ensureOffDutyRecordShape(record);
     syncOffDutyRecoveryState(record);
     return offDutyRecordStateLabels[record.state] || "待复核";
+  }
+  if (selectedVideoModule === "passage") {
+    ensurePassageRecordShape(record);
+    return passageRecordStateLabels[record.state] || "待处理";
   }
   if (record.state === "active") return selectedVideoModule === "flame" ? "待确认" : "待处理";
   if (record.state === "processing") return "处置中";
@@ -2245,8 +2327,12 @@ function renderVideoRecordTimeline(record) {
   const timeline = document.querySelector("#videoRecordTimeline");
   if (selectedVideoModule === "passage") {
     ensurePassageRecordShape(record);
-    const completed = record.state === "closed";
-    timeline.innerHTML = `<div class="completed"><span><i data-lucide="radio"></i></span><strong>预警上报</strong><small>${record.time.slice(11)}</small></div><i data-lucide="chevron-right"></i><div class="${completed ? "completed" : "pending"}"><span><i data-lucide="eye"></i></span><strong>现场核查</strong><small>${completed ? record.completedAt.slice(11) : "--"}</small></div><i data-lucide="chevron-right"></i><div class="${completed ? "completed" : "pending"}"><span><i data-lucide="circle-check"></i></span><strong>确认畅通</strong><small>${completed ? record.completedAt.slice(11) : "--"}</small></div>`;
+    const resolutionLabel = record.resolution === "false_alarm" ? "误报消警" : "确认通道顺畅";
+    const steps = [
+      { label: "预警上报", time: record.time, icon: "radio", completed: true },
+      { label: resolutionLabel, time: record.completedAt, icon: record.resolution === "false_alarm" ? "shield-check" : "circle-check", completed: Boolean(record.completedAt) },
+    ];
+    timeline.innerHTML = steps.map((step, index) => `${index ? '<i data-lucide="chevron-right"></i>' : ""}<div class="${step.completed ? "completed" : "pending"}"><span><i data-lucide="${step.icon}"></i></span><strong>${step.label}</strong><small>${step.time ? step.time.slice(11) : "--"}</small></div>`).join("");
     return;
   }
   if (selectedVideoModule !== "offduty") {
@@ -2272,19 +2358,21 @@ function renderPassageOperationHistory(record) {
   section.hidden = !isPassage;
   if (!isPassage) return;
   ensurePassageRecordShape(record);
-  count.textContent = `${record.operationHistory.length} 条`;
-  if (!record.operationHistory.length) {
+  const finalActions = record.operationHistory.filter((item) => ["confirm_clear", "false_alarm"].includes(item.action));
+  count.textContent = `${finalActions.length} 条`;
+  if (!finalActions.length) {
     list.innerHTML = '<div class="passage-history-empty"><i data-lucide="clipboard-list"></i><span>暂无处置记录</span><small>确认通道恢复后将显示处置说明和现场照片</small></div>';
     return;
   }
-  list.innerHTML = record.operationHistory.map((item) => {
+  list.innerHTML = finalActions.map((item) => {
     const photos = (item.photos || []).map((photo) => {
       const source = typeof photo === "string" ? photo : photo.dataUrl;
       const name = typeof photo === "string" ? "现场照片" : photo.name;
       return `<img src="${source}" alt="${escapeHtml(name)}" title="${escapeHtml(name)}" />`;
     }).join("");
+    const actionLabel = { confirm_clear: "确认通道顺畅", false_alarm: "误报消警" }[item.action] || "通道处置";
     return `<article class="passage-history-item">
-      <header><strong>确认通道畅通</strong><span>${escapeHtml(item.operator)} · ${escapeHtml(item.time)}</span></header>
+      <header><strong>${actionLabel}</strong><span>${escapeHtml(item.operator)} · ${escapeHtml(item.time)}</span></header>
       <p>${escapeHtml(item.description)}</p>
       ${photos ? `<div class="passage-history-photos">${photos}</div>` : ""}
     </article>`;
@@ -2541,18 +2629,21 @@ function openVideoRecordDetail(record) {
   const isPassage = selectedVideoModule === "passage";
   selectedVideoRecordId = record.id;
   selectedOffDutyResolution = "returned";
+  selectedPassageResolution = "cleared";
   if (isOffDuty) {
     ensureOffDutyRecordShape(record);
     syncOffDutyRecoveryState(record);
   }
-  if (isPassage) ensurePassageRecordShape(record);
+  if (isPassage) {
+    ensurePassageRecordShape(record);
+  }
   const modulePrefix = selectedVideoModule === "offduty" ? "OD" : selectedVideoModule === "passage" ? "PS" : "FL";
-  const method = isOffDuty ? getOffDutyRecordMethod(record) : isPassage ? record.state === "closed" ? "现场确认并恢复通道" : "待确认通道恢复" : "警情复核并完成闭环";
-  const conclusion = isOffDuty ? getOffDutyRecordConclusion(record) : isPassage ? record.handlingNote : "现场已完成复核处置，设备状态正常，火灾告警记录已闭环。";
+  const method = isOffDuty ? getOffDutyRecordMethod(record) : isPassage ? getPassageRecordMethod(record) : "警情复核并完成闭环";
+  const conclusion = isOffDuty ? getOffDutyRecordConclusion(record) : isPassage ? getPassageRecordConclusion(record) : "现场已完成复核处置，设备状态正常，火灾告警记录已闭环。";
   const eventTime = isOffDuty ? record.triggeredAt : record.time;
   document.querySelector("#videoRecordDetailTitle").textContent = `${module.recordTitle}详情`;
   document.querySelector("#videoRecordDetailState").textContent = getVideoRecordState(record);
-  document.querySelector("#videoRecordDetailState").className = `state-pill ${record.state === "closed" ? "reset" : record.state === "recovered_pending" ? "recovered-pending" : record.state === "processing" ? "processing" : "pending"}`;
+  document.querySelector("#videoRecordDetailState").className = `state-pill ${record.state === "closed" ? "reset" : record.state === "processing" ? "processing" : "pending"}`;
   document.querySelector("#videoRecordDetailEvent").textContent = record.title;
   document.querySelector("#videoRecordDetailMeta").textContent = `${eventTime} · ${record.eventType}`;
   document.querySelector("#videoRecordDetailNo").textContent = `REC-${modulePrefix}-20260723-${record.id.slice(-2).padStart(4, "0")}`;
@@ -2565,14 +2656,23 @@ function openVideoRecordDetail(record) {
   document.querySelector("#videoRecordDetailConclusion").textContent = conclusion;
   document.querySelector("#videoRecordConclusion").hidden = record.state !== "closed";
   document.querySelectorAll("[data-offduty-record-only]").forEach((node) => { node.hidden = !isOffDuty; });
+  document.querySelectorAll("[data-passage-record-only]").forEach((node) => { node.hidden = !isPassage; });
   if (isOffDuty) {
     document.querySelector("#offDutyRequiredCount").textContent = `${record.requiredCount} 人`;
     document.querySelector("#offDutyTriggerCount").textContent = `${record.detectedCountAtTrigger} 人`;
     document.querySelector("#offDutyCurrentCount").textContent = `${record.currentDetectedCount} / ${record.requiredCount} 人`;
     document.querySelector("#offDutyTriggerRule").textContent = `人数不足持续 ${record.triggerThresholdSeconds} 秒`;
   }
+  if (isPassage) {
+    document.querySelector("#passageOccupiedTarget").textContent = record.occupiedTarget === "object" ? "物品滞留" : "车辆占用";
+    document.querySelector("#passageDetectedObject").textContent = record.detectedObjectLabel;
+    document.querySelector("#passageDetectionState").textContent = record.detectionState === "clear" ? "设备识别通道畅通" : `${record.detectedObjectLabel}仍占用`;
+    document.querySelector("#passageTriggerRule").textContent = `${record.occupiedTarget === "object" ? "物品滞留" : "车辆占用"}持续 ${record.triggerThresholdSeconds} 秒`;
+    document.querySelector("#passageLastDetectedAt").textContent = record.lastDetectedAt || "--";
+  }
   renderVideoRecordTimeline(record);
   renderOffDutyReviewPanel(record);
+  renderPassageActionPanel(record);
   renderPassageOperationHistory(record);
   document.querySelector("#videoRecordModal").hidden = false;
   document.body.style.overflow = "hidden";
@@ -2589,16 +2689,12 @@ function closeVideoRecordDetail() {
 function resolveVideoRecord(recordId) {
   const module = getVideoModule();
   const record = module.records.find((item) => item.id === recordId);
-  if (selectedVideoModule === "offduty" && record) {
+  if (["offduty", "passage"].includes(selectedVideoModule) && record) {
     openVideoRecordDetail(record);
     return;
   }
   if (!record || record.state !== "active") {
     showToast("事件处置记录已打开（演示）");
-    return;
-  }
-  if (selectedVideoModule === "passage") {
-    openPassageActionModal(record.id);
     return;
   }
   openVideoRecordDetail(record);
@@ -2608,16 +2704,21 @@ function renderVideoRecordTable() {
   const module = getVideoModule();
   const tbody = document.querySelector("#videoRecordTableBody");
   const isOffDuty = selectedVideoModule === "offduty";
+  const isPassage = selectedVideoModule === "passage";
   const records = module.records.filter((item) => {
     if (isOffDuty) ensureOffDutyRecordShape(item);
+    if (isPassage) {
+      ensurePassageRecordShape(item);
+    }
     if (selectedVideoRecordFilter === "active") return isOffDuty ? item.state !== "closed" : item.state !== "closed";
     if (selectedVideoRecordFilter === "closed") return item.state === "closed";
     return true;
   });
   tbody.innerHTML = records.map((record) => {
     const isFire = selectedVideoModule === "flame";
-    const isActive = isOffDuty ? record.state !== "closed" : record.state === "active";
-    const actionLabel = isOffDuty ? record.state === "closed" ? "查看记录" : record.state === "pending" ? "查看并复核" : "继续处置" : isFire && record.state !== "closed" ? "查看告警" : isActive ? module.primaryAction : "查看记录";
+    const isActive = isOffDuty || isPassage ? record.state !== "closed" : record.state === "active";
+    const reviewActionLabel = record.state === "closed" ? "查看记录" : isPassage ? "查看并处置" : record.state === "pending" ? "查看并复核" : "继续处置";
+    const actionLabel = isOffDuty || isPassage ? reviewActionLabel : isFire && record.state !== "closed" ? "查看告警" : isActive ? module.primaryAction : "查看记录";
     const actionClass = isActive ? "video-record-action primary" : "video-record-action";
     const stateClass = record.state === "pending" || record.state === "active" ? "pending" : record.state === "processing" ? "processing" : record.state === "recovered_pending" ? "recovered-pending" : "reset";
     const recordTime = isOffDuty ? record.triggeredAt : record.time;
@@ -2628,7 +2729,7 @@ function renderVideoRecordTable() {
       <td><div class="video-record-device"><strong>${record.device}</strong><small>${record.point}</small></div></td>
       <td><span ${isOffDuty ? `data-offduty-duration="${record.id}"` : ""}>${duration}</span></td>
       <td>${record.owner}</td>
-      <td><span class="state-pill ${stateClass}" ${isOffDuty ? `data-offduty-state="${record.id}"` : ""}>${getVideoRecordState(record)}</span></td>
+      <td><span class="state-pill ${stateClass}" ${isOffDuty ? `data-offduty-state="${record.id}"` : isPassage ? `data-passage-state="${record.id}"` : ""}>${getVideoRecordState(record)}</span></td>
       <td><button class="${actionClass}" type="button" data-video-record-action="${record.id}">${actionLabel}</button></td>
     </tr>`;
   }).join("");
@@ -2638,7 +2739,7 @@ function renderVideoRecordTable() {
     button.addEventListener("click", () => {
       const record = module.records.find((item) => item.id === button.dataset.videoRecordAction);
       if (!record) return;
-      if (isOffDuty) openVideoRecordDetail(record);
+      if (isOffDuty || isPassage) openVideoRecordDetail(record);
       else if (selectedVideoModule === "flame" && record.state !== "closed") openFireAlarmFromVideo(record.fireAlarmId);
       else if (record.state === "active") resolveVideoRecord(record.id);
       else openVideoRecordDetail(record);
@@ -2675,7 +2776,7 @@ function renderVideoMonitoring() {
   document.querySelectorAll("[data-video-module-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.videoModuleTab === selectedVideoModule);
     const item = videoMonitoringModules[button.dataset.videoModuleTab];
-    const count = item.records.filter((record) => button.dataset.videoModuleTab === "offduty" ? record.state !== "closed" : record.state === "active").length;
+    const count = item.records.filter((record) => ["offduty", "passage"].includes(button.dataset.videoModuleTab) ? record.state !== "closed" : record.state === "active").length;
     button.querySelector("b").textContent = `${count} 条${button.dataset.videoModuleTab === "flame" ? "告警" : "预警"}`;
   });
 
@@ -3104,6 +3205,14 @@ function bindInteractions() {
     renderPassageActionPhotoPreview();
   });
   document.querySelector("#passageActionForm").addEventListener("submit", submitPassageAction);
+  document.querySelector("#passageFalseAlarmAction").addEventListener("click", () => {
+    const record = getSelectedPassageRecord();
+    if (record) openPassageActionModal(record.id, "false_alarm");
+  });
+  document.querySelector("#passageConfirmClear").addEventListener("click", () => {
+    const record = getSelectedPassageRecord();
+    if (record) openPassageActionModal(record.id, "cleared");
+  });
   document.querySelectorAll("[data-video-module-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedVideoModule = button.dataset.videoModuleTab;
@@ -3135,7 +3244,7 @@ function bindInteractions() {
       openFireAlarmFromVideo("fa1");
       return;
     }
-    const activeRecord = getVideoModule().records.find((item) => selectedVideoModule === "offduty" ? item.id === "vod01" && item.state !== "closed" : item.state === "active");
+    const activeRecord = getVideoModule().records.find((item) => ["offduty", "passage"].includes(selectedVideoModule) ? item.state !== "closed" : item.state === "active");
     if (activeRecord) resolveVideoRecord(activeRecord.id);
     else showToast("当前没有待处理事件");
   });

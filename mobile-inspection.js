@@ -106,6 +106,7 @@
       closedAt: values.closedAt || "",
       originTaskId: values.originTaskId || "",
       originItemId: values.originItemId || "",
+      originRoute: values.originRoute || "",
       history: clone(values.history || [])
     };
   }
@@ -191,6 +192,7 @@
     const alert = openFire ? { title: openFire.title, meta: `${openFire.location} · ${openFire.time.slice(11, 16)}`, note: openFire.note, route: `fire/${openFire.id}`, icon: "siren", tone: "fire" } : openWarning ? { title: openWarning.title, meta: `${openWarning.point} · ${openWarning.updated.slice(11, 16)}`, note: openWarning.note, route: `warning/${openWarning.id}`, icon: "triangle-alert", tone: "warning" } : { title: openFault?.title || "当前无待处理事件", meta: openFault ? `${openFault.point} · ${openFault.updated.slice(11, 16)}` : "设备运行状态稳定", note: openFault?.note || "所有重点消防设备运行正常。", route: openFault ? `fault/${openFault.id}` : "applications", icon: openFault ? "wrench" : "circle-check", tone: openFault ? "fault" : "normal" };
     const inspection = typeTasks("fire_check")[0];
     const done = taskCounts(inspection);
+    const routineMetrics = window.RoutineApp?.metrics() || { patrolCompleted: 5, patrolPending: 12 };
     const hazards = store.hazards.filter((item) => item.state !== "closed").slice(0, 3);
     const today = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "long" }).format(new Date());
     deps.renderHeader("首页", "", "", deps.notificationHeaderButton("home"));
@@ -201,7 +203,7 @@
       <button class="home-alert-card ${alert.tone}" type="button" data-route="${alert.route}"><span><i data-lucide="${alert.icon}"></i></span><div><strong>${deps.esc(alert.title)}</strong><small>${deps.esc(alert.meta)}</small><p>${deps.esc(alert.note)}</p></div><i data-lucide="chevron-right"></i></button>
       <div class="suite-section-title"><h2>与我相关待办</h2></div>
       <div class="home-todo-grid">
-        ${homeTodo("防火巡查", "待巡查 12 · 已完成 5", "去巡查", "user-round-check", "patrol")}
+        ${homeTodo("防火巡查", `待巡查 ${routineMetrics.patrolPending} · 已完成 ${routineMetrics.patrolCompleted}`, "去巡查", "user-round-check", "patrol")}
         ${homeTodo("消控室值班", "当前班次值班中", "进入值班", "monitor", "duty")}
         ${homeTodo("防火检查", `${inspection.items.length - done.unchecked}/${inspection.items.length} 项已检查`, "去检查", "clipboard-check", `inspection/execute/${inspection.id}`)}
         ${homeTodo("隐患整改", `${hazardOpenCount()} 项待闭环`, "去处理", "triangle-alert", "hazard")}
@@ -209,12 +211,12 @@
       <div class="suite-section-title"><h2>待处理隐患 <b>${hazardOpenCount()}</b></h2><button type="button" data-route="hazard">查看全部</button></div>
       <div class="suite-card-list">${hazards.map(hazardCard).join("")}</div>
       <div class="suite-section-title"><h2>快捷入口</h2></div>
-      <div class="home-quick-grid"><button type="button" data-route="hazard/new"><i data-lucide="circle-plus"></i><span>上报隐患</span></button><button type="button" data-suite-placeholder="巡查 NFC 打卡"><i data-lucide="scan-line"></i><span>NFC打卡</span></button><button type="button" data-suite-placeholder="巡查扫码"><i data-lucide="qr-code"></i><span>扫码</span></button></div>
+      <div class="home-quick-grid"><button type="button" data-route="hazard/new"><i data-lucide="circle-plus"></i><span>上报隐患</span></button><button type="button" data-route="patrol/quick/nfc"><i data-lucide="scan-line"></i><span>NFC打卡</span></button><button type="button" data-route="patrol/quick/qr"><i data-lucide="qr-code"></i><span>扫码</span></button></div>
     </div>`;
   }
 
   function homeTodo(title, meta, action, icon, route) {
-    const attr = route === "patrol" ? `data-suite-placeholder="防火巡查"` : `data-route="${route}"`;
+    const attr = `data-route="${route}"`;
     return `<article class="home-todo-card"><span class="suite-icon"><i data-lucide="${icon}"></i></span><div><strong>${title}</strong><small>${meta}</small></div><button type="button" ${attr}>${action}</button></article>`;
   }
 
@@ -334,7 +336,7 @@
     const action = item.state === "pending" ? `<button class="primary" type="button" data-hazard-action="assign" data-hazard-id="${item.id}">分配负责人</button>` : item.state === "rectifying" ? `<button type="button" data-hazard-action="change-assignee" data-hazard-id="${item.id}">更换负责人</button><button class="primary" type="button" data-hazard-action="rectify" data-hazard-id="${item.id}">上报整改</button>` : item.state === "review" ? `<button type="button" data-hazard-action="reject" data-hazard-id="${item.id}">退回整改</button><button class="primary" type="button" data-hazard-action="approve" data-hazard-id="${item.id}">审定通过</button>` : "";
     deps.renderHeader("隐患详情", item.no, "hazard");
     const overdue = isOverdue(item) ? `<div class="hazard-detail-alert"><i data-lucide="triangle-alert"></i>已超期，请尽快完成整改</div>` : "";
-    deps.appMain.innerHTML = `<div class="suite-page hazard-detail-page">${overdue}<section class="hazard-detail-hero ${item.level}"><div><span>${item.level === "major" ? "重大隐患" : "一般隐患"}</span><b>${hazardStateLabel(item.state)}</b></div><h2>${deps.esc(item.description)}</h2><p>${deps.esc(locationText(item))}</p></section><section class="suite-form-card"><h2>基础信息</h2><div class="suite-info-grid"><span><small>编号</small><b>${deps.esc(item.no)}</b></span><span><small>来源</small><b>${deps.esc(item.source)}</b></span><span><small>要素类型</small><b>${deps.esc(item.category)}</b></span><span><small>上报人</small><b>${deps.esc(item.reporter || "-")}</b></span><span><small>上报时间</small><b>${deps.esc(item.reportedAt || "-")}</b></span><span><small>整改期限</small><b>${deps.esc(item.deadline || "-")}</b></span><span><small>销号时间</small><b>${deps.esc(item.closedAt || "-")}</b></span><span><small>整改轮次</small><b>${item.rectificationRound || 0} 次</b></span></div></section><section class="suite-form-card"><h2>隐患描述与现场证据</h2><p class="hazard-detail-copy">${deps.esc(item.description)}</p><p class="hazard-location-copy"><i data-lucide="map-pin"></i>${deps.esc(locationText(item))}${item.locationNote ? ` · ${deps.esc(item.locationNote)}` : ""}</p>${photoGallery("隐患现场照片", item.photos, "暂无隐患现场照片")}${item.originTaskId ? `<button type="button" class="origin-link" data-route="${typeRoutes[taskById(item.originTaskId)?.type] || "applications"}/detail/${item.originTaskId}"><i data-lucide="external-link"></i>查看来源检查任务</button>` : ""}</section><section class="suite-form-card"><h2>责任链</h2>${detailRow("当前整改负责人", item.assignee || "待分配")}${detailRow("分配人", item.assigner || "-")}${detailRow("分配时间", item.assignedAt || "-")}${detailRow("实际整改人", item.actualRectifier || "-")}${detailRow("实际整改时间", item.rectifiedAt || "-")}${item.assignNote ? `<div class="note-box">分配说明：${deps.esc(item.assignNote)}</div>` : ""}</section>${rectificationSections(item)}${reviewSection(item)}<section class="suite-form-card"><h2>操作日志</h2><div class="timeline">${[...item.history].reverse().map((row) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${deps.esc(row.note)}</strong><time>${deps.esc(row.time)} · ${deps.esc(row.operator)}</time></div></div>`).join("") || `<p class="suite-hint">暂无处理记录</p>`}</div></section></div>${action ? `<div class="fixed-actions">${action}</div>` : ""}`;
+    deps.appMain.innerHTML = `<div class="suite-page hazard-detail-page">${overdue}<section class="hazard-detail-hero ${item.level}"><div><span>${item.level === "major" ? "重大隐患" : "一般隐患"}</span><b>${hazardStateLabel(item.state)}</b></div><h2>${deps.esc(item.description)}</h2><p>${deps.esc(locationText(item))}</p></section><section class="suite-form-card"><h2>基础信息</h2><div class="suite-info-grid"><span><small>编号</small><b>${deps.esc(item.no)}</b></span><span><small>来源</small><b>${deps.esc(item.source)}</b></span><span><small>要素类型</small><b>${deps.esc(item.category)}</b></span><span><small>上报人</small><b>${deps.esc(item.reporter || "-")}</b></span><span><small>上报时间</small><b>${deps.esc(item.reportedAt || "-")}</b></span><span><small>整改期限</small><b>${deps.esc(item.deadline || "-")}</b></span><span><small>销号时间</small><b>${deps.esc(item.closedAt || "-")}</b></span><span><small>整改轮次</small><b>${item.rectificationRound || 0} 次</b></span></div></section><section class="suite-form-card"><h2>隐患描述与现场证据</h2><p class="hazard-detail-copy">${deps.esc(item.description)}</p><p class="hazard-location-copy"><i data-lucide="map-pin"></i>${deps.esc(locationText(item))}${item.locationNote ? ` · ${deps.esc(item.locationNote)}` : ""}</p>${photoGallery("隐患现场照片", item.photos, "暂无隐患现场照片")}${item.originTaskId ? `<button type="button" class="origin-link" data-route="${item.originRoute || `${typeRoutes[taskById(item.originTaskId)?.type] || "applications"}/detail/${item.originTaskId}`}"><i data-lucide="external-link"></i>查看来源检查任务</button>` : ""}</section><section class="suite-form-card"><h2>责任链</h2>${detailRow("当前整改负责人", item.assignee || "待分配")}${detailRow("分配人", item.assigner || "-")}${detailRow("分配时间", item.assignedAt || "-")}${detailRow("实际整改人", item.actualRectifier || "-")}${detailRow("实际整改时间", item.rectifiedAt || "-")}${item.assignNote ? `<div class="note-box">分配说明：${deps.esc(item.assignNote)}</div>` : ""}</section>${rectificationSections(item)}${reviewSection(item)}<section class="suite-form-card"><h2>操作日志</h2><div class="timeline">${[...item.history].reverse().map((row) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${deps.esc(row.note)}</strong><time>${deps.esc(row.time)} · ${deps.esc(row.operator)}</time></div></div>`).join("") || `<p class="suite-hint">暂无处理记录</p>`}</div></section></div>${action ? `<div class="fixed-actions">${action}</div>` : ""}`;
   }
 
   function detailRow(label, value) { return `<div class="hazard-detail-row"><span>${deps.esc(label)}</span><b>${deps.esc(value)}</b></div>`; }
@@ -385,7 +387,7 @@
 
   function createHazard(values) {
     const sequence = store.hazards.length + 1; const createdAt = values.reportedAt || stamp(); const id = `hz${Date.now()}${sequence}`;
-    const hazard = initialHazard({ id, no: `HZ-${createdAt.slice(0, 10).replace(/-/g, "")}-${String(sequence).padStart(3, "0")}`, source: values.source, level: values.level || "general", category: values.category, state: "pending", description: values.description, point: values.point, locationMethod: values.locationMethod || "manual", building: values.building, floor: values.floor, place: values.place, locationNote: values.locationNote, photos: values.photos, reporter: values.reporter || "Admin", reportedAt: createdAt, suggestedAssignee: values.suggestedAssignee || "", assignee: "待分配", deadline: values.deadline || "2026-08-03", originTaskId: values.originTaskId, originItemId: values.originItemId, history: [{ action: "create", operator: values.reporter || "Admin", time: createdAt, note: `由${values.source}生成隐患。` }] });
+    const hazard = initialHazard({ id, no: `HZ-${createdAt.slice(0, 10).replace(/-/g, "")}-${String(sequence).padStart(3, "0")}`, source: values.source, level: values.level || "general", category: values.category, state: "pending", description: values.description, point: values.point, locationMethod: values.locationMethod || "manual", building: values.building, floor: values.floor, place: values.place, locationNote: values.locationNote, photos: values.photos, reporter: values.reporter || "Admin", reportedAt: createdAt, suggestedAssignee: values.suggestedAssignee || "", assignee: "待分配", deadline: values.deadline || "2026-08-03", originTaskId: values.originTaskId, originItemId: values.originItemId, originRoute: values.originRoute, history: [{ action: "create", operator: values.reporter || "Admin", time: createdAt, note: `由${values.source}生成隐患。` }] });
     store.hazards.unshift(hazard); return hazard;
   }
 
@@ -484,5 +486,5 @@
   function formatSize(bytes) { return bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`; }
   function emptyState(text) { return `<div class="suite-empty"><i data-lucide="inbox"></i><span>${text}</span></div>`; }
 
-  window.InspectionApp = { init, reset, badge, metrics, canRender, render, renderHome, handleClick };
+  window.InspectionApp = { init, reset, badge, metrics, canRender, render, renderHome, handleClick, createHazard };
 })();

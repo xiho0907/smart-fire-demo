@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>智慧消防综合管理平台</title>
-    <link rel="stylesheet" href="styles.css?v=20260729-fault-table-simple" />
+    <link rel="stylesheet" href="styles.css?v=20260729-passage-simple-action" />
   </head>
   <body>
     <div class="app-shell">
@@ -774,15 +774,17 @@
     <div class="modal-backdrop" id="passageActionModal" hidden>
       <section class="handle-modal passage-action-modal" role="dialog" aria-modal="true" aria-labelledby="passageActionModalTitle">
         <header>
-          <div><span class="assignment-badge passage-action-badge"><i data-lucide="traffic-cone"></i>通道处置</span><h2 id="passageActionModalTitle">确认通道畅通</h2></div>
+          <div><span class="assignment-badge passage-action-badge"><i data-lucide="traffic-cone"></i>通道处置</span><h2 id="passageActionModalTitle">确认通道顺畅</h2></div>
           <button class="icon-button" type="button" data-passage-action-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
         </header>
         <div class="modal-event-summary passage-action-summary"><span class="summary-icon"><i data-lucide="traffic-cone"></i></span><div><strong id="passageActionTargetTitle">消防通道车辆拥堵</strong><p id="passageActionTargetMeta">东侧消防通道 · 通道监测-08</p></div></div>
         <form id="passageActionForm" novalidate>
-          <div class="passage-action-context"><i data-lucide="info"></i><p>请确认占用车辆或物品已经移除，并记录现场核查结果。</p></div>
+          <div class="passage-action-context"><i data-lucide="info"></i><p id="passageActionContextText">请根据现场情况填写处置说明，人工确认通道顺畅。</p></div>
+          <label id="passageFalseAlarmField" hidden><span>误报原因 <b class="required-mark">必填</b></span><select id="passageFalseAlarmReason"><option value="">请选择误报原因</option><option value="画面遮挡">画面遮挡</option><option value="识别错误">识别错误</option><option value="非消防通道区域">非消防通道区域</option><option value="其他">其他</option></select></label>
           <label><span>处置说明 <b class="required-mark">必填</b></span><textarea id="passageActionDescription" rows="4" required placeholder="例如：车辆已驶离，现场确认消防通道无障碍物，已恢复正常通行。"></textarea><small class="field-hint">处置说明将保存在本次通道恢复记录中。</small></label>
           <label><span>现场照片 <em>选填</em></span><div class="photo-upload-box"><input id="passageActionPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple /><span class="photo-upload-icon"><i data-lucide="image-plus"></i></span><strong>选择现场照片</strong><small>支持 JPG、PNG、WebP，最多 6 张，单张不超过 10 MB</small></div><div class="photo-error" id="passageActionPhotoError" role="alert" hidden></div><div class="photo-preview-grid" id="passageActionPhotoPreview"></div></label>
-          <footer><button class="secondary-button" type="button" data-passage-action-close>取消</button><button class="primary-button" type="submit"><i data-lucide="badge-check"></i>确认通道畅通</button></footer>
+          <p class="form-error" id="passageActionError" hidden></p>
+          <footer><button class="secondary-button" type="button" data-passage-action-close>取消</button><button class="primary-button" type="submit" id="passageActionSubmit"><i data-lucide="badge-check"></i>确认通道顺畅</button></footer>
         </form>
       </section>
     </div>
@@ -978,6 +980,11 @@
             <div data-offduty-record-only><dt>触发人数</dt><dd id="offDutyTriggerCount">1 人</dd></div>
             <div data-offduty-record-only><dt>当前人数</dt><dd id="offDutyCurrentCount">2 / 2 人</dd></div>
             <div data-offduty-record-only><dt>触发规则</dt><dd id="offDutyTriggerRule">人数不足持续 60 秒</dd></div>
+            <div data-passage-record-only><dt>占用目标</dt><dd id="passageOccupiedTarget">车辆占用</dd></div>
+            <div data-passage-record-only><dt>最新识别对象</dt><dd id="passageDetectedObject">车辆</dd></div>
+            <div data-passage-record-only><dt>当前识别</dt><dd id="passageDetectionState">车辆仍占用</dd></div>
+            <div data-passage-record-only><dt>触发规则</dt><dd id="passageTriggerRule">车辆占用持续 120 秒</dd></div>
+            <div data-passage-record-only><dt>最近识别时间</dt><dd id="passageLastDetectedAt">--</dd></div>
             <div><dt>处置人员</dt><dd id="videoRecordDetailOwner">王晨</dd></div>
             <div><dt>处置方式</dt><dd id="videoRecordDetailMethod">视频复核并脱岗消警</dd></div>
             <div><dt>完成时间</dt><dd id="videoRecordDetailClosedAt">2026-07-23 16:45:02</dd></div>
@@ -1007,6 +1014,10 @@
             <div class="offduty-resolution-submit"><button class="primary-button" type="submit" id="offDutyResolutionSubmit"><i data-lucide="badge-check"></i>确认消警</button></div>
           </form>
         </section>
+        <section class="passage-action-panel" id="passageActionPanel" hidden>
+          <div><strong>人工处置</strong><p>设备识别结果仅供参考，请按现场实际情况完成处置。</p></div>
+          <div class="passage-resolution-buttons"><button class="secondary-button" type="button" id="passageFalseAlarmAction"><i data-lucide="shield-alert"></i>误报消警</button><button class="primary-button" type="button" id="passageConfirmClear"><i data-lucide="badge-check"></i>确认通道顺畅</button></div>
+        </section>
         <footer><button class="secondary-button" type="button" data-video-record-close><i data-lucide="x"></i>关闭</button></footer>
       </section>
     </div>
@@ -1014,6 +1025,6 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden><i data-lucide="circle-check"></i><span>操作成功</span></div>
 
     <script src="assets/vendor/lucide.min.js"></script>
-    <script src="app.js?v=20260729-fault-table-simple"></script>
+    <script src="app.js?v=20260729-passage-simple-action"></script>
   </body>
 </html>

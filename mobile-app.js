@@ -14,19 +14,39 @@ const featureApps = [
   { id: "micro-station", label: "微型消防站", icon: "shield", tone: "red", group: "facility" },
   { id: "duty", label: "消控室值班", icon: "monitor", tone: "orange", route: "duty", group: "daily" },
   { id: "evacuation", label: "安全疏散检查", icon: "log-in", tone: "green", route: "evacuation", group: "daily" },
-  { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange", group: "daily" },
-  { id: "electricity", label: "用电检查", icon: "zap", tone: "", group: "daily" },
-  { id: "gas", label: "用气检查", icon: "gauge", tone: "", group: "daily" },
-  { id: "duct", label: "油烟管道清洗", icon: "panels-top-left", tone: "indigo", group: "daily" },
-  { id: "hot-work", label: "动火作业", icon: "wrench", tone: "orange", group: "daily" },
-  { id: "renovation", label: "装修装饰检查", icon: "briefcase", tone: "green", group: "daily" },
-  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "", group: "hazard" },
+  { id: "fire-use", label: "用火检查", icon: "flame", tone: "orange", route: "fire-use", group: "daily" },
+  { id: "electricity", label: "用电检查", icon: "zap", tone: "", route: "electricity", group: "daily" },
+  { id: "gas", label: "用气检查", icon: "gauge", tone: "", route: "gas", group: "daily" },
+  { id: "duct", label: "油烟管道清洗", icon: "panels-top-left", tone: "indigo", route: "duct", group: "daily" },
+  { id: "hot-work", label: "动火作业", icon: "wrench", tone: "orange", route: "hot-work", group: "daily" },
+  { id: "renovation", label: "装修装饰检查", icon: "briefcase", tone: "green", route: "renovation", group: "daily" },
+  { id: "patrol", label: "防火巡查", icon: "user-round-check", tone: "", route: "patrol", group: "hazard" },
   { id: "inspection", label: "防火检查", icon: "clipboard-check", tone: "", route: "inspection", group: "hazard" },
   { id: "hazard", label: "隐患整改", icon: "triangle-alert", tone: "red", route: "hazard", group: "hazard" },
   { id: "fire", label: "火警告警", icon: "siren", tone: "red", route: "fire", group: "terminal" },
   { id: "warning", label: "设备预警", icon: "triangle-alert", tone: "orange", route: "warning", group: "terminal" },
   { id: "video", label: "视频监控", icon: "video", tone: "indigo", route: "video", group: "terminal" },
   { id: "fault", label: "设备故障", icon: "wrench", tone: "orange", route: "fault", group: "terminal" }
+];
+
+const profileRewards = [
+  { title: "2026年Q2消防安全先进个人", type: "奖励", tone: "success", date: "2026-06-30", category: "现金奖励", description: "在6月防火检查中表现突出，发现并及时处理3处重大隐患。" },
+  { title: "2026年Q1巡查优秀", type: "奖励", tone: "success", date: "2026-03-31", category: "通报表扬", description: "第一季度防火巡查完成率100%，未发现漏检情况。" },
+  { title: "值班记录不规范", type: "处罚", tone: "danger", date: "2026-02-15", category: "批评教育", description: "2月12日夜班值班记录填写不完整，已完成复核整改。" }
+];
+
+const profileRegulations = [
+  ["消防安全教育培训制度", "2026-06-01", true], ["防火巡查检查制度", "2026-06-01", true], ["安全疏散设施管理制度", "2026-05-15", true],
+  ["消防设施器材维护管理制度", "2026-05-15", true], ["消防控制室值班制度", "", false], ["用火用电安全管理制度", "2026-04-20", true],
+  ["火灾隐患整改制度", "2026-04-20", true], ["易燃易爆危险物品管理制度", "2026-03-10", true], ["灭火和应急疏散预案", "2026-03-10", true],
+  ["消防安全工作考评奖惩制度", "2026-02-01", true], ["微型消防站管理制度", "", false], ["动火作业审批制度", "2026-01-15", true],
+  ["装修装饰消防安全管理制度", "2026-01-15", true]
+];
+
+const profileCertificates = [
+  { name: "消防设施操作员资格证", no: "JF-2024-00123", issued: "2024-03-15", expires: "2026-09-14", state: "expiring", label: "即将到期" },
+  { name: "消防安全培训合格证", no: "PX-2025-00456", issued: "2025-06-20", expires: "2027-06-19", state: "valid", label: "有效" },
+  { name: "急救技能培训证书", no: "JJ-2023-00789", issued: "2023-01-10", expires: "2025-01-09", state: "expired", label: "已过期" }
 ];
 
 const fireAlarms = [
@@ -115,8 +135,9 @@ const videoModules = {
       { id: "ps12", name: "西侧装卸通道", device: "通道监测-12", code: "CH 12", status: "通道畅通" }
     ],
     records: [
-      { id: "vps01", time: "2026-07-24 09:31:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:04:13", state: "active", owner: "待处置", completedAt: "", handlingNote: "", operationHistory: [] },
-      { id: "vps02", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", state: "closed", owner: "赵凯", completedAt: "2026-07-23 18:26:45", handlingNote: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", operationHistory: [{ action: "confirm_clear", operator: "赵凯", time: "2026-07-23 18:26:45", description: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", photos: [] }] }
+      { id: "vps01", time: "2026-07-24 09:31:03", title: "消防通道车辆拥堵", eventType: "channelOccupy", device: "通道监测-08", point: "东侧消防通道", duration: "00:04:13", state: "pending", detectionState: "occupied", occupiedTarget: "vehicle", detectedObjectLabel: "车辆", lastDetectedAt: "2026-07-24 09:31:03", triggerThresholdSeconds: 120, clearStableSeconds: 60, reviewedAt: "", clearDetectedAt: "", clearStableSince: "", resolution: "", falseAlarmReason: "", owner: "待处置", completedAt: "", handlingNote: "", operationHistory: [] },
+      { id: "vps02", time: "2026-07-23 17:55:12", title: "消防通道物品滞留", eventType: "fireEscapeDetection", device: "通道监测-12", point: "西侧装卸通道", duration: "00:31:05", state: "closed", detectionState: "clear", occupiedTarget: "object", detectedObjectLabel: "卸货物品", lastDetectedAt: "2026-07-23 18:24:58", triggerThresholdSeconds: 60, clearStableSeconds: 60, reviewedAt: "2026-07-23 18:18:12", clearDetectedAt: "2026-07-23 18:24:58", clearStableSince: "2026-07-23 18:24:58", resolution: "cleared", falseAlarmReason: "", owner: "赵凯", completedAt: "2026-07-23 18:26:45", handlingNote: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", operationHistory: [{ action: "confirm_clear", operator: "赵凯", time: "2026-07-23 18:26:45", description: "现场货物已全部移出消防通道，视频复核确认道路恢复畅通。", photos: [] }, { action: "detection_clear", operator: "系统", time: "2026-07-23 18:24:58", description: "设备识别通道已畅通，开始计算稳定时间。", photos: [] }, { action: "start_review", operator: "赵凯", time: "2026-07-23 18:18:12", description: "开始核对事件抓拍与前后录像。", photos: [] }] },
+      { id: "vps03", time: "2026-07-23 15:08:37", title: "临停车辆占用通道", eventType: "channelOccupy", device: "通道监测-02", point: "北门消防通道", duration: "00:04:16", state: "closed", detectionState: "occupied", occupiedTarget: "vehicle", detectedObjectLabel: "临停车辆", lastDetectedAt: "2026-07-23 15:08:37", triggerThresholdSeconds: 60, clearStableSeconds: 60, reviewedAt: "2026-07-23 15:09:02", clearDetectedAt: "", clearStableSince: "", resolution: "false_alarm", falseAlarmReason: "非消防通道区域", owner: "陈峰", completedAt: "2026-07-23 15:13:21", handlingNote: "识别区域包含临时停车位，现场核对未占用消防通道。", operationHistory: [{ action: "false_alarm", operator: "陈峰", time: "2026-07-23 15:13:21", description: "非消防通道区域：识别区域包含临时停车位，现场核对未占用消防通道。", photos: [] }, { action: "start_review", operator: "陈峰", time: "2026-07-23 15:09:02", description: "开始核对事件抓拍与前后录像。", photos: [] }] }
     ]
   },
   flame: {
@@ -244,13 +265,14 @@ const state = {
   notificationReadFilter: "all", notificationTypeFilter: "all", notificationBackRoute: "applications",
   detailReturnRoute: "", detailTargetRoute: "", pushNotificationId: "", notificationsEnabled: false,
   sheetSubmit: null, sheetPhotos: [], sheetPhotoLimit: 6, toastTimer: null, pushTimer: null,
-  dutyRecordDateOffset: 0
+  dutyRecordDateOffset: 0,
+  profileSoundEnabled: true, profileWifiOnly: true
 };
 
 const fireStateLabels = { pending: "待确认", confirmed: "已确认", processing: "处置中", reset: "已复位", false: "误报消警" };
 const warningStateLabels = { pending: "待核查", checking: "核查中", recovered: "已恢复" };
 const faultStateLabels = { pending: "待处理", processing: "处理中", handled: "已处理待恢复", recovered: "已恢复" };
-const videoStateLabels = { pending: "待复核", processing: "处置中", recovered_pending: "待确认返岗", active: "待处置", closed: "已消警" };
+const videoStateLabels = { pending: "待复核", processing: "处置中", recovered_pending: "待确认返岗", active: "待处置", closed: "已闭环" };
 const fireActionLabels = { assign: "人员指派", confirm: "确认警情", false: "误报消警", dispose: "警情处置", reset: "设备复位" };
 const warningTypeMeta = {
   power: ["智能用电", "zap"], gas: ["可燃气体", "wind"], level: ["远程液位", "waves"],
@@ -496,6 +518,7 @@ function resetModuleState(module) {
     refreshAllDutyHandoverCategories(false);
   } else if (module === "inspection-suite") {
     window.InspectionApp?.reset();
+    window.RoutineApp?.reset();
   } else return;
   closePreviewControls();
   render();
@@ -531,6 +554,7 @@ function faultOpenCount() { return faults.filter((item) => item.state !== "recov
 
 function renderApplications() {
   const suiteMetrics = window.InspectionApp?.metrics() || { hazardOpen: 0, inspectionCompleted: "0/1" };
+  const routineMetrics = window.RoutineApp?.metrics() || { patrolRate: 0 };
   renderHeader("应用中心", "", "", notificationHeaderButton("applications"));
   setBottomNav("applications");
   appMain.innerHTML = `<div class="application-page">
@@ -550,7 +574,7 @@ function renderApplications() {
     }).join("")}</div>
     <div class="empty-search" id="appSearchEmpty" hidden>没有找到相关功能</div>
     <div class="section-heading"><h2>本月数据</h2><span>数据更新至今日</span></div>
-    <div class="monthly-grid"><div class="monthly-card"><strong>85%</strong><span>巡查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.inspectionCompleted}</strong><span>检查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.hazardOpen}</strong><span>待处理隐患</span></div><div class="monthly-card"><strong>12天</strong><span>本月值班</span></div></div>
+    <div class="monthly-grid"><div class="monthly-card"><strong>${routineMetrics.patrolRate}%</strong><span>巡查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.inspectionCompleted}</strong><span>检查完成率</span></div><div class="monthly-card"><strong>${suiteMetrics.hazardOpen}</strong><span>待处理隐患</span></div><div class="monthly-card"><strong>12天</strong><span>本月值班</span></div></div>
   </div>`;
 }
 
@@ -561,7 +585,109 @@ function renderHome() {
 function renderProfile() {
   renderHeader("我的");
   setBottomNav("profile");
-  appMain.innerHTML = "";
+  appMain.innerHTML = `<div class="profile-page profile-center-page">
+    <button class="profile-hero" type="button" data-route="profile/account">
+      <span class="profile-avatar-mark">A</span>
+      <span class="profile-identity"><strong>Admin</strong><small>XX市阳光养老院</small><i><b>消防安全管理员</b><b>值班员</b></i></span>
+      <i data-lucide="chevron-right"></i>
+    </button>
+    <div class="profile-section-heading"><h2>本月数据</h2><span>更新至今日</span></div>
+    <section class="profile-monthly-stats">
+      <span><strong>28</strong><small>巡查次数</small></span><span><strong>1</strong><small>检查次数</small></span><span><strong>5</strong><small>整改完成</small></span><span><strong>12</strong><small>值班天数</small></span>
+    </section>
+    <section class="profile-menu-group">
+      ${profileMenuItem("award", "奖惩记录", "profile/rewards")}
+      ${profileMenuItem("file-text", "消防制度与规程", "profile/regulations")}
+      ${profileMenuItem("book-open-check", "培训记录", "profile/training")}
+      ${profileMenuItem("badge-check", "证书管理", "profile/certificates", `<b class="profile-menu-badge warning">临期</b>`)}
+      ${profileMenuItem("file-signature", "责任书查看", "profile/responsibilities")}
+    </section>
+    <section class="profile-menu-group">
+      ${profileMenuItem("bell", "消息通知", "", `<b class="profile-menu-badge">${appNotifications.filter((item) => !item.read).length}</b>`, `data-notification-entry="profile"`)}
+      ${profileMenuItem("circle-help", "操作指南", "profile/guide")}
+      ${profileMenuItem("info", "关于平台", "profile/about", `<small>v1.0.0</small>`)}
+      ${profileMenuItem("settings", "设置", "profile/settings")}
+    </section>
+    <button class="profile-logout" type="button" data-profile-action="logout"><i data-lucide="log-out"></i>退出登录</button>
+  </div>`;
+}
+
+function profileMenuItem(icon, label, route, extra = "", attributes = "") {
+  return `<button class="profile-menu-item" type="button" ${route ? `data-route="${route}"` : attributes}><span><i data-lucide="${icon}"></i></span><strong>${label}</strong><aside>${extra}<i data-lucide="chevron-right"></i></aside></button>`;
+}
+
+function renderProfileSection(section) {
+  setBottomNav("", false);
+  if (section === "account") return renderProfileAccount();
+  if (section === "rewards") return renderProfileRewards();
+  if (section === "regulations") return renderProfileRegulations();
+  if (section === "training") return renderProfileTraining();
+  if (section === "certificates") return renderProfileCertificates();
+  if (section === "responsibilities") return renderProfileResponsibilities();
+  if (section === "guide") return renderProfileGuide();
+  if (section === "about") return renderProfileAbout();
+  if (section === "settings") return renderProfileSettings();
+  go("profile");
+}
+
+function renderProfileAccount() {
+  renderHeader("个人信息", "账号与机构身份", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><section class="profile-account-summary"><span>A</span><strong>Admin</strong><small>消防安全管理员</small></section><section class="profile-detail-section"><h2>基础信息</h2>${profileDetailRow("姓名", "Admin")}${profileDetailRow("所属机构", "XX市阳光养老院")}${profileDetailRow("所属部门", "消防安全管理部")}${profileDetailRow("手机号码", "138****3208")}${profileDetailRow("账号状态", "正常", "success")}</section><section class="profile-detail-section"><h2>岗位角色</h2><div class="profile-role-list"><span>消防安全管理员</span><span>值班员</span><span>隐患审定人</span></div></section></div>`;
+}
+
+function profileDetailRow(label, value, tone = "") {
+  return `<div class="profile-detail-row"><span>${label}</span><strong class="${tone}">${value}</strong></div>`;
+}
+
+function renderProfileRewards() {
+  renderHeader("奖惩记录", "个人消防安全履职记录", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><div class="profile-filter-tabs"><button class="active" type="button">全部</button><button type="button">2026年</button><button type="button">2025年</button></div><div class="profile-record-list">${profileRewards.map((item) => `<article class="profile-reward-item ${item.tone}"><div><strong>${item.title}</strong><span>${item.type}</span></div><small>${item.date} · ${item.category}</small><p>${item.description}</p></article>`).join("")}</div></div>`;
+}
+
+function renderProfileRegulations() {
+  renderHeader("消防制度与规程", "机构制度文件", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><div class="profile-document-list">${profileRegulations.map(([name, date, uploaded], index) => `<button type="button" class="profile-document-item" data-profile-preview="${uploaded ? name : ""}" ${uploaded ? "" : "disabled"}><span>${index + 1}</span><div><strong>${name}</strong><small><b class="${uploaded ? "uploaded" : "missing"}">${uploaded ? "已上传" : "未上传"}</b>${date || "暂无附件"}</small></div>${uploaded ? `<i data-lucide="eye"></i>` : `<i data-lucide="minus"></i>`}</button>`).join("")}</div></div>`;
+}
+
+function renderProfileTraining() {
+  const records = [
+    ["消防设施操作与应急处置培训", "2026-07-08", "2.0 学时", "已完成"],
+    ["养老机构夜间火灾疏散演练", "2026-06-18", "1.5 学时", "已完成"],
+    ["动火作业安全管理专题培训", "2026-08-05", "2.0 学时", "待参加"]
+  ];
+  renderHeader("培训记录", "个人消防培训档案", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><section class="profile-training-summary"><span><strong>6</strong><small>年度培训</small></span><span><strong>12.5</strong><small>累计学时</small></span><span><strong>100%</strong><small>考试通过率</small></span></section><div class="profile-record-list">${records.map(([title, date, duration, status]) => `<article class="profile-training-item"><span><i data-lucide="graduation-cap"></i></span><div><strong>${title}</strong><small>${date} · ${duration}</small></div><b class="${status === "已完成" ? "done" : "pending"}">${status}</b></article>`).join("")}</div></div>`;
+}
+
+function renderProfileCertificates() {
+  renderHeader("我的证书", "资质证书与有效期", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><div class="profile-record-list">${profileCertificates.map((item) => `<article class="profile-certificate-item ${item.state}"><div><span><i data-lucide="badge-check"></i></span><div><strong>${item.name}</strong><small>${item.no}</small></div><b>${item.label}</b></div><dl><div><dt>发证日期</dt><dd>${item.issued}</dd></div><div><dt>有效期至</dt><dd>${item.expires}</dd></div></dl><button type="button" data-profile-preview="${item.name}"><i data-lucide="eye"></i>查看证书</button></article>`).join("")}</div></div>`;
+}
+
+function renderProfileResponsibilities() {
+  const rows = [["2026年度消防安全责任书", "2026-01-03", "已签署"], ["消防控制室值班岗位责任书", "2026-01-03", "已签署"], ["隐患整改审定责任书", "2026-01-05", "已签署"]];
+  renderHeader("责任书查看", "岗位责任与签署记录", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><div class="profile-document-list">${rows.map(([name, date, status], index) => `<button type="button" class="profile-document-item" data-profile-preview="${name}"><span>${index + 1}</span><div><strong>${name}</strong><small><b class="uploaded">${status}</b>${date}</small></div><i data-lucide="eye"></i></button>`).join("")}</div></div>`;
+}
+
+function renderProfileGuide() {
+  const rows = [["火警与预警如何处置", "从人员指派到确认恢复的标准流程"], ["如何完成多人交接班", "交班确认、接班确认和异常交接说明"], ["如何执行巡查并转为隐患", "点位验证、异常记录和隐患闭环"], ["照片与附件上传要求", "支持格式、数量和文件大小说明"]];
+  renderHeader("操作指南", "常用业务操作说明", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><div class="profile-guide-list">${rows.map(([title, description], index) => `<details ${index === 0 ? "open" : ""}><summary><span><i data-lucide="book-open"></i></span><div><strong>${title}</strong><small>${description}</small></div><i data-lucide="chevron-down"></i></summary><p>${description}。请按照页面状态和底部操作按钮依次完成，提交后可在对应记录页面查看完整结果。</p></details>`).join("")}</div></div>`;
+}
+
+function renderProfileAbout() {
+  renderHeader("关于平台", "产品与机构信息", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><section class="profile-about-hero"><span><i data-lucide="shield-check"></i></span><h2>消防安全机构端</h2><p>养老机构消防安全日常管理与智能终端处置平台</p><b>v1.0.0</b></section><section class="profile-detail-section"><h2>平台信息</h2>${profileDetailRow("当前机构", "XX市阳光养老院")}${profileDetailRow("数据环境", "静态演示环境")}${profileDetailRow("更新时间", "2026-07-29")}</section><p class="profile-copyright">Copyright 2026 消防安全管理平台</p></div>`;
+}
+
+function renderProfileSettings() {
+  renderHeader("设置", "通知与使用偏好", "profile");
+  appMain.innerHTML = `<div class="profile-detail-page"><section class="profile-setting-group"><h2>消息设置</h2>${profileToggle("消息通知", "接收火警、预警、故障和待办通知", "notifications", state.notificationsEnabled, "bell-ring")}${profileToggle("声音与振动", "重要事件到达时播放提示", "sound", state.profileSoundEnabled, "volume-2")}</section><section class="profile-setting-group"><h2>网络设置</h2>${profileToggle("仅 Wi-Fi 加载视频", "移动网络下不自动加载监控画面", "wifi", state.profileWifiOnly, "wifi")}</section><section class="profile-setting-group"><h2>其他</h2><button type="button" data-profile-action="clear-cache"><span><i data-lucide="trash-2"></i></span><div><strong>清理临时数据</strong><small>恢复页面内的演示筛选和草稿状态</small></div><i data-lucide="chevron-right"></i></button></section></div>`;
+}
+
+function profileToggle(title, description, setting, checked, icon) {
+  return `<label class="profile-setting-toggle"><span><i data-lucide="${icon}"></i></span><div><strong>${title}</strong><small>${description}</small></div><input type="checkbox" data-profile-setting="${setting}" ${checked ? "checked" : ""}/><i></i></label>`;
 }
 
 function dutyDateInfo(offset = 0) {
@@ -1131,7 +1257,7 @@ function renderFireList() {
 
 function historyHtml(history = []) {
   if (!history.length) return `<div class="note-box">暂无人工操作记录</div>`;
-  return `<div class="timeline">${history.map((item) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${fireActionLabels[item.action] || (item.action === "confirm_clear" ? "确认通道畅通" : item.action)}</strong><time>${esc(item.time)} · ${esc(item.operator)}</time><p>${esc(item.description || item.note || "")}</p>${item.photos?.length ? `<div class="photo-history">${item.photos.map((photo) => `<button type="button" data-photo-view="${photo}"><img src="${photo}" alt="处置照片" /></button>`).join("")}</div>` : ""}</div></div>`).join("")}</div>`;
+  return `<div class="timeline">${history.map((item) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${fireActionLabels[item.action] || (item.action === "confirm_clear" ? "确认通道顺畅" : item.action)}</strong><time>${esc(item.time)} · ${esc(item.operator)}</time><p>${esc(item.description || item.note || "")}</p>${item.photos?.length ? `<div class="photo-history">${item.photos.map((photo) => `<button type="button" data-photo-view="${photo}"><img src="${photo}" alt="处置照片" /></button>`).join("")}</div>` : ""}</div></div>`).join("")}</div>`;
 }
 
 function fireActions(alarm) {
@@ -1328,6 +1454,7 @@ function fireActionSheet(alarm, action) {
 
 function renderVideoList() {
   const module = videoModules[state.videoModule];
+  if (state.videoModule === "passage") module.records.forEach(ensureMobilePassageRecord);
   const channel = module.channels.find((item) => item.id === state.videoChannels[state.videoModule]) || module.channels[0];
   renderHeader("视频监控", module.capability, "applications");
   setBottomNav("", false);
@@ -1336,11 +1463,35 @@ function renderVideoList() {
     <div class="channel-strip">${module.channels.map((item) => `<button class="channel-chip ${item.id === channel.id ? "active" : ""}" type="button" data-video-channel="${item.id}"><strong>${item.name}</strong><small>${item.code} · ${item.status}</small></button>`).join("")}</div>
     <section class="monitor-panel"><div class="monitor-top"><strong>${channel.name} · ${channel.device}</strong><span><i class="live-dot"></i>LIVE</span></div><div class="video-canvas-wrap"><canvas id="videoCanvas"></canvas><span class="video-overlay">${state.videoModule === "flame" ? "最高温 86.4°C" : "2026-07-24 09:43:08"}</span></div><div class="monitor-controls"><button type="button" data-video-control="snapshot"><i data-lucide="camera"></i>抓拍</button><button type="button" data-video-control="playback"><i data-lucide="play"></i>录像回看</button><button type="button" data-video-control="refresh"><i data-lucide="refresh-cw"></i>刷新</button></div></section>
     <div class="section-heading" style="padding:0 14px;margin-bottom:8px"><h2>事件记录</h2><span>${module.records.length} 条</span></div>
-    <div class="record-list">${module.records.map((item) => `<button class="record-card" type="button" data-route="video/${state.videoModule}/${item.id}"><div class="record-card-head"><span class="severity-mark ${state.videoModule === "offduty" ? "orange" : state.videoModule === "passage" ? "blue" : ""}"><i data-lucide="${module.icon}"></i></span><div><h3>${item.title}</h3><p>${item.point} · ${item.device}</p></div><span class="state-pill ${item.state}">${state.videoModule === "flame" ? (item.state === "active" ? "火警" : "处置中") : videoStateLabels[item.state]}</span></div><div class="record-card-meta"><span><i data-lucide="clock-3"></i>${item.time.slice(5,16)}</span><span>${item.owner}</span></div></button>`).join("")}</div>`;
+    <div class="record-list">${module.records.map((item) => `<button class="record-card" type="button" data-route="video/${state.videoModule}/${item.id}"><div class="record-card-head"><span class="severity-mark ${state.videoModule === "offduty" ? "orange" : state.videoModule === "passage" ? "blue" : ""}"><i data-lucide="${module.icon}"></i></span><div><h3>${item.title}</h3><p>${item.point} · ${item.device}</p></div><span class="state-pill ${item.state}">${state.videoModule === "flame" ? (item.state === "active" ? "火警" : "处置中") : state.videoModule === "passage" ? (item.state === "closed" ? "已闭环" : "待处理") : videoStateLabels[item.state]}</span></div><div class="record-card-meta"><span><i data-lucide="clock-3"></i>${item.time.slice(5,16)}</span><span>${item.owner}</span></div></button>`).join("")}</div>`;
   requestAnimationFrame(() => drawVideoScene(document.querySelector("#videoCanvas"), state.videoModule));
 }
 
 function videoRecord(moduleKey, id) { return videoModules[moduleKey]?.records.find((item) => item.id === id); }
+
+function ensureMobilePassageRecord(record) {
+  if (!record) return null;
+  if (record.state !== "closed") record.state = "pending";
+  record.detectionState ||= record.state === "closed" && record.resolution !== "false_alarm" ? "clear" : "occupied";
+  record.occupiedTarget ||= record.eventType === "fireEscapeDetection" ? "object" : "vehicle";
+  record.detectedObjectLabel ||= record.occupiedTarget === "object" ? "物品" : "车辆";
+  record.lastDetectedAt ||= record.clearDetectedAt || record.time || "";
+  record.triggerThresholdSeconds ??= 60;
+  record.resolution ||= "";
+  record.falseAlarmReason ||= "";
+  record.completedAt ||= "";
+  record.handlingNote ||= "";
+  record.operationHistory = Array.isArray(record.operationHistory) ? record.operationHistory : [];
+  return record;
+}
+
+function passageTimeline(record) {
+  ensureMobilePassageRecord(record);
+  const labels = { confirm_clear: "确认通道顺畅", false_alarm: "误报消警" };
+  const initial = { action: "created", operator: "系统", time: record.time, description: `${record.occupiedTarget === "object" ? "物品滞留" : "车辆占用"}达到触发规则，生成通道预警。`, photos: [] };
+  const history = [initial, ...record.operationHistory.filter((item) => ["confirm_clear", "false_alarm"].includes(item.action))].sort((a, b) => b.time.localeCompare(a.time));
+  return `<div class="timeline">${history.map((item) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${labels[item.action] || "预警上报"}</strong><time>${esc(item.time)} · ${esc(item.operator)}</time><p>${esc(item.description || "")}</p>${item.photos?.length ? `<div class="photo-history">${item.photos.map((photo) => `<button type="button" data-photo-view="${photo}"><img src="${photo}" alt="处置照片" /></button>`).join("")}</div>` : ""}</div></div>`).join("")}</div>`;
+}
 
 function offDutyTimeline(record) {
   const items = [{ title: "预警上报", time: record.time, note: `检测人数 ${record.detectedCountAtTrigger} 人，低于要求 ${record.requiredCount} 人并持续 60 秒。` }];
@@ -1359,13 +1510,16 @@ function renderVideoDetail(moduleKey, id) {
   setBottomNav("", false);
   const isOffDuty = moduleKey === "offduty";
   const isPassage = moduleKey === "passage";
-  const status = moduleKey === "flame" ? (record.state === "active" ? "火警" : "处置中") : videoStateLabels[record.state];
-  const metric = isOffDuty ? `<div><span>要求人数</span><strong>${record.requiredCount} 人</strong></div><div><span>触发人数</span><strong>${record.detectedCountAtTrigger} 人</strong></div><div><span>当前人数</span><strong>${record.currentDetectedCount} 人</strong></div><div><span>触发规则</span><strong>人数不足持续 60 秒</strong></div>` : `<div><span>事件类型</span><strong>${record.eventType}</strong></div><div><span>持续时间</span><strong>${record.duration}</strong></div><div><span>处置人员</span><strong>${record.owner}</strong></div><div><span>完成时间</span><strong>${record.completedAt || "--"}</strong></div>`;
-  const timeline = isOffDuty ? offDutyTimeline(record) : isPassage ? historyHtml(record.operationHistory) : `<div class="note-box">红外火灾事件与设备火警共用处置记录，请进入关联火警详情查看。</div>`;
+  if (isPassage) {
+    ensureMobilePassageRecord(record);
+  }
+  const status = moduleKey === "flame" ? (record.state === "active" ? "火警" : "处置中") : isPassage ? (record.state === "closed" ? "已闭环" : "待处理") : videoStateLabels[record.state];
+  const metric = isOffDuty ? `<div><span>要求人数</span><strong>${record.requiredCount} 人</strong></div><div><span>触发人数</span><strong>${record.detectedCountAtTrigger} 人</strong></div><div><span>当前人数</span><strong>${record.currentDetectedCount} 人</strong></div><div><span>触发规则</span><strong>人数不足持续 60 秒</strong></div>` : isPassage ? `<div><span>事件类型</span><strong>${record.eventType}</strong></div><div><span>识别对象</span><strong>${record.detectedObjectLabel}</strong></div><div><span>设备识别</span><strong>${record.detectionState === "clear" ? "通道畅通" : `${record.detectedObjectLabel}仍占用`}</strong></div><div><span>最近识别时间</span><strong>${record.lastDetectedAt || "--"}</strong></div><div><span>触发规则</span><strong>持续 ${record.triggerThresholdSeconds} 秒</strong></div><div><span>处置人员</span><strong>${record.owner}</strong></div><div><span>完成时间</span><strong>${record.completedAt || "--"}</strong></div>` : `<div><span>事件类型</span><strong>${record.eventType}</strong></div><div><span>持续时间</span><strong>${record.duration}</strong></div><div><span>处置人员</span><strong>${record.owner}</strong></div><div><span>完成时间</span><strong>${record.completedAt || "--"}</strong></div>`;
+  const timeline = isOffDuty ? offDutyTimeline(record) : isPassage ? passageTimeline(record) : `<div class="note-box">红外火灾事件与设备火警共用处置记录，请进入关联火警详情查看。</div>`;
   let actions = "";
   if (isOffDuty && record.state === "pending") actions = `<div class="fixed-actions"><button class="primary" type="button" data-offduty-action="review" data-id="${record.id}">开始复核</button></div>`;
   if (isOffDuty && ["processing", "recovered_pending"].includes(record.state)) actions = `<div class="fixed-actions"><button type="button" data-offduty-action="false" data-id="${record.id}">误报消警</button><button class="primary" type="button" data-offduty-action="returned" data-id="${record.id}" ${record.state !== "recovered_pending" ? "disabled" : ""}>人员返岗确认</button></div>`;
-  if (isPassage && record.state === "active") actions = `<div class="fixed-actions"><button class="primary" type="button" data-passage-action="${record.id}">确认通道畅通</button></div>`;
+  if (isPassage && record.state !== "closed") actions = `<div class="fixed-actions"><button type="button" data-passage-action="false" data-id="${record.id}">误报消警</button><button class="primary" type="button" data-passage-action="clear" data-id="${record.id}">确认通道顺畅</button></div>`;
   if (moduleKey === "flame") actions = `<div class="fixed-actions"><button class="danger" type="button" data-route="fire/${record.fireAlarmId}">进入火警处置</button></div>`;
   appMain.innerHTML = `<div class="detail-page"><section class="detail-summary video"><div class="detail-summary-head"><span>${module.title}</span><span class="state-pill ${record.state}">${status}</span></div><h2>${record.title}</h2><p>${record.point} · ${record.device}</p><div class="deadline"><i data-lucide="clock-3"></i>${record.time}</div></section>
     <section class="detail-section"><h3><i data-lucide="video"></i>事件录像</h3><div class="video-canvas-wrap" style="border-radius:6px;overflow:hidden"><canvas id="videoDetailCanvas"></canvas><span class="video-overlay">事件抓拍</span></div></section>
@@ -1467,14 +1621,33 @@ function faultActionSheet(fault, action) {
   }
 }
 
-function passageActionSheet(record) {
-  openSheet({ eyebrow: "消防通道处置", title: "确认通道畅通", submitText: "提交并完成处置", body: `${eventSummary(record.title, `${record.point} · ${record.device}`, "traffic-cone")}<label class="form-field"><span class="form-label">处置说明 <em>必填</em></span><textarea id="passageNote" placeholder="例如：车辆已驶离，现场确认消防通道无障碍物。"></textarea></label>${uploadField()}`, onSubmit: () => {
-    const note = document.querySelector("#passageNote").value.trim();
-    if (!note) return showToast("请填写处置说明");
-    record.state = "closed"; record.owner = currentUser; record.completedAt = nowText(); record.handlingNote = note;
-    record.operationHistory.unshift({ action: "confirm_clear", operator: currentUser, time: record.completedAt, description: note, photos: [...state.sheetPhotos] });
-    closeSheet(); render(); showToast("消防通道已确认恢复畅通");
-  }});
+function passageActionSheet(record, action) {
+  ensureMobilePassageRecord(record);
+  if (record.state === "closed") return;
+  const isFalse = action === "false";
+  openSheet({
+    eyebrow: "消防通道处置",
+    title: isFalse ? "误报消警" : "确认通道顺畅",
+    submitText: isFalse ? "确认误报并消警" : "确认顺畅并闭环",
+    danger: isFalse,
+    body: `${eventSummary(record.title, `${record.point} · ${record.device}`, "traffic-cone")}${isFalse ? `<label class="form-field"><span class="form-label">误报原因 <em>必选</em></span><span class="reason-grid">${["画面遮挡", "识别错误", "非消防通道区域", "其他"].map((reason) => `<label><input type="radio" name="passageFalseReason" value="${reason}" /><span>${reason}</span></label>`).join("")}</span></label>` : ""}<label class="form-field"><span class="form-label">处置说明 <em>必填</em></span><textarea id="passageNote" placeholder="请填写现场处置情况和通道当前状态。"></textarea></label>${uploadField()}`,
+    onSubmit: () => {
+      const note = document.querySelector("#passageNote").value.trim();
+      const reason = document.querySelector('input[name="passageFalseReason"]:checked')?.value || "";
+      if (isFalse && !reason) return showToast("请选择误报原因");
+      if (!note) return showToast("请填写处置说明");
+      record.state = "closed";
+      record.owner = currentUser;
+      record.completedAt = nowText();
+      record.resolution = isFalse ? "false_alarm" : "cleared";
+      record.falseAlarmReason = reason;
+      record.handlingNote = note;
+      record.operationHistory.unshift({ action: isFalse ? "false_alarm" : "confirm_clear", operator: currentUser, time: record.completedAt, description: isFalse ? `${reason}：${note}` : note, photos: [...state.sheetPhotos] });
+      closeSheet();
+      render();
+      showToast(isFalse ? "通道预警已按误报消警" : "消防通道已确认顺畅并完成闭环");
+    }
+  });
 }
 
 function offDutyAction(record, action) {
@@ -1533,6 +1706,7 @@ function render() {
   const parts = routeParts();
   const [screen, sub, id] = parts;
   if (screen === "home") renderHome();
+  else if (screen === "profile" && sub) renderProfileSection(sub);
   else if (screen === "profile") renderProfile();
   else if (screen === "notifications") renderNotifications();
   else if (screen === "duty" && ["clock-in", "clock-out"].includes(sub)) renderDutyClock(sub);
@@ -1548,6 +1722,7 @@ function render() {
   else if (screen === "video") renderVideoList();
   else if (screen === "fault" && sub) renderFaultDetail(sub);
   else if (screen === "fault") renderFaultList();
+  else if (window.RoutineApp?.canRender(screen)) window.RoutineApp.render(parts);
   else if (window.InspectionApp?.canRender(screen)) window.InspectionApp.render(parts);
   else renderApplications();
   refreshIcons();
@@ -1574,7 +1749,28 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (window.RoutineApp?.handleClick(event)) return;
   if (window.InspectionApp?.handleClick(event)) return;
+
+  const profilePreview = event.target.closest("[data-profile-preview]");
+  if (profilePreview) {
+    showToast(`${profilePreview.dataset.profilePreview}预览已打开`);
+    return;
+  }
+
+  const profileAction = event.target.closest("[data-profile-action]");
+  if (profileAction) {
+    if (profileAction.dataset.profileAction === "logout") {
+      openSheet({ eyebrow: "账号操作", title: "退出登录", submitText: "确认退出", danger: true, body: `<div class="profile-logout-confirm"><span><i data-lucide="log-out"></i></span><strong>确认退出当前账号？</strong><p>退出后需要重新登录才能继续使用机构端功能。</p></div>`, onSubmit: () => { closeSheet(); showToast("已退出登录（演示）"); } });
+    } else if (profileAction.dataset.profileAction === "clear-cache") {
+      state.notificationReadFilter = "all";
+      state.notificationTypeFilter = "all";
+      state.detailReturnRoute = "";
+      state.detailTargetRoute = "";
+      showToast("临时数据已清理");
+    }
+    return;
+  }
 
   const resetStateButton = event.target.closest("[data-reset-state]");
   if (resetStateButton) {
@@ -1719,8 +1915,8 @@ document.addEventListener("click", (event) => {
   }
   const passage = event.target.closest("[data-passage-action]");
   if (passage) {
-    const record = videoModules.passage.records.find((item) => item.id === passage.dataset.passageAction);
-    if (record) passageActionSheet(record);
+    const record = videoModules.passage.records.find((item) => item.id === passage.dataset.id);
+    if (record) passageActionSheet(record, passage.dataset.passageAction);
     return;
   }
 
@@ -1775,6 +1971,17 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("change", async (event) => {
+  if (event.target.matches("[data-profile-setting]")) {
+    const setting = event.target.dataset.profileSetting;
+    if (setting === "notifications") {
+      state.notificationsEnabled = event.target.checked;
+      newNotificationToggle.checked = event.target.checked;
+      if (!event.target.checked) hidePushBanner();
+    } else if (setting === "sound") state.profileSoundEnabled = event.target.checked;
+    else if (setting === "wifi") state.profileWifiOnly = event.target.checked;
+    showToast(`${event.target.closest("label")?.querySelector("strong")?.textContent || "设置"}已${event.target.checked ? "开启" : "关闭"}`);
+    return;
+  }
   if (!event.target.matches("[data-photo-input]")) return;
   const files = [...event.target.files];
   if (state.sheetPhotos.length + files.length > state.sheetPhotoLimit) { showToast(`最多只能上传 ${state.sheetPhotoLimit} 张照片`); event.target.value = ""; return; }
@@ -1856,6 +2063,20 @@ window.InspectionApp?.init({
   closeSheet,
   notificationHeaderButton,
   existingData: () => ({ fireAlarms, warnings, faults, dutyState })
+});
+window.RoutineApp?.init({
+  appMain,
+  assignees,
+  esc,
+  nowText,
+  routeParts,
+  go,
+  renderHeader,
+  setBottomNav,
+  showToast,
+  refreshIcons,
+  openSheet,
+  closeSheet
 });
 initializePreviewControls();
 if (!location.hash) history.replaceState(null, "", "#/applications");
