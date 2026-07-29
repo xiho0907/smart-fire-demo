@@ -137,6 +137,7 @@ const faults = [
   { id: "tf1", no: "FLT-20260724-0036", title: "消防通道摄像头离线", faultType: "设备离线", code: "ISUP_HEARTBEAT_LOST", device: "通道监测-02", serial: "DS-PS-02D531", point: "北门消防通道", source: "ISUP 设备心跳", firstTime: "2026-07-24 09:06:14", updated: "2026-07-24 09:42:44", state: "pending", assignee: "待指派", assignedAt: "", assignmentWindowMinutes: 0, assignmentDeadlineAt: "", handledAt: "", recoveredAt: "", note: "设备心跳已中断 36 分钟。", deviceStatus: { online: false, heartbeat: false, reporting: false, lastReport: "2026-07-24 09:06:14" }, handlingHistory: [] },
   { id: "tf2", no: "FLT-20260724-0032", title: "液位表数据上报中断", faultType: "数据异常", code: "DATA_REPORT_TIMEOUT", device: "消防水池液位表-01", serial: "NB-LV-01C208", point: "地下消防水池", source: "NB-IoT 数据上报", firstTime: "2026-07-24 08:35:20", updated: "2026-07-24 09:40:08", state: "processing", assignee: "陈峰", assignedAt: "2026-07-24T08:42:00+08:00", assignmentWindowMinutes: 240, assignmentDeadlineAt: "2026-07-24T12:42:00+08:00", handledAt: "", recoveredAt: "", note: "已安排现场检查仪表供电及运营商网络。", deviceStatus: { online: true, heartbeat: true, reporting: false, lastReport: "2026-07-24 08:35:20" }, handlingHistory: [{ action: "assign", operator: "Admin", operatorSide: "机构端", time: "2026-07-24 08:42:00", note: "指派陈峰处理，接单时限 4 小时。" }] },
   { id: "tf3", no: "FLT-20260724-0027", title: "压力表电池电压过低", faultType: "低电量", code: "BATTERY_LOW", device: "消火栓压力表-06", serial: "NB-PR-06A119", point: "三层西区消火栓", source: "设备状态上报", firstTime: "2026-07-24 07:18:33", updated: "2026-07-24 09:28:05", state: "handled", assignee: "赵凯", assignedAt: "2026-07-24T07:22:10+08:00", assignmentWindowMinutes: 240, assignmentDeadlineAt: "2026-07-24T11:22:10+08:00", handledAt: "2026-07-24 08:46:05", deviceRecoveredAt: "2026-07-24 09:28:05", recoveredAt: "", note: "已更换电池，等待设备状态稳定后人工确认恢复。", deviceStatus: { online: true, heartbeat: true, reporting: true, lastReport: "2026-07-24 09:28:05" }, handlingHistory: [{ action: "mark_handled", operator: "Admin", operatorSide: "机构端", time: "2026-07-24 08:46:05", note: "已更换仪表电池并重新安装，设备已开始上报。" }, { action: "assign", operator: "Admin", operatorSide: "机构端", time: "2026-07-24 07:22:10", note: "指派赵凯处理，接单时限 4 小时。" }] },
+  { id: "tf5", no: "FLT-20260724-0028", title: "压力表通信信号持续偏弱", faultType: "通信质量异常", code: "NB_SIGNAL_WEAK", device: "消火栓压力表-06", serial: "NB-PR-06A119", point: "三层西区消火栓", source: "NB-IoT 通信质量", firstTime: "2026-07-24 07:26:18", updated: "2026-07-24 09:31:42", state: "processing", assignee: "王晨", assignedAt: "2026-07-24T07:31:05+08:00", assignmentWindowMinutes: 240, assignmentDeadlineAt: "2026-07-24T11:31:05+08:00", handledAt: "", recoveredAt: "", note: "信号强度连续低于稳定上报要求，正在检查安装位置和运营商网络。", deviceStatus: { online: true, heartbeat: true, reporting: true, lastReport: "2026-07-24 09:31:42" }, handlingHistory: [{ action: "assign", operator: "Admin", operatorSide: "机构端", time: "2026-07-24 07:31:05", note: "指派王晨检查终端安装位置及通信信号。" }] },
   { id: "tf4", no: "FLT-20260723-0014", title: "红外摄像头存储异常", faultType: "存储异常", code: "STORAGE_WRITE_ERROR", device: "红外火灾摄像头-04", serial: "DS-FL-04C507", point: "锅炉房燃气阀组", source: "设备存储状态上报", firstTime: "2026-07-23 08:18:33", updated: "2026-07-23 08:46:05", state: "recovered", assignee: "陈峰", assignedAt: "2026-07-23T08:24:10+08:00", assignmentWindowMinutes: 240, assignmentDeadlineAt: "2026-07-23T12:24:10+08:00", handledAt: "2026-07-23 08:40:12", recoveredAt: "2026-07-23 08:46:05", note: "更换存储卡并完成格式化，抓拍及录像写入测试正常。", deviceStatus: { online: true, heartbeat: true, reporting: true, lastReport: "2026-07-23 08:45:48" }, handlingHistory: [{ action: "confirm_recovery", operator: "Admin", operatorSide: "机构端", time: "2026-07-23 08:46:05", note: "设备在线、心跳及数据上报均正常，确认恢复。" }, { action: "mark_handled", operator: "陈峰", operatorSide: "机构端", time: "2026-07-23 08:40:12", note: "已更换存储卡并完成格式化。" }] }
 ];
 
@@ -1378,13 +1379,31 @@ function faultDeviceHealthy(fault) {
   return fault.deviceStatus.online && fault.deviceStatus.heartbeat && fault.deviceStatus.reporting;
 }
 
+function faultConditionRecovered(fault) {
+  return fault.state === "recovered" || Boolean(fault.conditionRecoveredAt || fault.deviceRecoveredAt);
+}
+
+function openFaultsForDevice(fault) {
+  return faults.filter((item) => item.serial === fault.serial && item.state !== "recovered");
+}
+
+function otherOpenFaultsForDevice(fault) {
+  return openFaultsForDevice(fault).filter((item) => item.id !== fault.id);
+}
+
+function faultDeviceSummary(fault) {
+  const openFaults = openFaultsForDevice(fault);
+  if (openFaults.length) return { healthy: false, label: `设备仍有 ${openFaults.length} 条故障` };
+  return { healthy: faultDeviceHealthy(fault), label: faultDeviceHealthy(fault) ? "设备运行正常" : "设备状态异常" };
+}
+
 function renderFaultList() {
   renderHeader("设备故障", "设备运行维护记录", "applications");
   setBottomNav("", false);
   const records = faults.filter((item) => state.faultFilter === "all" || (state.faultFilter === "open" ? item.state !== "recovered" : item.state === "recovered"));
   appMain.innerHTML = `<section class="hero-band fault"><small>当前设备运行状态</small><h2>${faultOpenCount()} 条故障待闭环</h2><div class="hero-stats"><div><strong>${faults.filter((item) => item.state === "pending").length}</strong><span>待处理</span></div><div><strong>${faults.filter((item) => item.state === "processing").length}</strong><span>处理中</span></div><div><strong>${faults.filter((item) => item.state === "handled").length}</strong><span>待确认恢复</span></div></div></section>
     <div class="filter-row"><button class="filter-chip ${state.faultFilter === "open" ? "active" : ""}" data-fault-filter="open">待处理</button><button class="filter-chip ${state.faultFilter === "closed" ? "active" : ""}" data-fault-filter="closed">已恢复</button><button class="filter-chip ${state.faultFilter === "all" ? "active" : ""}" data-fault-filter="all">全部</button></div>
-    <div class="record-list">${records.map((item) => `<button class="record-card" type="button" data-route="fault/${item.id}"><div class="record-card-head"><span class="severity-mark ${item.state === "handled" ? "blue" : "orange"}"><i data-lucide="wrench"></i></span><div><h3>${item.title}</h3><p>${item.point} · ${item.device}</p></div><span class="state-pill ${item.state}">${faultStateLabels[item.state]}</span></div><div class="record-card-meta"><span><i data-lucide="${faultDeviceHealthy(item) ? "wifi" : "wifi-off"}"></i>${faultDeviceHealthy(item) ? "设备运行正常" : "设备状态异常"}</span><span>${item.assignee}</span></div></button>`).join("") || `<div class="empty-search">当前筛选下暂无记录</div>`}</div>`;
+    <div class="record-list">${records.map((item) => { const deviceSummary = faultDeviceSummary(item); return `<button class="record-card" type="button" data-route="fault/${item.id}"><div class="record-card-head"><span class="severity-mark ${item.state === "handled" ? "blue" : "orange"}"><i data-lucide="wrench"></i></span><div><h3>${item.title}</h3><p>${item.point} · ${item.device}</p></div><span class="state-pill ${item.state}">${faultStateLabels[item.state]}</span></div><div class="record-card-meta"><span><i data-lucide="${deviceSummary.healthy ? "wifi" : "wifi-off"}"></i>${deviceSummary.label}</span><span>${item.assignee}</span></div></button>`; }).join("") || `<div class="empty-search">当前筛选下暂无记录</div>`}</div>`;
 }
 
 function faultTimeline(fault) {
@@ -1393,14 +1412,14 @@ function faultTimeline(fault) {
     title: { assign: "人员指派", mark_handled: "标记处理", confirm_recovery: "人工确认恢复" }[item.action],
     time: item.time, note: `${item.operatorSide || "机构端"} · ${item.operator}：${item.note}`
   }));
-  if (fault.deviceRecoveredAt) history.push({ title: "设备状态恢复", time: fault.deviceRecoveredAt, note: "设备在线、心跳与数据上报恢复正常。" });
+  if (fault.conditionRecoveredAt || fault.deviceRecoveredAt) history.push({ title: "本故障指标恢复", time: fault.conditionRecoveredAt || fault.deviceRecoveredAt, note: "本故障对应的监测指标已恢复正常。" });
   const sorted = [...base, ...history].sort((a, b) => a.time.localeCompare(b.time));
   return `<div class="timeline">${sorted.map((item) => `<div class="timeline-item"><span class="timeline-dot"></span><div><strong>${item.title}</strong><time>${item.time}</time><p>${esc(item.note)}</p></div></div>`).join("")}</div>`;
 }
 
 function faultActions(fault) {
   if (fault.state === "recovered") return "";
-  if (fault.state === "handled") return `<div class="fixed-actions"><button type="button" data-fault-action="status" data-id="${fault.id}">查看设备状态</button><button class="primary" type="button" data-fault-action="recover" data-id="${fault.id}" ${faultDeviceHealthy(fault) ? "" : "disabled"}>确认恢复</button></div>`;
+  if (fault.state === "handled") return `<div class="fixed-actions"><button type="button" data-fault-action="status" data-id="${fault.id}">查看恢复状态</button><button class="primary" type="button" data-fault-action="recover" data-id="${fault.id}" ${faultConditionRecovered(fault) ? "" : "disabled"}>确认恢复</button></div>`;
   return `<div class="fixed-actions"><button type="button" data-fault-action="assign" data-id="${fault.id}">人员指派</button><button class="primary" type="button" data-fault-action="handle" data-id="${fault.id}">标记处理</button></div>`;
 }
 
@@ -1409,18 +1428,21 @@ function renderFaultDetail(id) {
   if (!fault) return go("fault");
   renderHeader("故障详情", fault.no, detailBackRoute("fault", `fault/${fault.id}`));
   setBottomNav("", false);
-  const healthy = faultDeviceHealthy(fault);
+  const conditionRecovered = faultConditionRecovered(fault);
+  const deviceSummary = faultDeviceSummary(fault);
+  const otherOpenFaults = otherOpenFaultsForDevice(fault);
   const deadline = fault.assignmentDeadlineAt ? `接单截止 ${shortDate(fault.assignmentDeadlineAt)}${isOverdue(fault) ? " · 已超时" : ""}` : "尚未指派处理人员";
   const abnormal = [!fault.deviceStatus.online && "设备离线", !fault.deviceStatus.heartbeat && "心跳异常", !fault.deviceStatus.reporting && "数据未上报"].filter(Boolean).join("、");
   appMain.innerHTML = `<div class="detail-page"><section class="detail-summary fault"><div class="detail-summary-head"><span>${fault.faultType}</span><span class="state-pill ${fault.state}">${faultStateLabels[fault.state]}</span></div><h2>${fault.title}</h2><p>${fault.point} · ${fault.device}</p><div class="deadline ${isOverdue(fault) ? "overdue" : ""}"><i data-lucide="timer"></i>${deadline}</div></section>
-    <section class="detail-section"><h3><i data-lucide="radio-tower"></i>设备实时状态</h3><div class="device-status"><span class="device-status-icon ${healthy ? "" : "bad"}"><i data-lucide="${healthy ? "circle-check" : "triangle-alert"}"></i></span><div><strong>${healthy ? "设备运行正常" : abnormal}</strong><span>最近上报 ${fault.deviceStatus.lastReport}</span></div><b class="${healthy ? "" : "bad"}">${healthy ? "可确认" : "异常"}</b></div>${fault.state === "handled" && !healthy ? `<small class="field-hint">设备在线、心跳和数据上报均恢复正常后，才能确认恢复。</small>` : ""}</section>
+    <section class="detail-section"><h3><i data-lucide="radio-tower"></i>本故障恢复状态</h3><div class="device-status"><span class="device-status-icon ${conditionRecovered ? "" : "bad"}"><i data-lucide="${conditionRecovered ? "circle-check" : "triangle-alert"}"></i></span><div><strong>${conditionRecovered ? "本故障对应指标已恢复" : (abnormal || "故障指标仍未恢复")}</strong><span>${conditionRecovered ? `恢复时间 ${fault.conditionRecoveredAt || fault.deviceRecoveredAt || fault.recoveredAt}` : `最近上报 ${fault.deviceStatus.lastReport}`}</span></div><b class="${conditionRecovered ? "" : "bad"}">${conditionRecovered ? "可确认" : "异常"}</b></div>${fault.state === "handled" && !conditionRecovered ? `<small class="field-hint">本故障对应的异常指标恢复后，才能确认本条记录闭环。</small>` : ""}</section>
+    <section class="detail-section"><h3><i data-lucide="cpu"></i>设备综合状态</h3><div class="device-status"><span class="device-status-icon ${deviceSummary.healthy ? "" : "bad"}"><i data-lucide="${deviceSummary.healthy ? "circle-check" : "wrench"}"></i></span><div><strong>${deviceSummary.label}</strong><span>${otherOpenFaults.length ? "本故障闭环后，设备仍保持故障状态" : "由该设备全部未闭环故障汇总"}</span></div><b class="${deviceSummary.healthy ? "" : "bad"}">${deviceSummary.healthy ? "正常" : "故障"}</b></div>${otherOpenFaults.map((item) => `<button class="duty-linked-record" type="button" data-route="fault/${item.id}"><span><i data-lucide="wrench"></i>${item.title}</span><small>${faultStateLabels[item.state]} · ${item.no}</small><i data-lucide="chevron-right"></i></button>`).join("")}</section>
     <section class="detail-section"><h3><i data-lucide="clipboard-list"></i>故障信息</h3><div class="info-grid"><div><span>故障编号</span><strong>${fault.no}</strong></div><div><span>故障代码</span><strong>${fault.code}</strong></div><div><span>首次发生</span><strong>${fault.firstTime}</strong></div><div><span>最近上报</span><strong>${fault.updated}</strong></div><div><span>处理人员</span><strong>${fault.assignee}</strong></div><div><span>数据来源</span><strong>${fault.source}</strong></div></div></section>
     <section class="detail-section"><h3><i data-lucide="message-square-text"></i>当前说明</h3><div class="note-box">${esc(fault.note)}</div></section>
     <section class="detail-section"><h3><i data-lucide="history"></i>处理时间线</h3>${faultTimeline(fault)}</section></div>${faultActions(fault)}`;
 }
 
 function faultActionSheet(fault, action) {
-  if (action === "status") return showToast(faultDeviceHealthy(fault) ? "设备在线、心跳与数据上报均正常" : "设备状态仍有异常，暂不能确认恢复");
+  if (action === "status") return showToast(faultConditionRecovered(fault) ? "本故障对应指标已恢复，可以确认闭环" : "本故障对应指标仍有异常，暂不能确认恢复");
   if (action === "handle") {
     openSheet({ eyebrow: "故障处理记录", title: "标记处理", submitText: "提交处理结果", body: `${eventSummary(fault.title, `${fault.point} · ${fault.no}`, "wrench")}<label class="form-field"><span class="form-label">处理备注 <em>必填</em></span><textarea id="faultNote" placeholder="请说明检查内容、处理措施和当前设备情况。"></textarea><small class="field-hint">提交后进入“已处理待恢复”，不会直接闭环。</small></label>`, onSubmit: () => {
       const note = document.querySelector("#faultNote").value.trim();
@@ -1433,9 +1455,10 @@ function faultActionSheet(fault, action) {
     }});
   }
   if (action === "recover") {
-    if (!faultDeviceHealthy(fault)) return showToast("设备状态尚未恢复正常");
-    openSheet({ eyebrow: "设备恢复验证", title: "确认设备恢复", submitText: "确认恢复并闭环", body: `${eventSummary(fault.title, `${fault.device} · ${fault.serial}`, "circle-check")}<div class="device-status"><span class="device-status-icon"><i data-lucide="circle-check"></i></span><div><strong>设备状态验证通过</strong><span>在线正常 · 心跳正常 · 数据上报正常</span></div><b>正常</b></div><small class="field-hint">确认后该故障将进入“已恢复”，本次处理正式闭环。</small>`, onSubmit: () => {
-      fault.state = "recovered"; fault.recoveredAt = nowText(); fault.note = "设备在线、心跳与数据上报均正常，已人工确认恢复。";
+    if (!faultConditionRecovered(fault)) return showToast("本故障对应指标尚未恢复正常");
+    const otherOpenFaults = otherOpenFaultsForDevice(fault);
+    openSheet({ eyebrow: "故障恢复验证", title: "确认本故障恢复", submitText: "确认恢复并闭环", body: `${eventSummary(fault.title, `${fault.device} · ${fault.serial}`, "circle-check")}<div class="device-status"><span class="device-status-icon"><i data-lucide="circle-check"></i></span><div><strong>本故障恢复验证通过</strong><span>对应异常指标已恢复正常</span></div><b>可确认</b></div>${otherOpenFaults.length ? `<div class="note-box">该设备另有 ${otherOpenFaults.length} 条未闭环故障。本记录闭环后，设备综合状态仍显示“故障”。</div>` : ""}<small class="field-hint">其他故障不会阻止本条记录独立闭环。</small>`, onSubmit: () => {
+      fault.state = "recovered"; fault.recoveredAt = nowText(); fault.note = "本故障对应异常指标已恢复，已人工确认闭环。";
       fault.handlingHistory.unshift({ action: "confirm_recovery", operator: currentUser, operatorSide: "机构端", time: fault.recoveredAt, note: fault.note });
       publishNotification("fault", "closed", "设备故障已恢复", `${fault.title}已人工确认恢复并完成闭环。`, `fault/${fault.id}`);
       refreshDutyHandoverCategory("device");

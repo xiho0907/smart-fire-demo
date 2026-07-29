@@ -4194,6 +4194,87 @@ kbd {
 .fault-device-status-row strong.warning { color: var(--warning); }
 .fault-device-status-row p { margin: 3px 0 0; color: var(--muted); font-size: 8px; }
 
+.fault-condition-row {
+  margin-bottom: 8px;
+  border-color: #c7d8ed;
+  background: #f7faff;
+}
+
+.fault-condition-badge {
+  border-radius: 3px;
+  padding: 5px 8px;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.fault-condition-badge.ready {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.fault-condition-badge.abnormal {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.fault-related-open-list {
+  display: grid;
+  gap: 6px;
+  margin: -4px 18px 13px;
+}
+
+.fault-related-open-list[hidden] {
+  display: none;
+}
+
+.fault-related-open-list button {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #c7d8ed;
+  border-radius: 4px;
+  padding: 8px 11px;
+  color: var(--blue);
+  background: #f6f9fd;
+  text-align: left;
+}
+
+.fault-related-open-list button:hover {
+  border-color: #91afd5;
+  background: var(--blue-pale);
+}
+
+.fault-related-open-list button span {
+  min-width: 0;
+}
+
+.fault-related-open-list strong,
+.fault-related-open-list small {
+  display: block;
+}
+
+.fault-related-open-list strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fault-related-open-list small {
+  margin-top: 3px;
+  color: var(--muted-2);
+  font-size: 8px;
+}
+
+.fault-related-open-list svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
 .fault-handling-history {
   margin: 0 18px 14px;
   border-top: 1px solid var(--line);
@@ -4393,6 +4474,106 @@ kbd {
 
 .warning-record-history {
   margin-bottom: 0;
+}
+
+.handle-modal.warning-recover-modal {
+  width: min(560px, 100%);
+}
+
+.modal-event-summary.warning-recover-summary {
+  border-color: #ead8ae;
+  background: #fffaf1;
+}
+
+.warning-recover-summary .summary-icon {
+  color: #a65f00;
+  background: var(--warning-soft);
+}
+
+.warning-recover-summary p {
+  color: #806b48;
+}
+
+.warning-recover-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.warning-recover-metrics > div {
+  min-height: 66px;
+  border: 1px solid #ead8ae;
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: #fffaf1;
+}
+
+.warning-recover-metrics span,
+.warning-recover-metrics strong {
+  display: block;
+}
+
+.warning-recover-metrics span {
+  color: var(--muted-2);
+  font-size: 9px;
+}
+
+.warning-recover-metrics strong {
+  margin-top: 5px;
+  color: #a65f00;
+  font-size: 16px;
+}
+
+.warning-recover-operator {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 9px 10px;
+  background: #f8fafd;
+}
+
+.warning-recover-operator > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--blue);
+}
+
+.warning-recover-operator > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.warning-recover-operator small,
+.warning-recover-operator strong {
+  display: block;
+}
+
+.warning-recover-operator small {
+  color: var(--muted-2);
+  font-size: 8px;
+}
+
+.warning-recover-operator strong {
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 10px;
+}
+
+.warning-recover-operator > span {
+  border-radius: 3px;
+  padding: 4px 7px;
+  color: #a65f00;
+  background: var(--warning-soft);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.warning-recover-error {
+  margin: 8px 0 0;
 }
 
 @media (max-width: 720px) {

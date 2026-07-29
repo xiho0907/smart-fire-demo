@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>智慧消防综合管理平台</title>
-    <link rel="stylesheet" href="styles.css?v=20260728-warning-record" />
+    <link rel="stylesheet" href="styles.css?v=20260729-fault-table-simple" />
   </head>
   <body>
     <div class="app-shell">
@@ -491,7 +491,7 @@
               <div><span>当前故障</span><strong class="danger-text" id="faultActiveCount">3</strong><small>全部终端实时汇总</small></div>
               <div><span>待处理</span><strong id="faultPendingCount">1</strong><small>需要指派运维人员</small></div>
               <div><span>处理中 / 待恢复</span><strong class="warning-text" id="faultProcessingCount">2</strong><small id="faultProcessingSummary">处理中 1 · 待恢复 1</small></div>
-              <div><span>今日已恢复</span><strong class="success-text" id="faultRepairedCount">5</strong><small>设备状态已人工确认</small></div>
+              <div><span>今日已恢复</span><strong class="success-text" id="faultRepairedCount">5</strong><small>故障记录已完成闭环</small></div>
             </div>
             <div class="filter-bar">
               <label class="filter-search wide"><i data-lucide="search"></i><input id="terminalFaultSearch" type="search" placeholder="搜索故障编号、设备、点位或故障代码" /></label>
@@ -511,7 +511,7 @@
             </div>
             <div class="data-table-wrap">
               <table class="data-table terminal-fault-table">
-                <thead><tr><th>故障信息</th><th>设备 / 点位</th><th>故障类型</th><th>首次发生</th><th>最近更新</th><th>持续时间</th><th>设备状态</th><th>处理人</th><th>处置状态</th><th>操作</th></tr></thead>
+                <thead><tr><th>故障信息</th><th>设备 / 点位</th><th>故障类型</th><th>首次发生</th><th>最近更新</th><th>持续时间</th><th>处理人</th><th>处置状态</th><th>操作</th></tr></thead>
                 <tbody id="terminalFaultTableBody"></tbody>
               </table>
               <div class="table-empty" id="terminalFaultTableEmpty" hidden><i data-lucide="search-x"></i><strong>未找到匹配故障</strong><span>请调整筛选条件</span></div>
@@ -796,7 +796,7 @@
         <div class="modal-event-summary fault-handle-summary"><span class="summary-icon"><i data-lucide="wrench"></i></span><div><strong id="faultHandleTargetTitle">设备通信中断</strong><p id="faultHandleTargetMeta">屋顶高位水箱 · FLT-20260723-0031</p></div></div>
         <form id="faultHandleForm">
           <div class="fault-handle-operator"><i data-lucide="user-check"></i><div><small>本次处理记录</small><strong id="faultHandleOperator">Admin</strong></div></div>
-          <label><span>处理备注 <b class="required-mark">必填</b></span><textarea id="faultHandleNote" rows="4" required placeholder="请记录故障原因、处理措施和当前设备情况"></textarea><small class="field-hint">提交后进入“已处理待恢复”，需设备状态恢复正常后再确认闭环。</small></label>
+          <label><span>处理备注 <b class="required-mark">必填</b></span><textarea id="faultHandleNote" rows="4" required placeholder="请记录故障原因、处理措施和当前设备情况"></textarea><small class="field-hint">提交后进入“已处理待恢复”，待本故障对应指标恢复后确认闭环。</small></label>
           <footer><button class="secondary-button" type="button" data-fault-handle-close>取消</button><button class="primary-button" type="submit"><i data-lucide="clipboard-check"></i>确认标记处理</button></footer>
         </form>
       </section>
@@ -829,10 +829,15 @@
             <div><dt>恢复时间</dt><dd id="faultDetailRepairedAt">--</dd></div>
           </dl>
         </div>
+        <div class="fault-device-status-row fault-condition-row">
+          <div><span class="fault-device-status-icon" id="faultConditionIcon"><i data-lucide="triangle-alert"></i></span><div><small>本故障恢复状态</small><strong id="faultConditionState">本故障指标仍有异常</strong><p id="faultConditionUpdated">最近上报 --</p></div></div>
+          <span class="fault-condition-badge abnormal" id="faultConditionBadge">异常</span>
+        </div>
         <div class="fault-device-status-row">
-          <div><span class="fault-device-status-icon" id="faultDetailDeviceStatusIcon"><i data-lucide="wifi-off"></i></span><div><small>当前设备状态</small><strong id="faultDetailDeviceStatus">离线</strong><p id="faultDetailDeviceUpdated">最近上报 16:30:42</p></div></div>
+          <div><span class="fault-device-status-icon" id="faultDetailDeviceStatusIcon"><i data-lucide="wifi-off"></i></span><div><small>设备综合状态</small><strong id="faultDetailDeviceStatus">离线</strong><p id="faultDetailDeviceUpdated">最近上报 16:30:42</p></div></div>
           <button class="secondary-button" type="button" id="faultDetailViewDevice"><i data-lucide="cpu"></i>查看设备状态</button>
         </div>
+        <div class="fault-related-open-list" id="faultRelatedOpenFaults" hidden></div>
         <div class="fault-detail-note" id="faultDetailNote"><i data-lucide="info"></i><div><strong>当前处理记录</strong><p>设备连续多个心跳周期未上报，等待指派运维人员现场核查。</p></div></div>
         <div class="fault-process" id="faultProcess" aria-label="故障处理过程"></div>
         <section class="fault-handling-history" aria-labelledby="faultHandlingHistoryTitle"><div class="fault-history-heading"><div><strong id="faultHandlingHistoryTitle">处理留痕</strong><small>记录操作人、时间和备注</small></div><span id="faultHandlingHistoryCount">0 条</span></div><div class="fault-history-list" id="faultHandlingHistory"></div></section>
@@ -890,6 +895,26 @@
           <button class="secondary-button" type="button" data-warning-record-close>关闭</button>
           <button class="primary-button" type="button" id="warningRecordViewDevice"><i data-lucide="cpu"></i>查看设备状态</button>
         </footer>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="warningRecoverModal" hidden>
+      <section class="handle-modal warning-recover-modal" role="dialog" aria-modal="true" aria-labelledby="warningRecoverModalTitle">
+        <header>
+          <div><span class="assignment-badge warning-record-badge"><i data-lucide="circle-check"></i>预警核查记录</span><h2 id="warningRecoverModalTitle">确认设备恢复</h2></div>
+          <button class="icon-button" type="button" data-warning-recover-close title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+        </header>
+        <div class="modal-event-summary warning-recover-summary"><span class="summary-icon"><i data-lucide="triangle-alert"></i></span><div><strong id="warningRecoverTitle">液位终端电池电量偏低</strong><p id="warningRecoverMeta">生活水泵房消防水箱 · WRN-20260723-0113</p></div></div>
+        <form id="warningRecoverForm" novalidate>
+          <div class="warning-recover-metrics" aria-label="预警监测数据">
+            <div><span>当前值</span><strong id="warningRecoverValue">电量 18%</strong></div>
+            <div><span>预警阈值</span><strong id="warningRecoverThreshold">≤ 20%</strong></div>
+          </div>
+          <div class="warning-recover-operator"><i data-lucide="user-check"></i><div><small>本次确认人员</small><strong id="warningRecoverHandler">王晨</strong></div><span>核查中</span></div>
+          <label><span>恢复说明 <b class="required-mark">必填</b></span><textarea id="warningRecoverNote" rows="4" required placeholder="请说明现场核查、处理措施和设备恢复情况。"></textarea><small class="field-hint">说明将写入处置结论和本次确认恢复留痕。</small></label>
+          <p class="form-error warning-recover-error" id="warningRecoverError" role="alert" hidden>请填写恢复说明</p>
+          <footer><button class="secondary-button" type="button" data-warning-recover-close>取消</button><button class="primary-button" type="submit"><i data-lucide="badge-check"></i>提交并完成闭环</button></footer>
+        </form>
       </section>
     </div>
 
@@ -989,6 +1014,6 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden><i data-lucide="circle-check"></i><span>操作成功</span></div>
 
     <script src="assets/vendor/lucide.min.js"></script>
-    <script src="app.js?v=20260728-warning-record"></script>
+    <script src="app.js?v=20260729-fault-table-simple"></script>
   </body>
 </html>

@@ -213,7 +213,8 @@ const terminalWarnings = [
 
 const terminalFaults = [
   { id: "tf1", no: "FLT-20260723-0031", terminalId: "t05", type: "level", faultType: "通信中断", faultCode: "DEV_OFFLINE", title: "液位终端连续心跳超时", device: "无线远程液位终端-04", serial: "WL-04-B9230", point: "屋顶高位水箱", source: "NB-IoT 心跳检测", firstTime: "2026-07-23 16:30:42", updated: "2026-07-23 19:43:08", duration: "03:12:26", state: "pending", assignee: "待指派", assignedAt: "", repairedAt: "", note: "设备连续多个心跳周期未上报，等待指派运维人员现场核查。" },
-  { id: "tf2", no: "FLT-20260723-0030", terminalId: "t13", type: "transmitter", faultType: "备电故障", faultCode: "BACKUP_POWER_FAULT", title: "用户信息传输装置备电异常", device: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", source: "传输装置状态上报", firstTime: "2026-07-23 18:46:17", updated: "2026-07-23 19:42:51", duration: "00:56:34", state: "handled", assignee: "陈峰", assignedAt: "2026-07-23 18:58:12", handledAt: "2026-07-23 19:38:26", repairedAt: "", note: "已完成备用电池组与充电回路检查，设备主电及数据传输已恢复，等待确认设备稳定运行。" },
+  { id: "tf2", no: "FLT-20260723-0030", terminalId: "t13", type: "transmitter", faultType: "备电故障", faultCode: "BACKUP_POWER_FAULT", title: "用户信息传输装置备电异常", device: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", source: "传输装置状态上报", firstTime: "2026-07-23 18:46:17", updated: "2026-07-23 19:42:51", duration: "00:56:34", state: "handled", assignee: "陈峰", assignedAt: "2026-07-23 18:58:12", handledAt: "2026-07-23 19:38:26", conditionRecoveredAt: "2026-07-23 19:42:10", repairedAt: "", note: "已完成备用电池组与充电回路检查，设备主电及数据传输已恢复，等待确认设备稳定运行。" },
+  { id: "tf9", no: "FLT-20260723-0032", terminalId: "t13", type: "transmitter", faultType: "上报延迟", faultCode: "REPORT_DELAY", title: "传输装置状态上报延迟", device: "用户信息传输装置-02", serial: "UT-02-C3958", point: "消防控制室备用机柜", source: "传输链路质量监测", firstTime: "2026-07-23 19:04:32", updated: "2026-07-23 19:43:02", duration: "00:38:30", state: "processing", assignee: "王晨", assignedAt: "2026-07-23 19:08:15", handledAt: "", repairedAt: "", note: "部分状态数据上报延迟，正在检查平台链路和设备网络配置。" },
   { id: "tf3", no: "FLT-20260723-0029", terminalId: "t14", type: "passage", faultType: "设备离线", faultCode: "ISUP_HEARTBEAT_LOST", title: "消防通道摄像头离线", device: "室外通道监测-02", serial: "DS-PS-02D531", point: "北门消防通道", source: "ISUP 设备心跳", firstTime: "2026-07-23 18:56:14", updated: "2026-07-23 19:42:44", duration: "00:46:30", state: "processing", assignee: "赵凯", assignedAt: "2026-07-23 19:02:35", repairedAt: "", note: "已指派现场巡查人员检查摄像头供电及园区交换机端口。" },
   { id: "tf4", no: "FLT-20260723-0027", terminalId: null, type: "power", faultType: "回路通信异常", faultCode: "METER_CHANNEL_TIMEOUT", title: "用电采集回路通信异常", device: "智能用电采集终端-09", serial: "PW-09-A6842", point: "锅炉房动力配电箱", source: "RS-485 采集状态", firstTime: "2026-07-23 15:18:09", updated: "2026-07-23 15:42:36", duration: "00:24:27", state: "repaired", assignee: "陈峰", assignedAt: "2026-07-23 15:23:18", repairedAt: "2026-07-23 15:42:36", note: "重新紧固采集回路接线后通信恢复，连续数据上报正常。" },
   { id: "tf5", no: "FLT-20260723-0024", terminalId: null, type: "pressure", faultType: "传感器异常", faultCode: "SENSOR_ZERO_DRIFT", title: "压力传感器零点漂移", device: "无线远程压力终端-05", serial: "WP-05-D4406", point: "消防泵房出水总管", source: "压力终端设备自检", firstTime: "2026-07-23 13:06:25", updated: "2026-07-23 13:38:14", duration: "00:31:49", state: "repaired", assignee: "李明", assignedAt: "2026-07-23 13:12:40", repairedAt: "2026-07-23 13:38:14", note: "完成压力传感器零点校准，与机械压力表比对读数正常。" },
@@ -228,6 +229,7 @@ terminalFaults.forEach((fault) => {
   fault.assignmentWindowMinutes = 0;
   fault.assignmentDeadlineAt = "";
   fault.handledAt = fault.handledAt || (previousState === "repaired" ? fault.repairedAt : "");
+  fault.conditionRecoveredAt = fault.conditionRecoveredAt || (previousState === "repaired" ? fault.repairedAt : "");
   fault.recoveredAt = previousState === "repaired" ? fault.repairedAt : "";
   fault.handledBy = fault.handledAt ? fault.assignee : "";
   fault.handlingHistory = [];
@@ -716,6 +718,18 @@ function getActiveFaultForTerminal(terminal) {
 
 function isTerminalHealthy(terminal) {
   return Boolean(terminal && terminal.status === "normal" && terminal.signal > 0);
+}
+
+function isFaultConditionRecovered(fault) {
+  return fault.state === "recovered" || Boolean(fault.conditionRecoveredAt);
+}
+
+function getOpenFaultsForTerminalFault(fault) {
+  return terminalFaults.filter((item) => item.serial === fault.serial && item.state !== "recovered");
+}
+
+function getOtherOpenFaultsForTerminalFault(fault) {
+  return getOpenFaultsForTerminalFault(fault).filter((item) => item.id !== fault.id);
 }
 
 function getTerminalRuntimeMeta(terminal) {
@@ -1670,7 +1684,7 @@ function renderTerminalWarningTable() {
   if (!tbody) return;
   tbody.innerHTML = filtered.map((item) => {
     const meta = terminalWarningTypeMeta[item.type];
-    const actionLabel = item.state === "pending" ? "开始核查" : item.state === "checking" ? "标记恢复" : "查看记录";
+    const actionLabel = item.state === "pending" ? "开始核查" : item.state === "checking" ? "确认恢复" : "查看记录";
     const actionIcon = item.state === "pending" ? "clipboard-check" : item.state === "checking" ? "circle-check" : "arrow-up-right";
     return `
       <tr>
@@ -1706,19 +1720,13 @@ function renderTerminalWarningTable() {
         warning.handlingHistory.push({ action: "start_check", operator: warning.assignee, time: warning.checkingStartedAt, note: "已接收任务并开始核查设备数据与现场状态。" });
         showToast(`${warning.device}预警已进入核查流程`);
       } else if (warning.state === "checking") {
-        warning.state = "recovered";
-        warning.recoveredAt = formatClock(new Date());
-        warning.updated = warning.recoveredAt.slice(11);
-        warning.handledBy = warning.assignee === "待指派" ? currentUser.name : warning.assignee;
-        warning.handlingNote = getWarningRecoveryConclusion(warning);
-        warning.handlingHistory.push({ action: "confirm_recovery", operator: warning.handledBy, time: warning.recoveredAt, note: warning.handlingNote });
-        showToast(`${warning.device}状态已恢复，处置记录已生成`);
+        openWarningRecoverModal(warning.id);
+        return;
       } else {
         openWarningRecord(warning.id);
         return;
       }
       renderTerminalWarningTable();
-      if (warning.state === "recovered") openWarningRecord(warning.id);
     });
   });
   tbody.querySelectorAll("[data-assign-warning]").forEach((button) => {
@@ -1735,24 +1743,18 @@ function getFaultHistoryRecord(fault, action) {
   return [...(fault.handlingHistory || [])].reverse().find((record) => record.action === action) || null;
 }
 
-function renderFaultDeviceState(fault) {
-  const terminal = getTerminalForFault(fault);
-  const runtime = getTerminalRuntimeMeta(terminal);
-  return `<div class="fault-runtime-cell"><span class="status-pill ${runtime.className}">${runtime.label}</span><small>${terminal ? `上报 ${runtime.updated}` : "未关联终端"}</small></div>`;
-}
-
 function renderFaultProcess(fault) {
   const terminal = getTerminalForFault(fault);
   const assigned = getFaultHistoryRecord(fault, "assign");
   const handled = getFaultHistoryRecord(fault, "mark_handled");
   const recovered = getFaultHistoryRecord(fault, "confirm_recovery");
-  const terminalHealthy = isTerminalHealthy(terminal);
+  const conditionRecovered = isFaultConditionRecovered(fault);
   const steps = [
     { label: "故障上报", icon: "radio", time: fault.firstTime.slice(11), className: "completed" },
     { label: "人员指派", icon: "user-check", time: assigned ? assigned.time.slice(11) : handled ? "未指派" : "待指派", className: assigned ? "completed" : handled ? "skipped" : fault.state === "processing" ? "processing" : "" },
     { label: "标记处理", icon: "clipboard-check", time: handled ? handled.time.slice(11) : "待处理", className: handled ? "completed" : fault.state === "processing" ? "processing" : "" },
-    { label: "设备恢复", icon: "activity", time: terminalHealthy ? `上报 ${terminal.updated}` : "等待正常上报", className: terminalHealthy ? "completed" : fault.state === "handled" ? "processing" : "" },
-    { label: "确认恢复", icon: "badge-check", time: recovered ? recovered.time.slice(11) : "待确认", className: recovered ? "completed" : fault.state === "handled" && terminalHealthy ? "processing" : "" },
+    { label: "指标恢复", icon: "activity", time: conditionRecovered ? (fault.conditionRecoveredAt || fault.recoveredAt).slice(11) : "等待指标恢复", className: conditionRecovered ? "completed" : fault.state === "handled" ? "processing" : "" },
+    { label: "确认恢复", icon: "badge-check", time: recovered ? recovered.time.slice(11) : "待确认", className: recovered ? "completed" : fault.state === "handled" && conditionRecovered ? "processing" : "" },
   ];
   document.querySelector("#faultProcess").innerHTML = steps.map((step, index) => `${index ? '<i data-lucide="chevron-right"></i>' : ""}<div class="${step.className}"><span><i data-lucide="${step.icon}"></i></span><strong>${step.label}</strong><small>${step.time}</small></div>`).join("");
 }
@@ -1782,11 +1784,10 @@ function renderTerminalFaultTable() {
   if (!tbody) return;
   tbody.innerHTML = filtered.map((item) => {
     const meta = terminalTypeMeta[item.type];
-    const terminal = getTerminalForFault(item);
     const canAssign = item.state === "pending" || item.state === "processing";
     const canHandle = item.state === "pending" || item.state === "processing";
-    const canRecover = item.state === "handled" && isTerminalHealthy(terminal);
-    const recoverTitle = item.state === "recovered" ? "故障已恢复" : item.state !== "handled" ? "需先标记处理" : canRecover ? "确认设备恢复" : "设备尚未恢复正常";
+    const canRecover = item.state === "handled" && isFaultConditionRecovered(item);
+    const recoverTitle = item.state === "recovered" ? "故障已恢复" : item.state !== "handled" ? "需先标记处理" : canRecover ? "确认本故障恢复" : "本故障指标尚未恢复";
     return `
       <tr>
         <td><div class="table-event"><span class="type-icon ${meta.className}"><i data-lucide="${meta.icon}"></i></span><div><strong>${item.title}</strong><small>${item.no}</small></div></div></td>
@@ -1795,7 +1796,6 @@ function renderTerminalFaultTable() {
         <td><time>${item.firstTime.slice(5)}</time></td>
         <td><time>${item.updated.slice(5)}</time></td>
         <td><span class="fault-duration">${item.duration}</span></td>
-        <td>${renderFaultDeviceState(item)}</td>
         <td>${renderAssignmentPersonCell(item)}</td>
         <td><span class="state-dot ${item.state === "recovered" ? "closed" : item.state}">${terminalFaultStateLabels[item.state]}</span></td>
         <td><div class="table-row-actions">
@@ -1838,6 +1838,9 @@ function openFaultDetail(id) {
   const meta = terminalTypeMeta[fault.type];
   const terminal = getTerminalForFault(fault);
   const runtime = getTerminalRuntimeMeta(terminal);
+  const conditionRecovered = isFaultConditionRecovered(fault);
+  const openFaults = getOpenFaultsForTerminalFault(fault);
+  const otherOpenFaults = getOtherOpenFaultsForTerminalFault(fault);
   const modal = document.querySelector("#faultDetailModal");
   const state = document.querySelector("#faultDetailState");
   state.textContent = terminalFaultStateLabels[fault.state];
@@ -1855,14 +1858,26 @@ function openFaultDetail(id) {
   document.querySelector("#faultDetailDuration").textContent = fault.duration;
   document.querySelector("#faultDetailAssignee").textContent = fault.handledBy || fault.assignee;
   setAssignmentDeadlineDetail("#faultDetailDeadline", fault);
-  document.querySelector("#faultDetailRepairedAt").textContent = fault.recoveredAt || "--";
+  document.querySelector("#faultDetailRepairedAt").textContent = fault.recoveredAt || fault.conditionRecoveredAt || "--";
 
-  document.querySelector("#faultDetailDeviceStatus").textContent = runtime.label;
-  document.querySelector("#faultDetailDeviceStatus").className = runtime.className;
-  document.querySelector("#faultDetailDeviceUpdated").textContent = terminal ? `最近上报 ${runtime.updated} · ${terminal.network} · 信号 ${terminal.signal}%` : "未找到关联设备状态";
-  document.querySelector("#faultDetailDeviceStatusIcon").className = `fault-device-status-icon ${runtime.className}`;
-  document.querySelector("#faultDetailDeviceStatusIcon").innerHTML = `<i data-lucide="${runtime.icon}"></i>`;
+  document.querySelector("#faultConditionState").textContent = conditionRecovered ? "本故障对应指标已恢复" : "本故障指标仍有异常";
+  document.querySelector("#faultConditionState").className = conditionRecovered ? "online" : "offline";
+  document.querySelector("#faultConditionUpdated").textContent = conditionRecovered ? `指标恢复 ${fault.conditionRecoveredAt || fault.recoveredAt}` : `最近上报 ${fault.updated}`;
+  document.querySelector("#faultConditionIcon").className = `fault-device-status-icon ${conditionRecovered ? "online" : "offline"}`;
+  document.querySelector("#faultConditionIcon").innerHTML = `<i data-lucide="${conditionRecovered ? "circle-check" : "triangle-alert"}"></i>`;
+  document.querySelector("#faultConditionBadge").textContent = fault.state === "recovered" ? "已确认" : conditionRecovered ? "可确认" : "异常";
+  document.querySelector("#faultConditionBadge").className = `fault-condition-badge ${conditionRecovered ? "ready" : "abnormal"}`;
+
+  document.querySelector("#faultDetailDeviceStatus").textContent = openFaults.length ? `设备仍有 ${openFaults.length} 条未闭环故障` : runtime.label;
+  document.querySelector("#faultDetailDeviceStatus").className = openFaults.length ? "offline" : runtime.className;
+  document.querySelector("#faultDetailDeviceUpdated").textContent = otherOpenFaults.length ? `本故障闭环后，设备仍保持故障状态 · 实时运行 ${runtime.label}` : terminal ? `最近上报 ${runtime.updated} · ${terminal.network} · 信号 ${terminal.signal}%` : "未找到关联设备状态";
+  document.querySelector("#faultDetailDeviceStatusIcon").className = `fault-device-status-icon ${openFaults.length ? "offline" : runtime.className}`;
+  document.querySelector("#faultDetailDeviceStatusIcon").innerHTML = `<i data-lucide="${openFaults.length ? "wrench" : runtime.icon}"></i>`;
   document.querySelector("#faultDetailViewDevice").disabled = !terminal;
+  const related = document.querySelector("#faultRelatedOpenFaults");
+  related.hidden = !otherOpenFaults.length;
+  related.innerHTML = otherOpenFaults.map((item) => `<button type="button" data-related-fault="${item.id}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.no)} · ${terminalFaultStateLabels[item.state]}</small></span><i data-lucide="arrow-up-right"></i></button>`).join("");
+  related.querySelectorAll("[data-related-fault]").forEach((button) => button.addEventListener("click", () => openFaultDetail(button.dataset.relatedFault)));
 
   const note = document.querySelector("#faultDetailNote");
   note.classList.toggle("repaired", fault.state === "recovered");
@@ -1879,8 +1894,8 @@ function openFaultDetail(id) {
   assignButton.innerHTML = `<i data-lucide="user-plus"></i>${fault.state === "processing" ? "重新指派" : "指派人员"}`;
   handleButton.hidden = fault.state !== "pending" && fault.state !== "processing";
   recoverButton.hidden = fault.state !== "handled";
-  recoverButton.disabled = fault.state === "handled" && !isTerminalHealthy(terminal);
-  recoverButton.title = recoverButton.disabled ? "设备尚未恢复正常" : "确认设备恢复";
+  recoverButton.disabled = fault.state === "handled" && !conditionRecovered;
+  recoverButton.title = recoverButton.disabled ? "本故障对应指标尚未恢复" : "确认本故障恢复";
   modal.hidden = false;
   document.body.style.overflow = "hidden";
   refreshIcons(modal);
@@ -1901,6 +1916,55 @@ function getWarningRecoveryConclusion(warning) {
     transmitter: "已完成传输装置供电和上报链路核查，设备状态恢复正常。",
   };
   return conclusions[warning.type] || "已完成设备和现场状态核查，监测值恢复至阈值以内，确认预警闭环。";
+}
+
+function openWarningRecoverModal(id) {
+  const warning = terminalWarnings.find((item) => item.id === id);
+  if (!warning || warning.state !== "checking") return;
+  selectedTerminalWarningId = warning.id;
+  document.querySelector("#warningRecoverTitle").textContent = warning.title;
+  document.querySelector("#warningRecoverMeta").textContent = `${warning.point} · ${warning.no}`;
+  document.querySelector("#warningRecoverValue").textContent = warning.value;
+  document.querySelector("#warningRecoverThreshold").textContent = warning.threshold;
+  document.querySelector("#warningRecoverHandler").textContent = warning.assignee === "待指派" ? currentUser.name : warning.assignee;
+  document.querySelector("#warningRecoverNote").value = "";
+  document.querySelector("#warningRecoverError").hidden = true;
+  const modal = document.querySelector("#warningRecoverModal");
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons(modal);
+  document.querySelector("#warningRecoverNote").focus();
+}
+
+function closeWarningRecoverModal() {
+  document.querySelector("#warningRecoverModal").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function submitWarningRecovery(event) {
+  event.preventDefault();
+  const warning = terminalWarnings.find((item) => item.id === selectedTerminalWarningId);
+  if (!warning || warning.state !== "checking") return closeWarningRecoverModal();
+  const noteInput = document.querySelector("#warningRecoverNote");
+  const note = noteInput.value.trim();
+  const error = document.querySelector("#warningRecoverError");
+  if (!note) {
+    error.textContent = "请填写恢复说明";
+    error.hidden = false;
+    noteInput.focus();
+    showToast("请填写恢复说明");
+    return;
+  }
+  warning.state = "recovered";
+  warning.recoveredAt = formatClock(new Date());
+  warning.updated = warning.recoveredAt.slice(11);
+  warning.handledBy = warning.assignee === "待指派" ? currentUser.name : warning.assignee;
+  warning.handlingNote = note;
+  warning.handlingHistory.push({ action: "confirm_recovery", operator: warning.handledBy, time: warning.recoveredAt, note });
+  closeWarningRecoverModal();
+  renderTerminalWarningTable();
+  showToast(`${warning.device}状态已恢复，处置记录已生成`);
+  openWarningRecord(warning.id);
 }
 
 function getTerminalForWarning(warning) {
@@ -2012,6 +2076,7 @@ function submitFaultHandle(event) {
   fault.note = note;
   fault.handledBy = currentUser.name;
   if (fault.assignee === "待指派") fault.assignee = currentUser.name;
+  if (!fault.conditionRecoveredAt && isTerminalHealthy(getTerminalForFault(fault))) fault.conditionRecoveredAt = handledAt;
   fault.handlingHistory.push({ action: "mark_handled", operator: currentUser.name, time: handledAt, note });
   closeFaultHandleModal();
   renderTerminalFaultTable();
@@ -2022,17 +2087,17 @@ function submitFaultHandle(event) {
 
 function confirmTerminalFaultRecovery(id) {
   const fault = getTerminalFault(id);
-  const terminal = getTerminalForFault(fault);
   if (fault.state !== "handled") {
     showToast("请先标记故障处理结果");
     return;
   }
-  if (!isTerminalHealthy(terminal)) {
-    showToast("设备尚未恢复正常，暂不能确认恢复");
+  if (!isFaultConditionRecovered(fault)) {
+    showToast("本故障对应指标尚未恢复，暂不能确认恢复");
     return;
   }
   const recoveredAt = formatClock(new Date());
-  const note = `已核对${terminal.name}在线状态、心跳和数据上报，确认设备恢复正常。`;
+  const otherOpenFaults = getOtherOpenFaultsForTerminalFault(fault);
+  const note = `本故障对应异常指标已恢复，已人工确认闭环。${otherOpenFaults.length ? `设备仍有 ${otherOpenFaults.length} 条其他未闭环故障。` : ""}`;
   fault.state = "recovered";
   fault.recoveredAt = recoveredAt;
   fault.updated = recoveredAt;
@@ -2942,6 +3007,10 @@ function bindInteractions() {
   document.querySelectorAll("[data-warning-record-close]").forEach((button) => button.addEventListener("click", closeWarningRecord));
   document.querySelector("#warningRecordModal").addEventListener("click", (event) => { if (event.target.id === "warningRecordModal") closeWarningRecord(); });
   document.querySelector("#warningRecordViewDevice").addEventListener("click", openWarningTerminalStatus);
+  document.querySelectorAll("[data-warning-recover-close]").forEach((button) => button.addEventListener("click", closeWarningRecoverModal));
+  document.querySelector("#warningRecoverModal").addEventListener("click", (event) => { if (event.target.id === "warningRecoverModal") closeWarningRecoverModal(); });
+  document.querySelector("#warningRecoverForm").addEventListener("submit", submitWarningRecovery);
+  document.querySelector("#warningRecoverNote").addEventListener("input", () => { document.querySelector("#warningRecoverError").hidden = true; });
   document.querySelector("#faultDetailAssign").addEventListener("click", () => {
     const faultId = selectedTerminalFaultId;
     closeFaultDetail();
@@ -3626,6 +3695,7 @@ function bindUtilityActions() {
     if (event.key === "Escape" && !document.querySelector("#faultHandleModal").hidden) closeFaultHandleModal();
     if (event.key === "Escape" && !document.querySelector("#faultDetailModal").hidden) closeFaultDetail();
     if (event.key === "Escape" && !document.querySelector("#warningRecordModal").hidden) closeWarningRecord();
+    if (event.key === "Escape" && !document.querySelector("#warningRecoverModal").hidden) closeWarningRecoverModal();
     if (event.key === "Escape" && !document.querySelector("#videoPlaybackModal").hidden) closeVideoPlayback();
     if (event.key === "Escape" && !document.querySelector("#videoRecordModal").hidden) closeVideoRecordDetail();
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
